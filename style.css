@@ -1,0 +1,1406 @@
+/* ==========================================
+   Whiteout Checklist V4
+========================================== */
+
+:root{
+
+    --bg:#eef4ff;
+    --card:#ffffff;
+
+    --blue:#4b82ff;
+    --blue2:#6fa0ff;
+
+    --border:#d8e5ff;
+
+    --text:#2d3748;
+
+    --success:#53c26d;
+
+    --shadow:
+        0 4px 15px rgba(0,0,0,.08);
+
+    --radius:16px;
+
+}
+
+*{
+
+    margin:0;
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+body{
+
+    background:var(--bg);
+
+    font-family:
+
+        "Yu Gothic UI",
+        "Segoe UI",
+        sans-serif;
+
+    color:var(--text);
+
+    padding:18px;
+
+}
+
+.container{
+
+    max-width:1800px;
+
+    margin:auto;
+
+}
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.top-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+    background:var(--card);
+
+    border-radius:var(--radius);
+
+    padding:14px 18px;
+
+    margin-bottom:18px;
+
+    box-shadow:var(--shadow);
+
+}
+
+/* ==========================================
+   CHARACTER
+========================================== */
+
+.character-bar{
+
+    display:flex;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+}
+
+.character-btn{
+
+    width:120px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:12px;
+
+    background:#edf4ff;
+
+    padding:10px;
+
+    transition:.2s;
+
+}
+
+.character-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.character-btn.active{
+
+    background:var(--blue);
+
+    color:white;
+
+}
+
+.character-name{
+
+    font-size:15px;
+
+    font-weight:bold;
+
+}
+
+.character-progress{
+
+    margin-top:4px;
+
+    font-size:13px;
+
+    opacity:.85;
+
+}
+
+/* ==========================================
+   HEADER RIGHT
+========================================== */
+
+.header-right{
+
+    display:flex;
+
+    gap:18px;
+
+}
+
+.bear-card{
+
+    width:200px;
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    background:#f8fbff;
+
+    padding:12px;
+
+}
+
+.bear-title{
+
+    font-size:13px;
+
+    color:#666;
+
+}
+
+.bear-date-row{
+
+    margin-top:5px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+#bearDate{
+
+    font-size:24px;
+
+    font-weight:bold;
+
+}
+
+#bearTime{
+
+    margin-top:5px;
+
+    font-size:16px;
+
+    color:#666;
+
+}
+
+.icon-btn{
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+}
+
+/* ==========================================
+   PROGRESS
+========================================== */
+
+.progress-card{
+
+    width:340px;
+
+}
+
+.progress-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:8px;
+
+    font-weight:bold;
+
+}
+
+.progress-bar{
+
+    width:100%;
+
+    height:18px;
+
+    background:#dbe7ff;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+.progress-fill{
+
+    width:0%;
+
+    height:100%;
+
+    background:
+
+        linear-gradient(
+
+            90deg,
+
+            #53c26d,
+
+            #87e49f
+
+        );
+
+    transition:.3s;
+
+}
+
+.progress-count{
+
+    margin-top:6px;
+
+    text-align:center;
+
+    font-size:13px;
+
+    color:#666;
+
+}
+
+/* ==========================================
+   DASHBOARD
+========================================== */
+
+.dashboard{
+
+    display:grid;
+
+    grid-template-columns:
+
+        260px
+        340px
+        1fr;
+
+    gap:18px;
+
+    align-items:start;
+
+}
+
+.card{
+
+    background:var(--card);
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    padding:18px;
+
+}
+
+.card h2{
+
+    margin-bottom:15px;
+
+    color:var(--blue);
+
+    font-size:20px;
+
+}
+/* ==========================================
+   TASK LIST
+========================================== */
+
+.task-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:8px;
+
+}
+
+.task-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:8px 10px;
+
+    border-radius:10px;
+
+    transition:.2s;
+
+    cursor:pointer;
+
+}
+
+.task-item:hover{
+
+    background:#f5f9ff;
+
+}
+
+.task-item input[type="checkbox"]{
+
+    width:22px;
+
+    height:22px;
+
+    accent-color:var(--blue);
+
+    cursor:pointer;
+
+}
+
+.task-item.checked{
+
+    background:#edf4ff;
+
+    color:#888;
+
+    text-decoration:line-through;
+
+}
+
+/* ==========================================
+   TIME TABLE
+========================================== */
+
+.time-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.time-table th{
+
+    padding:10px;
+
+    border:1px solid var(--border);
+
+    font-size:15px;
+
+}
+
+.time-table td{
+
+    border:1px solid #e8eefb;
+
+    padding:8px;
+
+    text-align:center;
+
+}
+
+.time-table td:first-child{
+
+    text-align:left;
+
+    white-space:nowrap;
+
+    font-weight:600;
+
+}
+
+.time-table input{
+
+    width:22px;
+
+    height:22px;
+
+    accent-color:var(--blue);
+
+}
+
+.time9{
+
+    background:#fff5b5;
+
+}
+
+.time17{
+
+    background:#ffd8a8;
+
+}
+
+.time1{
+
+    background:#dce8ff;
+
+}
+
+.small-note{
+
+    display:block;
+
+    margin-top:3px;
+
+    font-size:11px;
+
+    color:#777;
+
+}
+
+/* ==========================================
+   EVENT + OFFICER
+========================================== */
+
+.bottom-area{
+
+    margin-top:18px;
+
+    display:grid;
+
+    grid-template-columns:
+
+        2fr
+        1fr;
+
+    gap:18px;
+
+}
+
+.card-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:12px;
+
+}
+
+.primary-btn{
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+    padding:8px 14px;
+
+    background:var(--blue);
+
+    color:white;
+
+}
+
+.primary-btn:hover{
+
+    background:var(--blue2);
+
+}
+
+.success-btn{
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+    padding:8px 14px;
+
+    background:var(--success);
+
+    color:white;
+
+}
+
+.input-form{
+
+    display:flex;
+
+    gap:8px;
+
+    margin-bottom:12px;
+
+    flex-wrap:wrap;
+
+}
+
+.input-form.hidden{
+
+    display:none;
+
+}
+
+.input-form input{
+
+    flex:1;
+
+    min-width:180px;
+
+    padding:10px;
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+}
+
+/* ==========================================
+   EVENT LIST
+========================================== */
+
+.event-container{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:10px;
+
+}
+.event-item{
+
+    display:grid;
+
+    grid-template-columns:
+
+        30px
+        1fr
+        auto;
+
+    gap:10px;
+
+    align-items:center;
+
+    padding:9px 10px;
+
+    border-radius:10px;
+
+    background:#f8fbff;
+
+    border:1px solid var(--border);
+
+}
+
+.event-item.checked{
+
+    opacity:.55;
+
+}
+
+.event-title{
+
+    font-weight:600;
+
+}
+
+.event-memo{
+
+    display:block;
+
+    margin-top:3px;
+
+    font-size:12px;
+
+    color:#777;
+
+}
+
+.event-actions{
+
+    display:flex;
+
+    gap:5px;
+
+}
+
+.event-actions button{
+
+    width:32px;
+
+    height:32px;
+
+    border:none;
+
+    cursor:pointer;
+
+    border-radius:8px;
+
+    background:#edf4ff;
+
+}
+
+.event-actions button:hover{
+
+    background:#dbe7ff;
+
+}
+
+.event-container::-webkit-scrollbar{
+
+    width:8px;
+
+}
+
+.event-container::-webkit-scrollbar-thumb{
+
+    background:#c8d9ff;
+
+    border-radius:999px;
+
+}
+/* ==========================================
+   OFFICER
+========================================== */
+
+.officer-card{
+    display:flex;
+    flex-direction:column;
+    height:780px;       /* 好みで700～850pxくらい */
+}
+
+#officerContainer{
+    flex:1;
+    overflow-y:auto;
+    padding-right:8px;
+}
+
+.officer-item{
+
+    display:grid;
+
+    grid-template-columns:
+        28px
+        1fr
+        auto;
+
+    gap:10px;
+
+    align-items:center;
+
+    padding:8px 10px;
+
+    background:#f8fbff;
+
+    border:1px solid var(--border);
+
+    border-radius:10px;
+
+}
+
+.officer-item.checked{
+
+    opacity:.55;
+
+    text-decoration:line-through;
+
+}
+
+.officer-item input{
+
+    width:22px;
+
+    height:22px;
+
+    accent-color:var(--blue);
+
+}
+
+.officer-delete{
+
+    width:30px;
+
+    height:30px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    background:#edf4ff;
+
+}
+
+.officer-delete:hover{
+
+    background:#dce8ff;
+
+}
+
+/* ==========================================
+   UNDERGROUND
+========================================== */
+
+.underground-card{
+
+    margin-top:18px;
+
+}
+
+.memo-button{
+
+    width:100%;
+
+    text-align:left;
+
+    padding:12px 16px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    background:#edf4ff;
+
+    color:var(--blue);
+
+    font-weight:bold;
+
+    font-size:16px;
+
+}
+
+.memo-button:hover{
+
+    background:#dce8ff;
+
+}
+
+.memo-body{
+
+    margin-top:12px;
+
+    padding:14px;
+
+    background:#f8fbff;
+
+    border-radius:10px;
+
+}
+
+.memo-body.hidden{
+
+    display:none;
+
+}
+
+.memo-body pre{
+
+    white-space:pre-wrap;
+
+    line-height:1.8;
+
+    font-family:
+
+        Consolas,
+        "Yu Gothic UI",
+        monospace;
+
+}
+
+/* ==========================================
+   BACKUP
+========================================== */
+
+.backup-area{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:18px;
+
+}
+
+/* ==========================================
+   SCROLL BAR
+========================================== */
+
+::-webkit-scrollbar{
+
+    width:9px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#c8d8ff;
+
+    border-radius:999px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:transparent;
+
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width:1200px){
+
+    .top-header{
+
+        flex-direction:column;
+
+    }
+
+    .header-right{
+
+        width:100%;
+
+        justify-content:space-between;
+
+    }
+
+    .dashboard{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .bottom-area{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media (max-width:700px){
+
+    body{
+
+        padding:10px;
+
+    }
+
+    .character-bar{
+
+        justify-content:center;
+
+    }
+
+    .character-btn{
+
+        width:95px;
+
+    }
+
+    .header-right{
+
+        flex-direction:column;
+
+    }
+
+    .bear-card,
+
+    .progress-card{
+
+        width:100%;
+
+    }
+
+    .input-form{
+
+        flex-direction:column;
+
+    }
+
+    .backup-area{
+
+        flex-direction:column;
+
+    }
+
+    .time-table{
+
+        font-size:13px;
+
+    }
+
+    .time-table td,
+
+    .time-table th{
+
+        padding:6px;
+
+    }
+
+}
+/* =========================
+   Event
+========================= */
+
+.event-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:12px 16px;
+
+    margin-bottom:10px;
+
+    border:1px solid #d7e4ff;
+
+    border-radius:10px;
+
+    background:#fff;
+
+}
+
+.event-left{
+
+    flex:1;
+
+}
+
+.event-title{
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    margin-bottom:4px;
+
+}
+
+.event-memo{
+
+    color:#777;
+
+    font-size:14px;
+
+}
+
+.event-right{
+
+    display:flex;
+
+    gap:8px;
+
+    align-items:center;
+
+}
+
+.event-right button{
+
+    width:34px;
+
+    height:34px;
+
+    cursor:pointer;
+
+}
+.event-hidden{
+
+    opacity:0.4;
+
+    filter:grayscale(100%);
+
+}
+
+/* =========================
+   App Title
+========================= */
+
+.app-title{
+
+    margin-bottom:20px;
+
+}
+
+.app-title h1{
+
+    margin:0;
+
+    font-size:34px;
+
+    font-weight:700;
+
+    color:#6fc8ff;
+
+    letter-spacing:1px;
+
+}
+
+.app-title p{
+
+    margin:4px 0 0;
+
+    color:#9aa7b6;
+
+    font-size:13px;
+
+    letter-spacing:2px;
+
+}
+.main-character{
+
+    color:#222;
+
+    font-weight:700;
+
+}
+
+.main-btn{
+
+    border:2px solid #f6c343 !important;
+
+    background:linear-gradient(
+        180deg,
+        #fffef5,
+        #fff6d8
+    );
+
+    box-shadow:0 0 10px rgba(246,195,67,.35);
+
+    transform:scale(1.03);
+
+}
+.city-item{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:10px;
+
+    margin-bottom:8px;
+
+}
+
+.city-label{
+
+    flex:1;
+
+    font-weight:600;
+
+}
+
+.city-check{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:4px;
+
+    font-size:14px;
+
+}
+.city-check{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    font-size:14px;
+
+}
+
+.city-check input{
+
+    width:18px;
+
+    height:18px;
+
+    cursor:pointer;
+
+}
+.repeat-card{
+
+    margin-top:12px;
+
+}
+
+.repeat-row{
+
+    padding:10px 0;
+
+    border-bottom:1px solid #ddd;
+
+}
+
+.repeat-title{
+
+    font-weight:bold;
+
+    margin-bottom:6px;
+
+}
+
+.repeat-bottom{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.repeat-bar{
+
+    flex:1;
+
+    color:#ffcf4a;
+
+    letter-spacing:2px;
+
+    font-size:18px;
+
+}
+
+.repeat-time{
+
+    width:60px;
+
+    text-align:center;
+
+    color:#777;
+
+    font-size:13px;
+
+}
+
+.repeat-add{
+
+    width:32px;
+
+    height:32px;
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+}
+
+.repeat-title{
+
+    font-weight:bold;
+
+    margin-bottom:6px;
+
+}
+
+.repeat-bottom{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+}
+
+.repeat-bar{
+
+    flex:1;
+
+    color:#ffcf4a;
+
+    letter-spacing:2px;
+
+    font-size:18px;
+
+}
+
+.repeat-time{
+
+    width:60px;
+
+    text-align:center;
+
+    color:#aaa;
+
+    font-size:13px;
+
+}
+
+.repeat-add{
+
+    width:32px;
+
+    height:32px;
+
+    border:none;
+
+    border-radius:50%;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+}
+.station-card {
+
+    background: white;
+
+    border: 1px solid #d6e4ff;
+
+    border-radius: 18px;
+
+    padding: 16px;
+
+    min-width: 240px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+}.station-title{
+
+    font-weight:bold;
+
+    font-size:18px;
+
+}
+
+.station-count{
+
+    font-size:16px;
+
+    font-weight:bold;
+
+}
+/* ==========================================
+   イベント目隠し用のスタイル
+========================================== */
+
+/* 目隠し（非表示）状態のスタイル */
+.event-item.event-hidden {
+    opacity: 0.4;                  /* 半透明にする */
+    background-color: #f1f5f9;     /* グレー背景にする */
+    filter: grayscale(80%);        /* モノクロ化 */
+}
+
+/* テキストを薄く・打ち消し線を入れる場合（お好みで調整可） */
+.event-item.event-hidden .event-title {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+/* 完全に隠したい（消したい）場合はこちらを使います */
+/* 
+.event-item.event-hidden {
+    display: none !important;
+}
+*/
+/* ==========================================
+   イベントのチェックボックス拡大設定
+========================================== */
+.event-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #4a90e2; /* チェック時の背景色（お好みで変更可） */
+    margin-right: 4px;
+}
+/* ==========================================
+   イベント ＆ 都市チェックのチェックボックス拡大
+========================================== */
+.event-item input[type="checkbox"],
+.city-check input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #4a90e2; /* チェック時の色 */
+    vertical-align: middle; /* 位置の微調整 */
+}
+/* ==========================================
+   Lune以外で幹部メニューを非表示（移動・ドラッグ判定保持版）
+========================================== */
+#officerCard.officer-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    /* overflow: hidden を除去してドラッグ認識を残す */
+}
+/* ドラッグ中の影・透け感の設定 */
+.sortable-ghost {
+    opacity: 0.4;
+    background: #e0edff !important;
+}
+/* ドラッグ中の見た目（余計な動きなし） */
+.dragging {
+    opacity: 0.5;
+}
+/* ドラッグ中のカード（ぬるぬるアニメ無し） */
+.card-dragging {
+    opacity: 0.5 !important;
+}
+
+/* Lune以外で幹部メニューを非表示（入れ替えの枠組みは維持） */
+#officerCard.officer-hidden {
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    max-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
+}
+/* ドラッグ中の項目を少し薄くする */
+.item-dragging {
+    opacity: 0.4 !important;
+    background: #e2edff !important;
+}

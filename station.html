@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WS ステーション管理</title>
+  <link rel="stylesheet" href="station.css" />
+</head>
+
+<body>
+
+<div class="app-shell">
+
+<header class="page-header">
+  <div class="header-top">
+    <div>
+      <p class="eyebrow">Whiteout Survival</p>
+      <h1>🏰 WS ステーション管理</h1>
+    </div>
+
+    <!-- コンパクトになった同盟管理エリア -->
+    <div class="alliance-compact-panel">
+      <select id="allianceSelect" class="alliance-select"></select>
+      <input id="allianceNameInput" type="text" maxlength="30" placeholder="同盟名" />
+      <button id="addAllianceBtn" class="btn btn-primary" type="button">追加</button>
+      <button id="renameAllianceBtn" class="btn btn-secondary" type="button">名前変更</button>
+      <button id="deleteAllianceBtn" class="btn btn-danger" type="button">削除</button>
+    </div>
+  </div>
+
+  <section class="summary-grid">
+    <article class="summary-card">
+      <div class="summary-card__title">🚨 今閉じるべきステーション</div>
+      <div id="closeNow" class="summary-card__body">ありません</div>
+    </article>
+
+    <article class="summary-card summary-card--warning">
+    <div class="summary-card__title">
+        📅 24時間以内にシールド切れ
+        <button id="copyTodayBtn" class="copy-btn">📋</button>
+    </div>
+
+    <div id="todayStations" class="summary-card__body">
+        ありません
+    </div>
+</article>
+
+    <article class="summary-card">
+      <div class="summary-card__title">📊 管理状況</div>
+      <div id="allianceStats" class="summary-card__body">0 / 12 登録</div>
+    </article>
+  </section>
+
+  <section class="toolbar">
+    <div class="toolbar-group">
+      <span class="field-label">並び替え</span>
+      <label class="chip-option">
+        <input type="radio" name="sort" value="time" checked />
+        <span>残り時間順</span>
+      </label>
+      <label class="chip-option">
+        <input type="radio" name="sort" value="level" />
+        <span>レベル順</span>
+      </label>
+    </div>
+
+    <div class="toolbar-group toolbar-group--search">
+      <label class="field-label" for="searchInput">検索</label>
+      <input id="searchInput" type="search" placeholder="例: 技術 / Lv3" />
+    </div>
+  </section>
+</header>
+
+<main>
+  <section id="stations"></section>
+</main>
+
+</div>
+
+<script src="station.js"></script>
+
+</body>
+</html>

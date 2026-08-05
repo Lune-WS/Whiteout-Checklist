@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Whiteout Checklist</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header class="app-title">
+
+    <h1>❄ Whiteout Checklist</h1>
+
+    <p>For Whiteout Survival</p>
+
+</header>
+<!-- ========================= -->
+<!-- Header -->
+<!-- ========================= -->
+
+<header class="top-header">
+
+    <div class="character-bar" id="characterBar">
+        <!-- data.jsで生成 -->
+    </div>
+
+    <div class="header-right">
+
+        <div class="bear-card">
+
+            <div class="bear-title">
+
+                🐻 次回熊罠
+
+            </div>
+
+            <div class="bear-date-row">
+
+                <span id="bearDate">
+
+                    --/--
+
+                </span>
+
+                <button
+                    id="editBearTime"
+                    class="icon-btn">
+
+                    ✏
+
+                </button>
+
+            </div>
+
+            <div
+                class="bear-time"
+                id="bearTime">
+
+                21:00
+
+            </div>
+
+        </div>
+
+        <div class="station-card">
+
+    <div class="station-title">
+
+        🏭 ステーション
+
+    </div>
+
+    <div
+        id="stationToday"
+        class="station-count">
+
+        🟢 今日の閉鎖：0件
+
+    </div>
+
+    <button
+        id="openStation"
+        class="primary-btn">
+
+        📋 管理を開く
+
+    </button>
+
+    </div>
+
+        <div class="progress-card">
+
+            <div class="progress-header">
+
+                <span>
+
+                    今日の進捗
+
+                </span>
+
+                <span id="progressPercent">
+
+                    0%
+
+                </span>
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                    class="progress-fill"
+                    id="progressFill">
+
+                </div>
+
+            </div>
+
+            <div
+                id="progressCount"
+                class="progress-count">
+
+                0 / 0
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+
+<!-- ========================= -->
+<!-- Main Dashboard -->
+<!-- ========================= -->
+
+<main class="dashboard">
+
+    <!-- Daily -->
+
+<!-- Daily -->
+
+<section class="card daily-card">
+
+    <h2>
+        📋 デイリー
+    </h2>
+
+    <div
+        id="dailyContainer"
+        class="task-container">
+    </div>
+
+    <h3 class="extra-title">
+        ⭐ おまけ
+    </h3>
+
+    <div
+        id="dailyExtraContainer"
+        class="task-container">
+    </div>
+
+    <section class="card repeat-card">
+
+    <h2>🔄 繰り返し</h2>
+
+    <div id="repeatContainer"></div>
+
+</section>
+
+</section>
+
+
+    <!-- City -->
+
+    <section class="card city-card">
+
+        <h2>
+
+            🏰 都市チェック
+
+        </h2>
+
+        <div
+            id="cityContainer"
+            class="task-container">
+
+        </div>
+
+    </section>
+
+    <!-- Time -->
+
+    <section class="card time-card">
+
+        <h2>
+
+            ⏰ 時間チェック
+
+        </h2>
+
+        <div
+            id="timeContainer">
+
+        </div>
+
+    </section>
+
+    
+
+</main>
+    <!-- ========================= -->
+    <!-- Event -->
+    <!-- ========================= -->
+
+    <section class="bottom-area">
+
+        <section class="card event-card">
+
+            <div class="card-header">
+
+                <h2>🎪 イベント</h2>
+
+                <button
+                    id="toggleEventForm"
+                    class="primary-btn">
+
+                    ＋追加
+
+                </button>
+
+            </div>
+
+            <div
+                id="eventForm"
+                class="input-form hidden">
+
+                <input
+                    id="eventTitle"
+                    type="text"
+                    placeholder="イベント名">
+
+                <input
+                    id="eventMemo"
+                    type="text"
+                    placeholder="備考（任意）">
+
+                <button
+                    id="addEventBtn"
+                    class="success-btn">
+
+                    追加
+
+                </button>
+
+            </div>
+
+            <div
+                id="eventContainer"
+                class="event-container">
+
+                <!-- script.jsで生成 -->
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ========================= -->
+        <!-- Officer -->
+        <!-- ========================= -->
+
+        <section
+            id="officerCard"
+            class="card officer-card">
+
+            <div class="card-header">
+
+                <h2>
+
+                    👑 幹部メニュー
+
+                </h2>
+
+                <button
+                    id="toggleOfficerForm"
+                    class="primary-btn">
+
+                    ＋追加
+
+                </button>
+
+            </div>
+
+            <div
+                id="officerForm"
+                class="input-form hidden">
+
+                <input
+                    id="officerInput"
+                    type="text"
+                    placeholder="内容">
+
+                <button
+                    id="addOfficerBtn"
+                    class="success-btn">
+
+                    追加
+
+                </button>
+
+            </div>
+
+            <div
+                id="officerContainer">
+
+            </div>
+
+        </section>
+
+    </section>
+
+
+
+    <!-- ========================= -->
+    <!-- Underground Memo -->
+    <!-- ========================= -->
+
+    <section class="card underground-card">
+
+        <button
+            id="toggleMemo"
+            class="memo-button">
+
+            🌋 地底メモ ▼
+
+        </button>
+
+        <div
+            id="memoBody"
+            class="memo-body hidden">
+
+<pre>
+【🌋 地底探検】
+
+勇者 50:10:40 → 55/10/35
+獣  50:15:35 → 65/10/25
+微光 60:20:20 → 55/10/35
+地下 50:20:30 → 65/10/25
+黒鉄 60:15:25 → 55/10/35
+大地 50:15:35 → 55/10/35
+
+────────────
+
+① 1盾＋1槍＋グレッグ 60/40/0
+② 2盾＋ミア＋1弓  50/0/50
+③ 3盾＋2槍＋2弓  50/20/30
+
+────────────
+
+① 60：40：0（3軍弓英雄）
+② 55：10：35（1軍弓英雄）
+③ 55：15：30（2軍弓英雄）
+
+</pre>
+        </div>
+
+    </section>
+
+
+
+<!-- ========================= -->
+<!-- Backup & Links -->
+<!-- ========================= -->
+
+<section class="backup-area">
+
+    <!-- 本部駐屯計算機（駐屯人数計算機）を開くボタン -->
+    <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
+        🏭 駐屯人数計算機を開く
+    </a>
+
+    <!-- 援軍計算機を開くボタン（必要に応じてファイル名やURLに変更してください） -->
+    <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
+        🔢 援軍計算機を開く
+    </a>
+
+    <button
+        id="exportJson"
+        class="primary-btn">
+
+        💾 JSON保存
+
+    </button>
+
+    <input
+        id="importJsonFile"
+        type="file"
+        accept=".json"
+        hidden>
+
+    <button
+        id="importJson"
+        class="primary-btn">
+
+        📂 JSON読込
+
+    </button>
+
+</section>
+
+<!-- ========================= -->
+<!-- JavaScript -->
+<!-- ========================= -->
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+</body>
+
+</html>

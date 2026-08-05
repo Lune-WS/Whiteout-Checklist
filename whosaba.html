@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホワサバ 援軍・部隊割り振り計算機</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 650px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; }
+        .section { margin-bottom: 20px; padding: 15px; background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 6px; }
+        .section h3 { margin-top: 0; font-size: 16px; color: #4183c4; border-bottom: 1px solid #e1e4e8; padding-bottom: 5px; }
+        label { display: block; margin-top: 10px; font-size: 14px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        button { width: 100%; background: #2ea44f; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #2c974b; }
+        table { width: 100%; margin-top: 15px; border-collapse: collapse; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #f1f8ff; }
+        .summary { margin-top: 10px; font-size: 14px; color: #555; }
+        .leftover-box { margin-top: 15px; padding: 12px; background: #eef2f7; border-radius: 6px; font-size: 14px; }
+        .leftover-box h4 { margin: 0 0 8px 0; color: #2c3e50; font-size: 14px; }
+        .placeholder-text { font-size: 12px; color: #888; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ホワサバ 援軍計算機</h2>
+    
+    <div class="section">
+        <h3>1. 基本設定</h3>
+        <label>基本出兵上限（素の数値）:</label>
+        <input type="number" id="baseLimit" placeholder="例: 110000">
+        
+        <label>ペット雪猿レベル (1〜10):</label>
+        <input type="number" id="snowApeLv" placeholder="例: 5" min="1" max="10">
+        
+        <label>出征容量バフ:</label>
+        <select id="buffRate">
+            <option value="0" selected>0%</option>
+            <option value="0.1">10%</option>
+            <option value="0.2">20%</option>
+        </select>
+        
+        <label>有効行軍数 (1〜6):</label>
+        <input type="number" id="activeTroops" placeholder="例: 6" min="1" max="6">
+    </div>
+
+    <div class="section">
+        <h3>2. 本部駐屯指示（数値 または 割合%） <span class="placeholder-text">※指定がなければ空欄でOK</span></h3>
+        <div class="row">
+            <div>
+                <label>本部用 盾兵:</label>
+                <input type="number" id="hqShieldInput" placeholder="例: 70000">
+            </div>
+            <div>
+                <label>入力タイプ:</label>
+                <select id="hqShieldType">
+                    <option value="num">固定数</option>
+                    <option value="per">割合(%)</option>
+                </select>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            <div>
+                <label>本部用 槍兵:</label>
+                <input type="number" id="hqSpearInput" placeholder="例: 30000">
+            </div>
+            <div>
+                <label>入力タイプ:</label>
+                <select id="hqSpearType">
+                    <option value="num">固定数</option>
+                    <option value="per">割合(%)</option>
+                </select>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 10px;">
+            <div>
+                <label>本部用 弓兵:</label>
+                <input type="number" id="hqBowInput" placeholder="例: 0">
+            </div>
+            <div>
+                <label>入力タイプ:</label>
+                <select id="hqBowType">
+                    <option value="num">固定数</option>
+                    <option value="per">割合(%)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>3. 現在の兵士数（保有数）</h3>
+        <div class="row">
+            <div>
+                <label>保有 盾兵:</label>
+                <input type="number" id="myShields" placeholder="例: 280000">
+            </div>
+            <div>
+                <label>保有 槍兵:</label>
+                <input type="number" id="mySpears" placeholder="例: 220000">
+            </div>
+            <div>
+                <label>保有 弓兵:</label>
+                <input type="number" id="myBows" placeholder="例: 340000">
+            </div>
+        </div>
+    </div>
+
+    <button onclick="calculate()">計算する</button>
+
+    <div class="section" id="resultSection" style="display:none; margin-top: 20px;">
+        <h3>4. 各行軍の割り振り結果</h3>
+        <div class="summary" id="capacitySummary"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>部隊</th>
+                    <th>盾兵</th>
+                    <th>槍兵</th>
+                    <th>弓兵</th>
+                    <th>合計</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody"></tbody>
+        </table>
+
+        <div class="leftover-box" id="leftoverSummary">
+            <h4>🏠 自都市に残る兵士数</h4>
+            <div id="leftoverText"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculate() {
+    try {
+        const baseLimit = parseFloat(document.getElementById('baseLimit').value) || 0;
+        const snowApeLv = parseInt(document.getElementById('snowApeLv').value) || 0;
+        const buffRate = parseFloat(document.getElementById('buffRate').value) || 0;
+        const activeTroops = parseInt(document.getElementById('activeTroops').value) || 1;
+        
+        let myShields = parseFloat(document.getElementById('myShields').value) || 0;
+        let mySpears = parseFloat(document.getElementById('mySpears').value) || 0;
+        let myBows = parseFloat(document.getElementById('myBows').value) || 0;
+        
+        if (baseLimit === 0) {
+            alert("基本出兵上限を入力してください！");
+            return;
+        }
+
+        const unitCapacity = baseLimit + (snowApeLv * 1500) + (baseLimit * buffRate);
+        const totalCapacity = unitCapacity * activeTroops;
+        
+        document.getElementById('capacitySummary').innerHTML = 
+            `1部隊上限: <b>${Math.floor(unitCapacity).toLocaleString()}</b> / 総出兵容量: <b>${Math.floor(totalCapacity).toLocaleString()}</b>`;
+        
+        // 本部指定の目標値計算
+        let hqShieldRaw = parseFloat(document.getElementById('hqShieldInput').value) || 0;
+        let hqShieldMode = document.getElementById('hqShieldType').value;
+        let targetShieldTotal = hqShieldRaw > 0 ? (hqShieldMode === 'per' ? (totalCapacity * (hqShieldRaw / 100)) : hqShieldRaw) : 0;
+        
+        let hqSpearRaw = parseFloat(document.getElementById('hqSpearInput').value) || 0;
+        let hqSpearMode = document.getElementById('hqSpearType').value;
+        let targetSpearTotal = hqSpearRaw > 0 ? (hqSpearMode === 'per' ? (totalCapacity * (hqSpearRaw / 100)) : hqSpearRaw) : 0;
+
+        let hqBowRaw = parseFloat(document.getElementById('hqBowInput').value) || 0;
+        let hqBowMode = document.getElementById('hqBowType').value;
+        let targetBowTotal = hqBowRaw > 0 ? (hqBowMode === 'per' ? (totalCapacity * (hqBowRaw / 100)) : hqBowRaw) : 0;
+
+        let targetShieldPlus = targetShieldTotal > 0 ? targetShieldTotal + 1000 : 0;
+        let targetSpearPlus = targetSpearTotal > 0 ? targetSpearTotal + 1000 : 0;
+        let targetBowPlus = targetBowTotal > 0 ? targetBowTotal + 1000 : 0;
+
+        // 各軍の割り振り配列
+        let troopsShields = new Array(activeTroops).fill(0);
+        let troopsSpears = new Array(activeTroops).fill(0);
+        let troopsBows = new Array(activeTroops).fill(0);
+
+        let stockShields = myShields;
+        let stockSpears = mySpears;
+        let stockBows = myBows;
+
+        // --- ステップ1〜3: 基本の均等割り振り（上限厳守） ---
+        let eachShield = stockShields / activeTroops;
+        for (let i = 0; i < activeTroops; i++) {
+            let cap = unitCapacity - (troopsShields[i] + troopsSpears[i] + troopsBows[i]);
+            let add = Math.min(cap, eachShield, stockShields);
+            troopsShields[i] += add;
+            stockShields -= add;
+        }
+
+        let eachSpear = stockSpears / activeTroops;
+        for (let i = 0; i < activeTroops; i++) {
+            let cap = unitCapacity - (troopsShields[i] + troopsSpears[i] + troopsBows[i]);
+            if (cap > 0 && stockSpears > 0) {
+                let add = Math.min(cap, eachSpear, stockSpears);
+                troopsSpears[i] += add;
+                stockSpears -= add;
+            }
+        }
+
+        let eachBow = stockBows / activeTroops;
+        for (let i = 0; i < activeTroops; i++) {
+            let cap = unitCapacity - (troopsShields[i] + troopsSpears[i] + troopsBows[i]);
+            if (cap > 0 && stockBows > 0) {
+                let add = Math.min(cap, eachBow, stockBows);
+                troopsBows[i] += add;
+                stockBows -= add;
+            }
+        }
+
+        // --- ステップ4〜5: 1軍のチェックと調整（上限厳守） ---
+        // A. 盾の調整
+        if (targetShieldPlus > 0 && troopsShields[0] < targetShieldPlus) {
+            let needed = targetShieldPlus - troopsShields[0];
+            let g1Free = unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]);
+            let addCity = Math.min(needed, stockShields, g1Free);
+            troopsShields[0] += addCity;
+            stockShields -= addCity;
+            needed -= addCity;
+
+            if (needed > 0 && activeTroops > 1) {
+                let remTroops = activeTroops - 1;
+                let takePerTroop = Math.ceil(needed / remTroops);
+                let actuallyCollected = 0;
+
+                for (let i = 1; i < activeTroops; i++) {
+                    let canTake = Math.min(troopsShields[i], takePerTroop);
+                    troopsShields[i] -= canTake;
+                    actuallyCollected += canTake;
+                }
+                // 1軍の空き容量を超えないように制限
+                let finalAdd = Math.min(actuallyCollected, unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]));
+                troopsShields[0] += finalAdd;
+            }
+        }
+
+        // B. 槍の調整
+        if (targetSpearPlus > 0 && troopsSpears[0] < targetSpearPlus) {
+            let needed = targetSpearPlus - troopsSpears[0];
+            let g1Free = unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]);
+            let addCity = Math.min(needed, stockSpears, g1Free);
+            troopsSpears[0] += addCity;
+            stockSpears -= addCity;
+            needed -= addCity;
+
+            if (needed > 0 && activeTroops > 1) {
+                let remTroops = activeTroops - 1;
+                let takePerTroop = Math.ceil(needed / remTroops);
+                let actuallyCollected = 0;
+
+                for (let i = 1; i < activeTroops; i++) {
+                    let canTake = Math.min(troopsSpears[i], takePerTroop);
+                    troopsSpears[i] -= canTake;
+                    actuallyCollected += canTake;
+                }
+                let finalAdd = Math.min(actuallyCollected, unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]));
+                troopsSpears[0] += finalAdd;
+            }
+        }
+
+        // C. 弓の調整
+        if (targetBowPlus > 0 && troopsBows[0] < targetBowPlus) {
+            let needed = targetBowPlus - troopsBows[0];
+            let g1Free = unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]);
+            let addCity = Math.min(needed, stockBows, g1Free);
+            troopsBows[0] += addCity;
+            stockBows -= addCity;
+            needed -= addCity;
+
+            if (needed > 0 && activeTroops > 1) {
+                let remTroops = activeTroops - 1;
+                let takePerTroop = Math.ceil(needed / remTroops);
+                let actuallyCollected = 0;
+
+                for (let i = 1; i < activeTroops; i++) {
+                    let canTake = Math.min(troopsBows[i], takePerTroop);
+                    troopsBows[i] -= canTake;
+                    actuallyCollected += canTake;
+                }
+                let finalAdd = Math.min(actuallyCollected, unitCapacity - (troopsShields[0] + troopsSpears[0] + troopsBows[0]));
+                troopsBows[0] += finalAdd;
+            }
+        }
+
+        // --- 全体の余り枠を上から順に埋め直す（各軍の上限を絶対に超えない） ---
+        for (let i = 0; i < activeTroops; i++) {
+            let free = unitCapacity - (troopsShields[i] + troopsSpears[i] + troopsBows[i]);
+            if (free > 0 && stockShields > 0) {
+                let add = Math.min(free, stockShields);
+                troopsShields[i] += add; stockShields -= add; free -= add;
+            }
+            if (free > 0 && stockSpears > 0) {
+                let add = Math.min(free, stockSpears);
+                troopsSpears[i] += add; stockSpears -= add; free -= add;
+            }
+            if (free > 0 && stockBows > 0) {
+                let add = Math.min(free, stockBows);
+                troopsBows[i] += add; stockBows -= add; free -= add;
+            }
+        }
+
+        // --- テーブル出力 & 自都市残り計算 ---
+        let tbodyHtml = '';
+        let totalAllocatedShields = 0;
+        let totalAllocatedSpears = 0;
+        let totalAllocatedBows = 0;
+
+        for (let i = 0; i < activeTroops; i++) {
+            let sN = Math.floor(troopsShields[i]);
+            let spN = Math.floor(troopsSpears[i]);
+            let bN = Math.floor(troopsBows[i]);
+            let totalN = sN + spN + bN;
+
+            totalAllocatedShields += sN;
+            totalAllocatedSpears += spN;
+            totalAllocatedBows += bN;
+
+            tbodyHtml += `<tr>
+                <td>${i + 1}軍</td>
+                <td>${sN.toLocaleString()}</td>
+                <td>${spN.toLocaleString()}</td>
+                <td>${bN.toLocaleString()}</td>
+                <td><b>${totalN.toLocaleString()}</b></td>
+            </tr>`;
+        }
+        
+        document.getElementById('resultTableBody').innerHTML = tbodyHtml;
+
+        let leftShields = Math.max(0, myShields - totalAllocatedShields);
+        let leftSpears = Math.max(0, mySpears - totalAllocatedSpears);
+        let leftBows = Math.max(0, myBows - totalAllocatedBows);
+
+        document.getElementById('leftoverText').innerHTML = 
+            `盾兵: <b>${Math.floor(leftShields).toLocaleString()}</b> / ` +
+            `槍兵: <b>${Math.floor(leftSpears).toLocaleString()}</b> / ` +
+            `弓兵: <b>${Math.floor(leftBows).toLocaleString()}</b>`;
+
+        document.getElementById('resultSection').style.display = 'block';
+    } catch (e) {
+        alert("計算中にエラーが発生しました: " + e.message);
+    }
+}
+</script>
+
+</body>
+</html>
