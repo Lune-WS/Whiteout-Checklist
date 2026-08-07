@@ -28,6 +28,15 @@
     </div>
   </div>
 
+  <!-- バックアップ・復元ボタンエリア -->
+  <section style="margin: 16px 0 0 0; display: flex; gap: 10px; align-items: center;">
+    <button onclick="exportData()" class="btn btn-secondary" type="button">💾 データをバックアップする</button>
+    <label class="btn btn-secondary" style="cursor: pointer; display: inline-flex; align-items: center; margin: 0;">
+      📁 復元する
+      <input type="file" accept=".json" onchange="importData(event)" style="display: none;" />
+    </label>
+  </section>
+
   <section class="summary-grid">
     <article class="summary-card">
       <div class="summary-card__title">🚨 今閉じるべきステーション</div>
