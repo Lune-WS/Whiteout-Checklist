@@ -123,7 +123,6 @@ function bindEvents() {
     });
   }
 
-  // 👇 ここにコピーボタンの処理を追加しました
   const copyTodayBtn = document.getElementById("copyTodayBtn");
   if (copyTodayBtn) {
     copyTodayBtn.addEventListener("click", () => {
@@ -309,8 +308,8 @@ function buildStationCard(station, record) {
         Lv${station.level} ${escapeHtml(station.name)}
     </div>
 
-    <div class="station-date">
-        ${status.icon} ${dateText} <span style="font-size: 0.85em; color: #666;">${remainText}</span>
+    <div class="station-date" data-field="dateText">
+        ${status.icon} ${dateText} <span data-field="remainText" style="font-size: 0.85em; color: #666;">${remainText}</span>
     </div>
 
     <div class="station-input">
@@ -329,6 +328,7 @@ function buildStationCard(station, record) {
 </div>
 `;
 }
+
 function getStationStatus(record) {
   if (!record || !record.closeTime) {
     return { icon: "⚪", badgeText: "未登録" };
@@ -424,7 +424,7 @@ function updateSummary() {
     const now = new Date();
 
     const urgent = [];
-    const warningMap = {}; // 日付ごとにグループ化するため
+    const warningMap = {};
 
     let registeredCount = 0;
 
@@ -456,12 +456,10 @@ function updateSummary() {
         const remain = shieldEnd - now;
 
         if (remain > 0 && remain <= 86400000) {
-            // 切れる日の日付文字列を作る（例: "8/5"）
             const month = shieldEnd.getMonth() + 1;
             const date = shieldEnd.getDate();
             const dateKey = `${month}/${date}`;
 
-            // 時間だけを抽出（例: "14:10"）
             const hoursStr = String(shieldEnd.getHours()).padStart(2, '0');
             const minutesStr = String(shieldEnd.getMinutes()).padStart(2, '0');
             const timeOnlyStr = `${hoursStr}:${minutesStr}`;
@@ -485,26 +483,22 @@ function updateSummary() {
     const warningHtmlList = [];
     const copyTextLines = [];
 
-    // 日付ごとに整理してまとめる
     Object.keys(warningMap).forEach((dateKey) => {
         const items = warningMap[dateKey];
-        // 残り時間順に並び替え
         items.sort((a, b) => a.remain - b.remain);
 
-        // コピー用テキストの組み立て
         copyTextLines.push(`📅 ステーション ${dateKey}`);
         items.forEach((item) => {
             warningHtmlList.push(item.html);
             copyTextLines.push(item.text);
         });
-        copyTextLines.push(""); // 空行
+        copyTextLines.push("");
     });
 
     if (closeNow) closeNow.innerHTML = urgent.length ? urgent.join("") : "ありません";
     if (todayStations) todayStations.innerHTML = warningHtmlList.length ? warningHtmlList.join("") : "ありません";
     if (allianceStats) allianceStats.innerHTML = `${registeredCount} / ${stations.length} 登録`;
 
-    // 末尾の余分な空行を削ってコピーテキストを完成させる
     window.todayCopyText = copyTextLines.join("\n").trim();
 
     const alliance = getCurrentAlliance();
@@ -516,18 +510,10 @@ function updateSummary() {
     localStorage.setItem("ws_station_registered_count", registeredCount);
 }
 
-// 秒を省いた短縮版の残り時間フォーマット関数
-function formatRemainShort(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  return `${hours}時間${minutes}分`;
-}
-
-// 1秒ごとのライブ更新（入力中の項目がある場合はリセットを防ぐためスキップ）
+// 1秒ごとのライブ更新（入力中は更新をスキップして消えるのを防ぐ）
 function updateLiveContent() {
   const activeEl = document.activeElement;
-  if (activeEl && activeEl.classList.contains("timeInput")) {
+  if (activeEl && activeEl.tagName === "INPUT") {
     return;
   }
 
@@ -535,7 +521,7 @@ function updateLiveContent() {
   const now = new Date();
 
   stations.forEach((station) => {
-    const card = container.querySelector(`.station[data-id="${station.id}"]`);
+    const card = container.querySelector(`.station-row[data-id="${station.id}"]`);
     if (!card) return;
 
     const record = stationData[station.id];
@@ -544,19 +530,24 @@ function updateLiveContent() {
     const closeTime = new Date(record.closeTime);
     const shieldEnd = new Date(closeTime);
     shieldEnd.setDate(shieldEnd.getDate() + 3);
-    const autoEnd = new Date(shieldEnd);
-    autoEnd.setDate(autoEnd.getDate() + 1);
 
-    const remainValEl = card.querySelector(".status-remain-val");
-    const descEl = card.querySelector(".status-desc");
+    const status = getStationStatus(record);
+    const dateTextEl = card.querySelector('[data-field="dateText"]');
+    
+    if (dateTextEl) {
+      const remainMs = shieldEnd - now;
+      let remainText = "";
+      if (remainMs > 0) {
+        const totalSeconds = Math.floor(remainMs / 1000);
+        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(totalSeconds % 60).padStart(2, '0');
+        remainText = `（あと ${hours}:${minutes}:${seconds}）`;
+      } else {
+        remainText = "（シールド切れ）";
+      }
 
-    if (now >= shieldEnd && now < autoEnd) {
-      if (remainValEl) remainValEl.textContent = formatRemain(autoEnd - now);
-      if (descEl) descEl.textContent = `自動占領まで ${formatRemain(autoEnd - now)} です。`;
-    } else if (now < shieldEnd) {
-      const remain = shieldEnd - now;
-      if (remainValEl) remainValEl.textContent = formatRemain(remain);
-      if (descEl) descEl.textContent = `シールド終了まで ${formatRemain(remain)} です。`;
+      dateTextEl.innerHTML = `${status.icon} ${formatShortDate(shieldEnd)} <span data-field="remainText" style="font-size: 0.85em; color: #666;">${remainText}</span>`;
     }
   });
 
@@ -571,14 +562,6 @@ function formatShortDate(date) {
   return `${month}/${day} ${hours}:${minutes}`;
 }
 
-function formatRemain(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return `${hours}時間${minutes}分${seconds}秒`;
-}
-
 function escapeHtml(text) {
   return String(text)
     .replaceAll("&", "&amp;")
@@ -586,4 +569,40 @@ function escapeHtml(text) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
+}
+// --- バックアップ機能 ---
+function exportData() {
+    const dataStr = localStorage.getItem(STORAGE_KEY);
+    if (!dataStr) {
+        alert("保存するデータがありません。");
+        return;
+    }
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ws_station_backup_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (!imported || typeof imported !== "object") {
+                throw new Error("無効なデータ形式です");
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
+            alert("データを復元しました！");
+            location.reload(); // 読み込み後にページを再読み込み
+        } catch (err) {
+            console.error(err);
+            alert("ファイルの読み込みに失敗しました。正しいバックアップファイルを選択してください。");
+        }
+    };
+    reader.readAsText(file);
 }
