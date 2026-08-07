@@ -760,3 +760,8 @@ function initListSortable() {
     makeListSortable('eventContainer', STORAGE?.events || "ws_events");
     makeListSortable('officerContainer', 'officer_list');
 }
+// カウントダウンを1秒ごとに更新する処理
+setInterval(() => {
+    // 繰り返しタスク（英雄募集・倉庫回収）の表示を再生成
+    renderRepeat();
+}, 1000);
