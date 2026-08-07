@@ -556,6 +556,15 @@ function renderOfficers() {
     initListSortable();
 }
 
+// 幹部メニューの項目を削除する関数
+function deleteOfficer(id) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    // 該当するID以外のものだけを残す
+    officers = officers.filter(o => String(o.id) !== String(id));
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers(); // 再描画
+}
+
 // ==========================================
 // イベント・各種ボタン操作のセットアップ
 // ==========================================
