@@ -38,12 +38,20 @@ function checkDailyReset() {
 
     const resetTimeISO = resetTime.toISOString();
 
-    // 最後にリセットした時間より新しい基準点（朝9時）を過ぎていればリセット実行
-    if (!lastResetStr || new Date(lastResetStr) < resetTime) {
-        // localStorage 内のタスクチェック（キーの末尾が数値や _am, _pm などのもの）を削除
+    // ★修正：最後の更新日時が「現在の9時」より前である場合のみリセット
+    // これにより、1日のうちに何度もページを開いても、二度とリセットは走りません
+    if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
+        
+        // リセット対象を限定的にする
         Object.keys(localStorage).forEach(key => {
-            // イベントの目隠し(_hide_)や設定データ(ws_)以外で、チェック判定のデータをクリア
-            if (!key.includes("_hide_") && !key.startsWith("ws_") && !key.includes("_list") && !key.includes("bear_")) {
+            // "ws_last_reset_date" 以外で、かつ "ws_" や "bear_" などの設定系は消さない
+            // チェック判定用のキーだけを消すように調整
+            if (!key.includes("_hide_") && 
+                !key.startsWith("ws_") && 
+                !key.includes("_list") && 
+                !key.includes("bear_") &&
+                !key.includes("_time")) { // ★重要：時間データ（_time）も消さないように変更
+                
                 localStorage.removeItem(key);
             }
         });
