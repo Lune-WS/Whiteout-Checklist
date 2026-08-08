@@ -572,11 +572,19 @@ function escapeHtml(text) {
 }
 // --- バックアップ機能 ---
 function exportData() {
-    const dataStr = localStorage.getItem(STORAGE_KEY);
-    if (!dataStr) {
-        alert("保存するデータがありません。");
-        return;
+    // ステーション管理だけでなく、全体のストレージから関連データを安全に書き出します
+    const exportObj = {
+        stationState: state,
+        // 必要に応じて他の同盟ごとのカウントなども保持
+    };
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith("ws_station") || key.includes("StationManager"))) {
+            exportObj[key] = localStorage.getItem(key);
+        }
     }
+
+    const dataStr = JSON.stringify(exportObj, null, 2);
     const blob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -596,9 +604,27 @@ function importData(event) {
             if (!imported || typeof imported !== "object") {
                 throw new Error("無効なデータ形式です");
             }
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
-            alert("データを復元しました！");
-            location.reload(); // 読み込み後にページを再読み込み
+
+            // 新形式（包括的バックアップ）の場合
+            if (imported.stationState) {
+                state = imported.stationState;
+                persistState();
+            } else if (imported.alliances && imported.stationDataByAlliance) {
+                // 旧形式のステーションデータ互換
+                state = imported;
+                persistState();
+            } else {
+                // 個別キーの復元
+                Object.keys(imported).forEach(key => {
+                    if (key.startsWith("ws_")) {
+                        localStorage.setItem(key, imported[key]);
+                    }
+                });
+                state = loadState();
+            }
+
+            alert("ステーションデータを正常に復元しました！");
+            location.reload(); // ページを再読み込みして反映
         } catch (err) {
             console.error(err);
             alert("ファイルの読み込みに失敗しました。正しいバックアップファイルを選択してください。");
