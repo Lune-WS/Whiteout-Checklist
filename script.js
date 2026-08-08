@@ -27,36 +27,33 @@ function checkDailyReset() {
     const lastResetStr = localStorage.getItem("ws_last_reset_date");
     const now = new Date();
     
-    // 今日の「朝9:00」の基準日時を計算
     let resetTime = new Date();
     resetTime.setHours(9, 0, 0, 0);
 
-    // 現在時刻が朝9時前なら、前日の朝9時が基準点
     if (now < resetTime) {
         resetTime.setDate(resetTime.getDate() - 1);
     }
 
     const resetTimeISO = resetTime.toISOString();
 
-    // ★修正：最後の更新日時が「現在の9時」より前である場合のみリセット
-    // これにより、1日のうちに何度もページを開いても、二度とリセットは走りません
     if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
         
-        // リセット対象を限定的にする
         Object.keys(localStorage).forEach(key => {
-            // "ws_last_reset_date" 以外で、かつ "ws_" や "bear_" などの設定系は消さない
-            // チェック判定用のキーだけを消すように調整
+            // ★ ここに「ステーション管理のデータは絶対に消さない」という条件を追加します
+            if (key === "wsStationManagerStateV4" || key.startsWith("ws_station")) {
+                return; // 削除せずにスキップ
+            }
+
             if (!key.includes("_hide_") && 
                 !key.startsWith("ws_") && 
                 !key.includes("_list") && 
                 !key.includes("bear_") &&
-                !key.includes("_time")) { // ★重要：時間データ（_time）も消さないように変更
+                !key.includes("_time")) {
                 
                 localStorage.removeItem(key);
             }
         });
 
-        // リセット完了日時を保存
         localStorage.setItem("ws_last_reset_date", resetTimeISO);
     }
 }
