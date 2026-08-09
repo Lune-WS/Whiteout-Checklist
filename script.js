@@ -26,7 +26,7 @@ const CHARACTER_STATION_ALLIANCE = {
 function checkDailyReset() {
     const lastResetStr = localStorage.getItem("ws_last_reset_date");
     const now = new Date();
-    
+
     let resetTime = new Date();
     resetTime.setHours(9, 0, 0, 0);
 
@@ -37,21 +37,28 @@ function checkDailyReset() {
     const resetTimeISO = resetTime.toISOString();
 
     if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
-        
+
         Object.keys(localStorage).forEach(key => {
-            // ★ ここに「ステーション管理のデータは絶対に消さない」という条件を追加します
+
+            // ステーション管理データは削除しない
             if (key === "wsStationManagerStateV4" || key.startsWith("ws_station")) {
-                return; // 削除せずにスキップ
+                return;
             }
 
-            if (!key.includes("_hide_") && 
-                !key.startsWith("ws_") && 
-                !key.includes("_list") && 
-                !key.includes("bear_") &&
-                !key.includes("_time")) {
-                
-                localStorage.removeItem(key);
+            // 残したいデータ
+            if (
+                key.includes("_hide_") ||
+                key.startsWith("ws_") ||
+                key.includes("_list") ||
+                key.endsWith("_bear_time") ||
+                key.endsWith("_storage_time") ||
+                key.endsWith("_hero_time")
+            ) {
+                return;
             }
+
+            // それ以外はリセット
+            localStorage.removeItem(key);
         });
 
         localStorage.setItem("ws_last_reset_date", resetTimeISO);
