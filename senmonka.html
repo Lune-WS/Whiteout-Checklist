@@ -47,18 +47,24 @@
             color: white;
             border-color: transparent;
         }
+        /* ★ 2列レイアウト用のグリッド指定 */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
         }
-        @media (max-width: 680px) { .grid-container { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) {
+            .grid-container { grid-template-columns: 1fr; }
+        }
         .expert-card {
             background: var(--card-bg);
             border-radius: 12px;
             padding: 20px;
             border: 1px solid var(--border-color);
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .expert-header {
             display: flex;
@@ -66,7 +72,7 @@
             align-items: center;
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
             gap: 10px;
         }
@@ -79,25 +85,78 @@
             border-radius: 6px;
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
-        .relations-row { font-size: 0.9rem; margin-bottom: 15px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        /* 親密度エリア */
+        .intimacy-section {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 15px;
+        }
+        .intimacy-title {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .intimacy-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        @media (max-width: 500px) {
+            .intimacy-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .intimacy-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
+            text-align: center;
+        }
+        .intimacy-label {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-bottom: 4px;
+        }
+        .intimacy-input-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .intimacy-input {
+            width: 45px !important;
+            padding: 4px !important;
+            font-size: 0.85rem !important;
+            text-align: center;
+        }
         .relation-badge {
-            background: #334155;
-            color: #e2e8f0;
-            padding: 4px 8px;
+            font-size: 0.7rem;
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 2px 4px;
             border-radius: 4px;
-            display: inline-block;
-            border: 1px solid #475569;
-            margin-right: 5px;
             margin-top: 4px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
         .check-ref-btn {
             background: rgba(56, 189, 248, 0.15);
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
-            padding: 6px 12px;
+            padding: 4px 10px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             transition: 0.2s;
         }
@@ -126,7 +185,7 @@
         }
         .reference-section h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; color: var(--accent-color); }
         
-        /* モーダルウィンドウ */
+        /* モーダル */
         .modal {
             display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
@@ -148,7 +207,7 @@
     <h1>ホワイトアウト・サバイバル 専門家管理</h1>
     
     <div class="tab-container">
-        <button class="tab-btn active" onclick="switchView('experts')">❄️ 専門家スキル管理 (2列)</button>
+        <button class="tab-btn active" onclick="switchView('experts')">❄️ 専門家スキル＆親密度管理 (2列)</button>
         <button class="tab-btn" onclick="switchView('reference')">📊 全体 早見表</button>
     </div>
 
@@ -169,29 +228,30 @@
 
 <script>
     const refData = [
-        { lv: 10, rel: "知人1", s: 5, h: 8, r: 20, b: 6, f: 12, v: 20, ro: 8, c: 10, g: 30 },
-        { lv: 20, rel: "知人2", s: 10, h: 16, r: 40, b: 12, f: 24, v: 40, ro: 16, c: 20, g: 60 },
-        { lv: 30, rel: "知人3", s: 15, h: 24, r: 80, b: 18, f: 36, v: 60, ro: 24, c: 30, g: 120 },
-        { lv: 40, rel: "友人1", s: 20, h: 32, r: 120, b: 24, f: 48, v: 80, ro: 32, c: 40, g: 180 },
-        { lv: 50, rel: "友人2", s: 25, h: 40, r: 160, b: 30, f: 60, v: 100, ro: 40, c: 50, g: 240 },
-        { lv: 60, rel: "友人3", s: 30, h: 48, r: 200, b: 36, f: 72, v: 120, ro: 48, c: 60, g: 300 },
-        { lv: 70, rel: "親友1", s: 35, h: 56, r: 240, b: 42, f: 84, v: 140, ro: 56, c: 70, g: 360 },
-        { lv: 80, rel: "親友2", s: 40, h: 64, r: 280, b: 48, f: 96, v: 160, ro: 64, c: 80, g: 420 },
-        { lv: 90, rel: "親友3", s: 45, h: 72, r: 320, b: 54, f: 108, v: 180, ro: 72, c: 90, g: 480 },
-        { lv: 100, rel: "心の友", s: 50, h: 80, r: 360, b: 60, f: 120, v: 200, ro: 80, c: 100, g: 540 }
+        { lv: 0, rel: "邂逅" },
+        { lv: 10, rel: "知人1" },
+        { lv: 20, rel: "知人2" },
+        { lv: 30, rel: "知人3" },
+        { lv: 40, rel: "友人1" },
+        { lv: 50, rel: "友人2" },
+        { lv: 60, rel: "友人3" },
+        { lv: 70, rel: "親友1" },
+        { lv: 80, rel: "親友2" },
+        { lv: 90, rel: "親友3" },
+        { lv: 100, rel: "心の友" }
     ];
 
     const expertsData = [
-        { id: "syril", name: "シリル", bonus: "熊狩りポイント増加", col: "s", relations: ["友人1: Lune", "友人2: Melune", "友人1: Chocolat"], skills: ["①集結容量", "②強化パーツ", "③エネ石", "④出征容量"] },
-        { id: "agnes", name: "アグネス", bonus: "資源採集時宝箱増加", col: "s", relations: ["友人3: Lune", "友人3: Melune", "友人3: Chocolat"], skills: ["①灯台", "②缶詰", "③建設時間", "④神秘ショップ"] },
-        { id: "holger", name: "ホルガー", bonus: "競技場報酬増加", col: "h", relations: ["友人1: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①攻撃＆HPアップ", "②競技コイン増加", "③アリーナショップ割引", "④更に攻撃＆HPアップ"] },
-        { id: "romulus", name: "ロムルス", bonus: "出撃部隊上昇", col: "r", relations: ["知人2: Lune", "知人1: Melune", "知人1: Chocolat"], skills: ["①兵士無料増員＆タグ", "②攻撃＆防御増加", "③殺傷＆HP増加", "④集結容量UP"] },
-        { id: "bald", name: "バルド", bonus: "同盟ショップ割引など", col: "b", relations: ["友人1: Lune", "友人3: Melune", "知人2: Chocolat"], skills: ["①同盟総動員", "②争覇戦", "③クレイジョイ", "④同盟大作戦"] },
-        { id: "fabian", name: "ファビアン", bonus: "兵器攻防アップ", col: "f", relations: ["知人3: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①兵器コイン増加", "②兵士回復", "③殺傷HPアップ", "④集結容量UP"] },
-        { id: "valeria", name: "ヴァレリア", bonus: "戦争フェーズ攻防アップ", col: "v", relations: ["知人1: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①準備ポイント増加", "②太陽コイン増加", "③殺傷HPアップ", "④集結量アップ"] },
-        { id: "rony", name: "ロニー", bonus: "トラック攻撃時攻防アップ", col: "ro", relations: ["知人3: Lune", "知人1: Melune"], skills: ["①トラック到達時短", "②略奪成功時確実報酬UP", "③霊魂+LV6リリート出現", "④神話トラック出現"] },
-        { id: "casey", name: "ケイシー", bonus: "燃霜鉱区中殺傷&HP上昇", col: "c", relations: ["知人3: Lune", "知人2: Melune"], skills: ["①経験値10%アップ", "②部隊数上昇、回復up", "③宝石図面up", "④ハンドブック+ｵﾘﾊﾙ量増加"] },
-        { id: "gales", name: "ガレス", bonus: "容量+回復速度UP", col: "g", relations: ["初期30 (重め設定)"], skills: ["①訓練するごとに宝箱", "②防御UP", "③HPup", "④殺傷低下"] }
+        { id: "syril", name: "シリル", bonus: "熊狩りポイント増加", col: "s", skills: ["①集結容量", "②強化パーツ", "③エネ石", "④出征容量"] },
+        { id: "agnes", name: "アグネス", bonus: "資源採集時宝箱増加", col: "s", skills: ["①灯台", "②缶詰", "③建設時間", "④神秘ショップ"] },
+        { id: "holger", name: "ホルガー", bonus: "競技場報酬増加", col: "h", skills: ["①攻撃＆HPアップ", "②競技コイン増加", "③アリーナショップ割引", "④更に攻撃＆HPアップ"] },
+        { id: "romulus", name: "ロムルス", bonus: "出撃部隊上昇", col: "r", skills: ["①兵士無料増員＆タグ", "②攻撃＆防御増加", "③殺傷＆HP増加", "④集結容量UP"] },
+        { id: "bald", name: "バルド", bonus: "同盟ショップ割引など", col: "b", skills: ["①同盟総動員", "②争覇戦", "③クレイジョイ", "④同盟大作戦"] },
+        { id: "fabian", name: "ファビアン", bonus: "兵器攻防アップ", col: "f", skills: ["①兵器コイン増加", "②兵士回復", "③殺傷HPアップ", "④集結容量UP"] },
+        { id: "valeria", name: "ヴァレリア", bonus: "戦争フェーズ攻防アップ", col: "v", skills: ["①準備ポイント増加", "②太陽コイン増加", "③殺傷HPアップ", "④集結量アップ"] },
+        { id: "rony", name: "ロニー", bonus: "トラック攻撃時攻防アップ", col: "ro", skills: ["①トラック到達時短", "②略奪成功時確実報酬UP", "③霊魂+LV6リリート出現", "④神話トラック出現"] },
+        { id: "casey", name: "ケイシー", bonus: "燃霜鉱区中殺傷&HP上昇", col: "c", skills: ["①経験値10%アップ", "②部隊数上昇、回復up", "③宝石図面up", "④ハンドブック+ｵﾘﾊﾙ量増加"] },
+        { id: "gales", name: "ガレス", bonus: "容量+回復速度UP", col: "g", skills: ["①訓練するごとに宝箱", "②防御UP", "③HPup", "④殺傷低下"] }
     ];
 
     const targets = ["Lune", "Melune", "Chocolat", "vanille"];
@@ -205,12 +265,28 @@
         render();
     }
 
+    function getRelationName(lvNum) {
+        if (isNaN(lvNum)) return "邂逅";
+        if (lvNum >= 100) return "心の友";
+        if (lvNum >= 90) return "親友3";
+        if (lvNum >= 80) return "親友2";
+        if (lvNum >= 70) return "親友1";
+        if (lvNum >= 60) return "友人3";
+        if (lvNum >= 50) return "友人2";
+        if (lvNum >= 40) return "友人1";
+        if (lvNum >= 30) return "知人3";
+        if (lvNum >= 20) return "知人2";
+        if (lvNum >= 10) return "知人1";
+        return "邂逅";
+    }
+
     function render() {
         const container = document.getElementById('main-content');
         if (currentView === 'experts') {
             let html = '<div class="grid-container">';
             expertsData.forEach(expert => {
-                let savedData = JSON.parse(localStorage.getItem('wh_expert_' + expert.id)) || { levels: {} };
+                let savedData = JSON.parse(localStorage.getItem('wh_expert_' + expert.id)) || { levels: {}, intimacy: {} };
+                
                 html += `
                     <div class="expert-card">
                         <div>
@@ -218,24 +294,54 @@
                                 <span class="expert-name">${expert.name}</span>
                                 <span class="expert-effect">効果: ${expert.bonus}</span>
                             </div>
-                            <div class="relations-row">
-                                <div><strong>必要条件:</strong> ${expert.relations.map(r => `<span class="relation-badge">${r}</span>`).join('')}</div>
+                            
+                            <div class="card-top-row">
+                                <span style="font-size: 0.85rem; color: var(--text-sub);">専門家の親密度・スキルレベル管理</span>
                                 <button class="check-ref-btn" onclick="openModal('${expert.name}', '${expert.col}')">📋 早見表確認</button>
                             </div>
+
+                            <!-- 各キャラクターごとの親密度レベル入力エリア -->
+                            <div class="intimacy-section">
+                                <div class="intimacy-title">⭐ 専門家 親密度レベル (キャラ別)</div>
+                                <div class="intimacy-grid">
+                `;
+                
+                targets.forEach(t => {
+                    const intKey = `int_${t}`;
+                    const val = savedData.intimacy[intKey] !== undefined ? savedData.intimacy[intKey] : '';
+                    const relName = getRelationName(Number(val));
+                    html += `
+                        <div class="intimacy-box">
+                            <div class="intimacy-label">${t}</div>
+                            <div class="intimacy-input-row">
+                                <input type="text" class="intimacy-input" value="${val}" placeholder="Lv" oninput="saveIntimacy('${expert.id}', '${intKey}', this.value)">
+                            </div>
+                            <span class="relation-badge" id="rel_${expert.id}_${t}">${relName}</span>
+                        </div>
+                    `;
+                });
+
+                html += `
+                                </div>
+                            </div>
+
+                            <!-- スキル別レベル入力テーブル -->
                             <div class="table-wrapper">
                                 <table>
                                     <thead><tr><th style="width:35%;">スキル項目</th>${targets.map(t => `<th>${t}</th>`).join('')}</tr></thead>
                                     <tbody>
                 `;
+                
                 expert.skills.forEach((skill, sIdx) => {
                     html += `<tr><td style="text-align:left; font-weight:500;">${skill}</td>`;
                     targets.forEach(t => {
                         const key = `${sIdx}_${t}`;
                         const val = savedData.levels[key] || '';
-                        html += `<td><input type="text" value="${val}" placeholder="Lv/解放" oninput="saveData('${expert.id}', '${key}', this.value)"></td>`;
+                        html += `<td><input type="text" value="${val}" placeholder="Lv" oninput="saveData('${expert.id}', '${key}', this.value)"></td>`;
                     });
                     html += `</tr>`;
                 });
+                
                 html += `</tbody></table></div></div></div>`;
             });
             container.innerHTML = html + '</div>';
@@ -247,7 +353,22 @@
                         <table>
                             <thead><tr><th>Lv</th><th>関係</th><th>シリル/アグネス</th><th>ホルガー</th><th>ロムルス</th><th>バルド</th><th>ファビアン</th><th>ヴァレリア</th><th>ロニー</th><th>ケイシー</th><th>ガレス(重め)</th></tr></thead>
                             <tbody>
-                                ${refData.map(r => `<tr><td>${r.lv}</td><td>${r.rel}</td><td>${r.s}</td><td>${r.h}</td><td>${r.r}</td><td>${r.b}</td><td>${r.f}</td><td>${r.v}</td><td>${r.ro}</td><td>${r.c}</td><td>${r.g}</td></tr>`).join('')}
+                                ${refData.map(r => {
+                                    const fullRef = [
+                                        { lv: 10, s: 5, h: 8, r: 20, b: 6, f: 12, v: 20, ro: 8, c: 10, g: 30 },
+                                        { lv: 20, s: 10, h: 16, r: 40, b: 12, f: 24, v: 40, ro: 16, c: 20, g: 60 },
+                                        { lv: 30, s: 15, h: 24, r: 80, b: 18, f: 36, v: 60, ro: 24, c: 30, g: 120 },
+                                        { lv: 40, s: 20, h: 32, r: 120, b: 24, f: 48, v: 80, ro: 32, c: 40, g: 180 },
+                                        { lv: 50, s: 25, h: 40, r: 160, b: 30, f: 60, v: 100, ro: 40, c: 50, g: 240 },
+                                        { lv: 60, s: 30, h: 48, r: 200, b: 36, f: 72, v: 120, ro: 48, c: 60, g: 300 },
+                                        { lv: 70, s: 35, h: 56, r: 240, b: 42, f: 84, v: 140, ro: 56, c: 70, g: 360 },
+                                        { lv: 80, s: 40, h: 64, r: 280, b: 48, f: 96, v: 160, ro: 64, c: 80, g: 420 },
+                                        { lv: 90, s: 45, h: 72, r: 320, b: 54, f: 108, v: 180, ro: 72, c: 90, g: 480 },
+                                        { lv: 100, s: 50, h: 80, r: 360, b: 60, f: 120, v: 200, ro: 80, c: 100, g: 540 }
+                                    ];
+                                    let match = fullRef.find(item => item.lv === r.lv);
+                                    return `<tr><td>${r.lv}</td><td>${r.rel}</td><td>${match ? match.s : '-'}</td><td>${match ? match.h : '-'}</td><td>${match ? match.r : '-'}</td><td>${match ? match.b : '-'}</td><td>${match ? match.f : '-'}</td><td>${match ? match.v : '-'}</td><td>${match ? match.ro : '-'}</td><td>${match ? match.c : '-'}</td><td>${match ? match.g : '-'}</td></tr>`;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -258,9 +379,28 @@
 
     function openModal(expertName, colKey) {
         document.getElementById('modalTitle').innerText = `${expertName} の親密度早見表`;
+        const fullRef = [
+            { lv: 10, rel: "知人1" }, { lv: 20, rel: "知人2" }, { lv: 30, rel: "知人3" },
+            { lv: 40, rel: "友人1" }, { lv: 50, rel: "友人2" }, { lv: 60, rel: "友人3" },
+            { lv: 70, rel: "親友1" }, { lv: 80, rel: "親友2" }, { lv: 90, rel: "親友3" }, { lv: 100, rel: "心の友" }
+        ];
+        const valMap = {
+            s: [5,10,15,20,25,30,35,40,45,50],
+            h: [8,16,24,32,40,48,56,64,72,80],
+            r: [20,40,80,120,160,200,240,280,320,360],
+            b: [6,12,18,24,30,36,42,48,54,60],
+            f: [12,24,36,48,60,72,84,96,108,120],
+            v: [20,40,60,80,100,120,140,160,180,200],
+            ro: [8,16,24,32,40,48,56,64,72,80],
+            c: [10,20,30,40,50,60,70,80,90,100],
+            g: [30,60,120,180,240,300,360,420,480,540]
+        };
+        const arr = valMap[colKey] || valMap['s'];
+
         let modalHtml = `<table><thead><tr><th>Lv</th><th>階級</th><th>必要ポイント</th></tr></thead><tbody>`;
-        refData.forEach(row => {
-            modalHtml += `<tr><td>${row.lv}</td><td>${row.rel}</td><td style="font-weight:bold; color:var(--accent-color);">${row[colKey]}</td></tr>`;
+        modalHtml += `<tr><td>0</td><td>邂逅</td><td>0</td></tr>`;
+        fullRef.forEach((row, idx) => {
+            modalHtml += `<tr><td>${row.lv}</td><td>${row.rel}</td><td style="font-weight:bold; color:var(--accent-color);">${arr[idx]}</td></tr>`;
         });
         modalHtml += `</tbody></table>`;
         document.getElementById('modalBody').innerHTML = modalHtml;
@@ -272,9 +412,25 @@
 
     function saveData(expertId, key, value) {
         let storageKey = 'wh_expert_' + expertId;
-        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {} };
+        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {}, intimacy: {} };
         savedData.levels[key] = value;
         localStorage.setItem(storageKey, JSON.stringify(savedData));
+    }
+
+    function saveIntimacy(expertId, key, value) {
+        let storageKey = 'wh_expert_' + expertId;
+        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {}, intimacy: {} };
+        savedData.intimacy[key] = value;
+        localStorage.setItem(storageKey, JSON.stringify(savedData));
+
+        const parts = key.split('_');
+        if(parts.length === 2) {
+            const targetName = parts[1];
+            const badge = document.getElementById(`rel_${expertId}_${targetName}`);
+            if(badge) {
+                badge.textContent = getRelationName(Number(value));
+            }
+        }
     }
 
     render();
