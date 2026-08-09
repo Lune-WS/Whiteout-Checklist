@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホワイトアウト・サバイバル 専門家・親密度管理</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-gradient: linear-gradient(135deg, #0ea5e9, #2563eb);
+            --border-color: #334155;
+            --input-bg: #0f172a;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        /* タブデザイン */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .tab-btn {
+            padding: 10px 24px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-sub);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+        }
+        /* 2列レイアウト用のグリッドコンテナ */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
+            gap: 20px;
+        }
+        @media (max-width: 680px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        /* カードデザイン */
+        .expert-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+        .expert-card:hover {
+            border-color: #475569;
+        }
+        .expert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .expert-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #f1f5f9;
+        }
+        .expert-effect {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .relations-row {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            color: var(--text-sub);
+        }
+        .relation-badge {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 6px;
+            display: inline-block;
+            margin-top: 4px;
+            border: 1px solid #475569;
+        }
+        /* テーブル */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #0f172a;
+            color: var(--text-sub);
+            font-weight: 600;
+        }
+        input[type="text"] {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            padding: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(56, 189, 248, 0.3);
+        }
+        /* 早見表ビュー */
+        .reference-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        .reference-section h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            color: var(--accent-color);
+        }
+        .footer-note {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ホワイトアウト・サバイバル 専門家管理</h1>
+    
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchView('experts')">❄️ 専門家スキル管理 (2列表示)</button>
+        <button class="tab-btn" onclick="switchView('reference')">📊 専門家別 親密度早見表</button>
+    </div>
+
+    <div id="main-content"></div>
+
+    <div class="footer-note">✨ 入力したデータは自動的にブラウザに保存されます</div>
+</div>
+
+<script>
+    const expertsData = [
+        { id: "syril", name: "シリル", bonus: "熊狩りポイント増加", relations: ["友人1: Lune", "友人2: Melune", "友人1: Chocolat"], skills: ["①集結容量", "②強化パーツ", "③エネ石", "④出征容量"] },
+        { id: "agnes", name: "アグネス", bonus: "資源採集時宝箱増加", relations: ["友人3: Lune", "友人3: Melune", "友人3: Chocolat"], skills: ["①灯台", "②缶詰", "③建設時間", "④神秘ショップ"] },
+        { id: "holger", name: "ホルガー", bonus: "競技場報酬増加", relations: ["友人1: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①攻撃＆HPアップ", "②競技コイン増加", "③アリーナショップ割引", "④更に攻撃＆HPアップ"] },
+        { id: "romulus", name: "ロムルス", bonus: "出撃部隊上昇", relations: ["知人2: Lune", "知人1: Melune", "知人1: Chocolat"], skills: ["①兵士無料増員＆タグ", "②攻撃＆防御増加", "③殺傷＆HP増加", "④集結容量UP"] },
+        { id: "bald", name: "バルド", bonus: "同盟ショップ割引など", relations: ["友人1: Lune", "友人3: Melune", "知人2: Chocolat"], skills: ["①同盟総動員", "②争覇戦", "③クレイジョイ", "④同盟大作戦"] },
+        { id: "fabian", name: "ファビアン", bonus: "兵器攻防アップ", relations: ["知人3: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①兵器コイン増加", "②兵士回復", "③殺傷HPアップ", "④集結容量UP"] },
+        { id: "valeria", name: "ヴァレリア", bonus: "戦争フェーズ攻防アップ", relations: ["知人1: Lune", "知人2: Melune", "知人1: Chocolat"], skills: ["①準備ポイント増加", "②太陽コイン増加", "③殺傷HPアップ", "④集結量アップ"] },
+        { id: "rony", name: "ロニー", bonus: "トラック攻撃時攻防アップ", relations: ["知人3: Lune", "知人1: Melune"], skills: ["①トラック到達時短", "②略奪成功時確実報酬UP", "③霊魂+LV6リリート出現", "④神話トラック出現"] },
+        { id: "casey", name: "ケイシー", bonus: "燃霜鉱区中殺傷&HP上昇", relations: ["知人3: Lune", "知人2: Melune"], skills: ["①経験値10%アップ", "②部隊数上昇、回復up", "③宝石図面up", "④ハンドブック+ｵﾘﾊﾙ量増加"] },
+        { id: "gales", name: "ガレス", bonus: "容量+回復速度UP", relations: ["初期30 (重め設定)"], skills: ["①訓練するごとに宝箱", "②防御UP", "③HPup", "④殺傷低下"] }
+    ];
+
+    const targets = ["Lune", "Melune", "Chocolat", "vanille"];
+    let currentView = 'experts';
+
+    function switchView(view) {
+        currentView = view;
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            if((view === 'experts' && idx === 0) || (view === 'reference' && idx === 1)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('main-content');
+        if (currentView === 'experts') {
+            let html = '<div class="grid-container">';
+            expertsData.forEach(expert => {
+                let savedData = JSON.parse(localStorage.getItem('wh_expert_' + expert.id)) || { levels: {} };
+
+                html += `
+                    <div class="expert-card">
+                        <div>
+                            <div class="expert-header">
+                                <span class="expert-name">${expert.name}</span>
+                                <span class="expert-effect">効果: ${expert.bonus}</span>
+                            </div>
+                            <div class="relations-row">
+                                <strong>必要条件:</strong> 
+                                ${expert.relations.length > 0 ? expert.relations.map(r => `<span class="relation-badge">${r}</span>`).join('') : '<span>なし</span>'}
+                            </div>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 35%;">スキル項目</th>
+                `;
+                targets.forEach(t => { html += `<th>${t}</th>`; });
+                html += `</tr></thead><tbody>`;
+
+                expert.skills.forEach((skill, sIdx) => {
+                    html += `<tr><td style="text-align: left; font-weight: 500;">${skill}</td>`;
+                    targets.forEach(t => {
+                        const key = `${sIdx}_${t}`;
+                        const val = savedData.levels[key] || '';
+                        html += `<td><input type="text" value="${val}" placeholder="Lv/解放" oninput="saveData('${expert.id}', '${key}', this.value)"></td>`;
+                    });
+                    html += `</tr>`;
+                });
+                html += `</tbody></table></div></div></div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        } else {
+            // ガレスに最初の値が30（重め）の成長係数を反映した早見表
+            container.innerHTML = `
+                <div class="reference-section">
+                    <h2>専門家別 親密度ポイント早見表 (ガレス重め設定反映)</h2>
+                    <p style="font-size: 0.85rem; color: var(--text-sub);">ガレスは初期30スタートの重めコスト仕様として、割合に合わせて広がるように調整しています。</p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Lv</th>
+                                    <th>関係</th>
+                                    <th>シリル/アグネス</th>
+                                    <th>ホルガー</th>
+                                    <th>ロムルス</th>
+                                    <th>バルド</th>
+                                    <th>ファビアン</th>
+                                    <th>ヴァレリア</th>
+                                    <th>ロニー</th>
+                                    <th>ケイシー</th>
+                                    <th>ガレス(重め)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>1</td><td>邂逅</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+                                <tr><td>10</td><td>知人1</td><td>5</td><td>8</td><td>20</td><td>6</td><td>12</td><td>20</td><td>8</td><td>10</td><td>30</td></tr>
+                                <tr><td>20</td><td>知人2</td><td>10</td><td>16</td><td>40</td><td>12</td><td>24</td><td>40</td><td>16</td><td>20</td><td>60</td></tr>
+                                <tr><td>30</td><td>知人3</td><td>15</td><td>24</td><td>80</td><td>18</td><td>36</td><td>60</td><td>24</td><td>30</td><td>120</td></tr>
+                                <tr><td>40</td><td>友人1</td><td>20</td><td>32</td><td>120</td><td>24</td><td>48</td><td>80</td><td>32</td><td>40</td><td>180</td></tr>
+                                <tr><td>50</td><td>友人2</td><td>25</td><td>40</td><td>160</td><td>30</td><td>60</td><td>100</td><td>40</td><td>50</td><td>240</td></tr>
+                                <tr><td>60</td><td>友人3</td><td>30</td><td>48</td><td>200</td><td>36</td><td>72</td><td>120</td><td>48</td><td>60</td><td>300</td></tr>
+                                <tr><td>70</td><td>親友1</td><td>35</td><td>56</td><td>240</td><td>42</td><td>84</td><td>140</td><td>56</td><td>70</td><td>360</td></tr>
+                                <tr><td>80</td><td>親友2</td><td>40</td><td>64</td><td>280</td><td>48</td><td>96</td><td>160</td><td>64</td><td>80</td><td>420</td></tr>
+                                <tr><td>90</td><td>親友3</td><td>45</td><td>72</td><td>320</td><td>54</td><td>108</td><td>180</td><td>72</td><td>90</td><td>480</td></tr>
+                                <tr><td>100</td><td>心の友</td><td>50</td><td>80</td><td>360</td><td>60</td><td>120</td><td>200</td><td>80</td><td>100</td><td>540</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function saveData(expertId, key, value) {
+        let storageKey = 'wh_expert_' + expertId;
+        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {} };
+        savedData.levels[key] = value;
+        localStorage.setItem(storageKey, JSON.stringify(savedData));
+    }
+
+    render();
+</script>
+
+</body>
+</html>
