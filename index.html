@@ -1,431 +1,367 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホワイトアウト・サバイバル 専門家・親密度管理</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-gradient: linear-gradient(135deg, #0ea5e9, #2563eb);
+            --border-color: #334155;
+            --input-bg: #0f172a;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding-bottom: 80px; }
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .tab-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+        .tab-btn {
+            padding: 10px 24px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-sub);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--accent-gradient);
+            color: white;
+            border-color: transparent;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
+            gap: 20px;
+        }
+        @media (max-width: 680px) { .grid-container { grid-template-columns: 1fr; } }
+        .expert-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+        .expert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .expert-name { font-size: 1.3rem; font-weight: bold; color: #f1f5f9; }
+        .expert-effect {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .relations-row { font-size: 0.9rem; margin-bottom: 15px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .relation-badge {
+            background: #334155;
+            color: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid #475569;
+            margin-right: 5px;
+        }
+        .check-ref-btn {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .check-ref-btn:hover { background: var(--accent-color); color: #0f172a; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { border: 1px solid var(--border-color); padding: 6px 8px; text-align: center; }
+        th { background-color: #0f172a; color: var(--text-sub); font-weight: 600; }
+        input[type="text"] {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            padding: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); }
+        .reference-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .reference-section h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; color: var(--accent-color); }
+        
+        /* モーダルウィンドウ */
+        .modal {
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);
+            max-width: 600px; width: 90%; color: var(--text-main); box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .close-btn { float: right; font-size: 1.5rem; cursor: pointer; color: var(--text-sub); }
+        .close-btn:hover { color: var(--text-main); }
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Whiteout Checklist</title>
-
-<link rel="stylesheet" href="style.css">
-
+        /* 下部固定の操作ボタンエリア */
+        .footer-toolbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid var(--border-color);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+            z-index: 50;
+            box-sizing: border-box;
+        }
+        .tool-btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .tool-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .tool-btn.json-save { background: #4f46e5; }
+        .tool-btn.json-load { background: #0284c7; }
+        /* 新しく追加用のテンプレートボタン */
+        .tool-btn.custom-add { background: #0d9488; }
+    </style>
 </head>
-
 <body>
 
 <div class="container">
-
-<header class="app-title">
-
-    <h1>❄ Whiteout Checklist</h1>
-
-    <p>For Whiteout Survival</p>
-
-</header>
-<!-- ========================= -->
-<!-- Header -->
-<!-- ========================= -->
-
-<header class="top-header">
-
-    <div class="character-bar" id="characterBar">
-        <!-- data.jsで生成 -->
-    </div>
-
-    <div class="header-right">
-
-        <div class="bear-card">
-
-            <div class="bear-title">
-
-                🐻 次回熊罠
-
-            </div>
-
-            <div class="bear-date-row">
-
-                <span id="bearDate">
-
-                    --/--
-
-                </span>
-
-                <button
-                    id="editBearTime"
-                    class="icon-btn">
-
-                    ✏
-
-                </button>
-
-            </div>
-
-            <div
-                class="bear-time"
-                id="bearTime">
-
-                21:00
-
-            </div>
-
-        </div>
-
-        <div class="station-card">
-
-    <div class="station-title">
-
-        🏭 ステーション
-
-    </div>
-
-    <div
-        id="stationToday"
-        class="station-count">
-
-        🟢 今日の閉鎖：0件
-
-    </div>
-
-    <button
-        id="openStation"
-        class="primary-btn">
-
-        📋 管理を開く
-
-    </button>
-
-    </div>
-
-        <div class="progress-card">
-
-            <div class="progress-header">
-
-                <span>
-
-                    今日の進捗
-
-                </span>
-
-                <span id="progressPercent">
-
-                    0%
-
-                </span>
-
-            </div>
-
-            <div class="progress-bar">
-
-                <div
-                    class="progress-fill"
-                    id="progressFill">
-
-                </div>
-
-            </div>
-
-            <div
-                id="progressCount"
-                class="progress-count">
-
-                0 / 0
-
-            </div>
-
-        </div>
-
-    </div>
-
-</header>
-
-<!-- ========================= -->
-<!-- Main Dashboard -->
-<!-- ========================= -->
-
-<main class="dashboard">
-
-    <!-- Daily -->
-
-<!-- Daily -->
-
-<section class="card daily-card">
-
-    <h2>
-        📋 デイリー
-    </h2>
-
-    <div
-        id="dailyContainer"
-        class="task-container">
-    </div>
-
-    <h3 class="extra-title">
-        ⭐ おまけ
-    </h3>
-
-    <div
-        id="dailyExtraContainer"
-        class="task-container">
-    </div>
-
-    <section class="card repeat-card">
-
-    <h2>🔄 繰り返し</h2>
-
-    <div id="repeatContainer"></div>
-
-</section>
-
-</section>
-
-
-    <!-- City -->
-
-    <section class="card city-card">
-
-        <h2>
-
-            🏰 都市チェック
-
-        </h2>
-
-        <div
-            id="cityContainer"
-            class="task-container">
-
-        </div>
-
-    </section>
-
-    <!-- Time -->
-
-    <section class="card time-card">
-
-        <h2>
-
-            ⏰ 時間チェック
-
-        </h2>
-
-        <div
-            id="timeContainer">
-
-        </div>
-
-    </section>
-
+    <h1>ホワイトアウト・サバイバル 専門家管理</h1>
     
-
-</main>
-    <!-- ========================= -->
-    <!-- Event -->
-    <!-- ========================= -->
-
-    <section class="bottom-area">
-
-        <section class="card event-card">
-
-            <div class="card-header">
-
-                <h2>🎪 イベント</h2>
-
-                <button
-                    id="toggleEventForm"
-                    class="primary-btn">
-
-                    ＋追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="eventForm"
-                class="input-form hidden">
-
-                <input
-                    id="eventTitle"
-                    type="text"
-                    placeholder="イベント名">
-
-                <input
-                    id="eventMemo"
-                    type="text"
-                    placeholder="備考（任意）">
-
-                <button
-                    id="addEventBtn"
-                    class="success-btn">
-
-                    追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="eventContainer"
-                class="event-container">
-
-                <!-- script.jsで生成 -->
-
-            </div>
-
-        </section>
-
-
-
-        <!-- ========================= -->
-        <!-- Officer -->
-        <!-- ========================= -->
-
-        <section
-            id="officerCard"
-            class="card officer-card">
-
-            <div class="card-header">
-
-                <h2>
-
-                    👑 幹部メニュー
-
-                </h2>
-
-                <button
-                    id="toggleOfficerForm"
-                    class="primary-btn">
-
-                    ＋追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="officerForm"
-                class="input-form hidden">
-
-                <input
-                    id="officerInput"
-                    type="text"
-                    placeholder="内容">
-
-                <button
-                    id="addOfficerBtn"
-                    class="success-btn">
-
-                    追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="officerContainer">
-
-            </div>
-
-        </section>
-
-    </section>
-
-
-
-    <!-- ========================= -->
-    <!-- Underground Memo -->
-    <!-- ========================= -->
-
-    <section class="card underground-card">
-
-        <button
-            id="toggleMemo"
-            class="memo-button">
-
-            🌋 地底メモ ▼
-
-        </button>
-
-        <div
-            id="memoBody"
-            class="memo-body hidden">
-
-<pre>
-【🌋 地底探検】
-
-勇者 50:10:40 → 55/10/35
-獣  50:15:35 → 65/10/25
-微光 60:20:20 → 55/10/35
-地下 50:20:30 → 65/10/25
-黒鉄 60:15:25 → 55/10/35
-大地 50:15:35 → 55/10/35
-
-────────────
-
-① 1盾＋1槍＋グレッグ 60/40/0
-② 2盾＋ミア＋1弓  50/0/50
-③ 3盾＋2槍＋2弓  50/20/30
-
-────────────
-
-① 60：40：0（3軍弓英雄）
-② 55：10：35（1軍弓英雄）
-③ 55：15：30（2軍弓英雄）
-
-</pre>
-        </div>
-
-    </section>
-
-
-
-<!-- ========================= -->
-<!-- Backup & Links -->
-<!-- ========================= -->
-
-<section class="backup-area">
-
-    <!-- 本部駐屯計算機（駐屯人数計算機）を開くボタン -->
-    <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-        🏭 駐屯人数計算機を開く
-    </a>
-
-    <!-- 援軍計算機を開くボタン（必要に応じてファイル名やURLに変更してください） -->
-    <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-        🔢 援軍計算機を開く
-    </a>
-
-    <button
-        id="exportJson"
-        class="primary-btn">
-
-        💾 JSON保存
-
-    </button>
-
-    <input
-        id="importJsonFile"
-        type="file"
-        accept=".json"
-        hidden>
-
-    <button
-        id="importJson"
-        class="primary-btn">
-
-        📂 JSON読込
-
-    </button>
-
-</section>
-
-<!-- ========================= -->
-<!-- JavaScript -->
-<!-- ========================= -->
-
-<script src="data.js"></script>
-<script src="script.js"></script>
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="switchView('experts')">❄️ 専門家スキル管理</button>
+        <button class="tab-btn" onclick="switchView('reference')">📊 全体 早見表</button>
+    </div>
+
+    <div id="main-content"></div>
+</div>
+
+<!-- 下部固定ツールバー（ボタン追加済み） -->
+<div class="footer-toolbar">
+    <button class="tool-btn" onclick="openCustomTool()">🏭 駐屯人数計算機を開く</button>
+    <button class="tool-btn" onclick="openCustomTool2()">📊 援軍計算機を開く</button>
+    
+    <!-- ▼ ここに新しいボタンを追加しました ▼ -->
+    <button class="tool-btn custom-add" onclick="openNewFeature()">➕ 追加ボタン</button>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+
+    <button class="tool-btn json-save" onclick="saveJSON()">💾 JSON保存</button>
+    <button class="tool-btn json-load" onclick="document.getElementById('fileInput').click()">📁 JSON読込</button>
+    <input type="file" id="fileInput" style="display:none" accept=".json" onchange="loadJSON(event)">
+</div>
+
+<!-- モーダルポップアップ (早見表用) -->
+<div id="refModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <h3 id="modalTitle" style="margin-top:0; color:var(--accent-color);">早見表</h3>
+        <div id="modalBody" class="table-wrapper"></div>
+    </div>
+</div>
+
+<script>
+    const refData = [
+        { lv: 10, rel: "知人1", s: 5, h: 8, r: 20, b: 6, f: 12, v: 20, ro: 8, c: 10, g: 30 },
+        { lv: 20, rel: "知人2", s: 10, h: 16, r: 40, b: 12, f: 24, v: 40, ro: 16, c: 20, g: 60 },
+        { lv: 30, rel: "知人3", s: 15, h: 24, r: 80, b: 18, f: 36, v: 60, ro: 24, c: 30, g: 120 },
+        { lv: 40, rel: "友人1", s: 20, h: 32, r: 120, b: 24, f: 48, v: 80, ro: 32, c: 40, g: 180 },
+        { lv: 50, rel: "友人2", s: 25, h: 40, r: 160, b: 30, f: 60, v: 100, ro: 40, c: 50, g: 240 },
+        { lv: 60, rel: "友人3", s: 30, h: 48, r: 200, b: 36, f: 72, v: 120, ro: 48, c: 60, g: 300 },
+        { lv: 70, rel: "親友1", s: 35, h: 56, r: 240, b: 42, f: 84, v: 140, ro: 56, c: 70, g: 360 },
+        { lv: 80, rel: "親友2", s: 40, h: 64, r: 280, b: 48, f: 96, v: 160, ro: 64, c: 80, g: 420 },
+        { lv: 90, rel: "親友3", s: 45, h: 72, r: 320, b: 54, f: 108, v: 180, ro: 72, c: 90, g: 480 },
+        { lv: 100, rel: "心の友", s: 50, h: 80, r: 360, b: 60, f: 120, v: 200, ro: 80, c: 100, g: 540 }
+    ];
+
+    const expertsData = [
+        { id: "syril", name: "シリル", bonus: "熊狩りポイント増加", col: "s", relations: ["友人1: Lune", "友人2: Melune", "友人1: Chocolat"], skills: ["①集結容量", "②強化パーツ", "③エネ石", "④出征容量"] },
+        { id: "agnes", name: "アグネス", bonus: "資源採集時宝箱増加", col: "s", relations: ["友人3: Lune", "友人3: Melune", "友人3: Chocolat"], skills: ["①灯台", "②缶詰", "③建設時間", "④神秘ショップ"] },
+        { id: "holger", name: "ホルガー", bonus: "競技場報酬増加", col: "h", relations: ["友人1: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①攻撃＆HPアップ", "②競技コイン増加", "③アリーナショップ割引", "④更に攻撃＆HPアップ"] },
+        { id: "romulus", name: "ロムルス", bonus: "出撃部隊上昇", col: "r", relations: ["知人2: Lune", "知人1: Melune", "知人1: Chocolat"], skills: ["①兵士無料増員＆タグ", "②攻撃＆防御増加", "③殺傷＆HP増加", "④集結容量UP"] },
+        { id: "bald", name: "バルド", bonus: "同盟ショップ割引など", col: "b", relations: ["友人1: Lune", "友人3: Melune", "知人2: Chocolat"], skills: ["①同盟総動員", "②争覇戦", "③クレイジョイ", "④同盟大作戦"] },
+        { id: "fabian", name: "ファビアン", bonus: "兵器攻防アップ", col: "f", relations: ["知人3: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①兵器コイン増加", "②兵士回復", "③殺傷HPアップ", "④集結容量UP"] },
+        { id: "valeria", name: "ヴァレリア", bonus: "戦争フェーズ攻防アップ", col: "v", relations: ["知人1: Lune", "知人2: Melune", "友人1: Chocolat"], skills: ["①準備ポイント増加", "②太陽コイン増加", "③殺傷HPアップ", "④集結量アップ"] },
+        { id: "rony", name: "ロニー", bonus: "トラック攻撃時攻防アップ", col: "ro", relations: ["知人3: Lune", "知人1: Melune"], skills: ["①トラック到達時短", "②略奪成功時確実報酬UP", "③霊魂+LV6リリート出現", "④神話トラック出現"] },
+        { id: "casey", name: "ケイシー", bonus: "燃霜鉱区中殺傷&HP上昇", col: "c", relations: ["知人3: Lune", "知人2: Melune"], skills: ["①経験値10%アップ", "②部隊数上昇、回復up", "③宝石図面up", "④ハンドブック+ｵﾘﾊﾙ量増加"] },
+        { id: "gales", name: "ガレス", bonus: "容量+回復速度UP", col: "g", relations: ["初期30 (重め)"], skills: ["①訓練するごとに宝箱", "②防御UP", "③HPup", "④殺傷低下"] }
+    ];
+
+    const targets = ["Lune", "Melune", "Chocolat", "vanille"];
+    let currentView = 'experts';
+
+    function switchView(view) {
+        currentView = view;
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            btn.classList.toggle('active', (view === 'experts' && idx === 0) || (view === 'reference' && idx === 1));
+        });
+        render();
+    }
+
+    function render() {
+        const container = document.getElementById('main-content');
+        if (currentView === 'experts') {
+            let html = '<div class="grid-container">';
+            expertsData.forEach(expert => {
+                let savedData = JSON.parse(localStorage.getItem('wh_expert_' + expert.id)) || { levels: {} };
+                html += `
+                    <div class="expert-card">
+                        <div class="expert-header">
+                            <span class="expert-name">${expert.name}</span>
+                            <span class="expert-effect">効果: ${expert.bonus}</span>
+                        </div>
+                        <div class="relations-row">
+                            <div><strong>必要:</strong> ${expert.relations.map(r => `<span class="relation-badge">${r}</span>`).join('')}</div>
+                            <button class="check-ref-btn" onclick="openModal('${expert.name}', '${expert.col}')">📋 早見表確認</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead><tr><th style="width:35%;">スキル項目</th>${targets.map(t => `<th>${t}</th>`).join('')}</tr></thead>
+                                <tbody>
+                `;
+                expert.skills.forEach((skill, sIdx) => {
+                    html += `<tr><td style="text-align:left; font-weight:500;">${skill}</td>`;
+                    targets.forEach(t => {
+                        const key = `${sIdx}_${t}`;
+                        const val = savedData.levels[key] || '';
+                        html += `<td><input type="text" value="${val}" placeholder="Lv/解放" oninput="saveData('${expert.id}', '${key}', this.value)"></td>`;
+                    });
+                    html += `</tr>`;
+                });
+                html += `</tbody></table></div></div>`;
+            });
+            container.innerHTML = html + '</div>';
+        } else {
+            container.innerHTML = `
+                <div class="reference-section">
+                    <h2>専門家別 親密度ポイント早見表</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Lv</th><th>関係</th><th>シリル/アグネス</th><th>ホルガー</th><th>ロムルス</th><th>バルド</th><th>ファビアン</th><th>ヴァレリア</th><th>ロニー</th><th>ケイシー</th><th>ガレス</th></tr></thead>
+                            <tbody>
+                                ${refData.map(r => `<tr><td>${r.lv}</td><td>${r.rel}</td><td>${r.s}</td><td>${r.h}</td><td>${r.r}</td><td>${r.b}</td><td>${r.f}</td><td>${r.v}</td><td>${r.ro}</td><td>${r.c}</td><td>${r.g}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function openModal(expertName, colKey) {
+        document.getElementById('modalTitle').innerText = `${expertName} の親密度早見表`;
+        let modalHtml = `<table><thead><tr><th>Lv</th><th>階級</th><th>必要ポイント</th></tr></thead><tbody>`;
+        refData.forEach(row => {
+            modalHtml += `<tr><td>${row.lv}</td><td>${row.rel}</td><td style="font-weight:bold; color:var(--accent-color);">${row[colKey]}</td></tr>`;
+        });
+        modalHtml += `</tbody></table>`;
+        document.getElementById('modalBody').innerHTML = modalHtml;
+        document.getElementById('refModal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('refModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == document.getElementById('refModal')) closeModal(); }
+
+    function saveData(expertId, key, value) {
+        let storageKey = 'wh_expert_' + expertId;
+        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {} };
+        savedData.levels[key] = value;
+        localStorage.setItem(storageKey, JSON.stringify(savedData));
+    }
+
+    // 各ボタンの処理用関数（必要に応じて中身を書き換えてください）
+    function openCustomTool() { alert("駐屯人数計算機を開きます"); }
+    function openCustomTool2() { alert("援軍計算機を開きます"); }
+    function openNewFeature() { alert("新しい機能の処理をここに記述できます"); }
+
+    // JSON保存機能
+    function saveJSON() {
+        let allData = {};
+        expertsData.forEach(ex => {
+            allData[ex.id] = JSON.parse(localStorage.getItem('wh_expert_' + ex.id)) || {};
+        });
+        let blob = new Blob([JSON.stringify(allData, null, 2)], {type: "application/json"});
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = "wh_experts_data.json";
+        a.click();
+    }
+
+    // JSON読込機能
+    function loadJSON(event) {
+        let file = event.target.files[0];
+        if (!file) return;
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                let data = JSON.parse(e.target.result);
+                for (let key in data) {
+                    localStorage.setItem('wh_expert_' + key, JSON.stringify(data[key]));
+                }
+                alert("データを正常に読み込みました！");
+                render();
+            } catch (err) {
+                alert("ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    render();
+</script>
 
 </body>
-
 </html>
