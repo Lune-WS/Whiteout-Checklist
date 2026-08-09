@@ -47,7 +47,6 @@
             color: white;
             border-color: transparent;
         }
-        /* ★ 2列レイアウト用のグリッド指定 */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -85,7 +84,6 @@
             border-radius: 6px;
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
-        /* 親密度エリア */
         .intimacy-section {
             background: rgba(15, 23, 42, 0.6);
             border: 1px solid var(--border-color);
@@ -185,7 +183,6 @@
         }
         .reference-section h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; color: var(--accent-color); }
         
-        /* モーダル */
         .modal {
             display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
@@ -217,7 +214,6 @@
     <div class="footer-note">✨ 入力データは自動的にブラウザに保存されます</div>
 </div>
 
-<!-- モーダルポップアップ -->
 <div id="refModal" class="modal">
     <div class="modal-content">
         <span class="close-btn" onclick="closeModal()">&times;</span>
@@ -259,9 +255,11 @@
 
     function switchView(view) {
         currentView = view;
-        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-            btn.classList.toggle('active', (view === 'experts' && idx === 0) || (view === 'reference' && idx === 1));
-        });
+        const buttons = document.querySelectorAll('.tab-btn');
+        if (buttons.length >= 2) {
+            buttons[0].classList.toggle('active', view === 'experts');
+            buttons[1].classList.toggle('active', view === 'reference');
+        }
         render();
     }
 
@@ -282,10 +280,16 @@
 
     function render() {
         const container = document.getElementById('main-content');
+        if (!container) return;
+
         if (currentView === 'experts') {
             let html = '<div class="grid-container">';
             expertsData.forEach(expert => {
-                let savedData = JSON.parse(localStorage.getItem('wh_expert_' + expert.id)) || { levels: {}, intimacy: {} };
+                let savedData = { levels: {}, intimacy: {} };
+                try {
+                    const parsed = JSON.parse(localStorage.getItem('wh_expert_' + expert.id));
+                    if (parsed) savedData = parsed;
+                } catch(e) {}
                 
                 html += `
                     <div class="expert-card">
@@ -297,10 +301,9 @@
                             
                             <div class="card-top-row">
                                 <span style="font-size: 0.85rem; color: var(--text-sub);">専門家の親密度・スキルレベル管理</span>
-                                <button class="check-ref-btn" onclick="openModal('${expert.name}', '${expert.col}')">📋 早見表確認</button>
+                                <button type="button" class="check-ref-btn" onclick="openModal('${expert.name}', '${expert.col}')">📋 早見表確認</button>
                             </div>
 
-                            <!-- 各キャラクターごとの親密度レベル入力エリア -->
                             <div class="intimacy-section">
                                 <div class="intimacy-title">⭐ 専門家 親密度レベル (キャラ別)</div>
                                 <div class="intimacy-grid">
@@ -308,7 +311,7 @@
                 
                 targets.forEach(t => {
                     const intKey = `int_${t}`;
-                    const val = savedData.intimacy[intKey] !== undefined ? savedData.intimacy[intKey] : '';
+                    const val = (savedData.intimacy && savedData.intimacy[intKey] !== undefined) ? savedData.intimacy[intKey] : '';
                     const relName = getRelationName(Number(val));
                     html += `
                         <div class="intimacy-box">
@@ -325,7 +328,6 @@
                                 </div>
                             </div>
 
-                            <!-- スキル別レベル入力テーブル -->
                             <div class="table-wrapper">
                                 <table>
                                     <thead><tr><th style="width:35%;">スキル項目</th>${targets.map(t => `<th>${t}</th>`).join('')}</tr></thead>
@@ -336,7 +338,7 @@
                     html += `<tr><td style="text-align:left; font-weight:500;">${skill}</td>`;
                     targets.forEach(t => {
                         const key = `${sIdx}_${t}`;
-                        const val = savedData.levels[key] || '';
+                        const val = (savedData.levels && savedData.levels[key]) ? savedData.levels[key] : '';
                         html += `<td><input type="text" value="${val}" placeholder="Lv" oninput="saveData('${expert.id}', '${key}', this.value)"></td>`;
                     });
                     html += `</tr>`;
@@ -378,7 +380,12 @@
     }
 
     function openModal(expertName, colKey) {
-        document.getElementById('modalTitle').innerText = `${expertName} の親密度早見表`;
+        const modal = document.getElementById('refModal');
+        const title = document.getElementById('modalTitle');
+        const body = document.getElementById('modalBody');
+        if (!modal || !title || !body) return;
+
+        title.innerText = `${expertName} の親密度早見表`;
         const fullRef = [
             { lv: 10, rel: "知人1" }, { lv: 20, rel: "知人2" }, { lv: 30, rel: "知人3" },
             { lv: 40, rel: "友人1" }, { lv: 50, rel: "友人2" }, { lv: 60, rel: "友人3" },
@@ -403,23 +410,38 @@
             modalHtml += `<tr><td>${row.lv}</td><td>${row.rel}</td><td style="font-weight:bold; color:var(--accent-color);">${arr[idx]}</td></tr>`;
         });
         modalHtml += `</tbody></table>`;
-        document.getElementById('modalBody').innerHTML = modalHtml;
-        document.getElementById('refModal').style.display = 'flex';
+        body.innerHTML = modalHtml;
+        modal.style.display = 'flex';
     }
 
-    function closeModal() { document.getElementById('refModal').style.display = 'none'; }
-    window.onclick = function(event) { if (event.target == document.getElementById('refModal')) closeModal(); }
+    function closeModal() {
+        const modal = document.getElementById('refModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('refModal');
+        if (event.target == modal) closeModal();
+    }
 
     function saveData(expertId, key, value) {
         let storageKey = 'wh_expert_' + expertId;
-        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {}, intimacy: {} };
+        let savedData = { levels: {}, intimacy: {} };
+        try {
+            const parsed = JSON.parse(localStorage.getItem(storageKey));
+            if (parsed) savedData = parsed;
+        } catch(e) {}
         savedData.levels[key] = value;
         localStorage.setItem(storageKey, JSON.stringify(savedData));
     }
 
     function saveIntimacy(expertId, key, value) {
         let storageKey = 'wh_expert_' + expertId;
-        let savedData = JSON.parse(localStorage.getItem(storageKey)) || { levels: {}, intimacy: {} };
+        let savedData = { levels: {}, intimacy: {} };
+        try {
+            const parsed = JSON.parse(localStorage.getItem(storageKey));
+            if (parsed) savedData = parsed;
+        } catch(e) {}
         savedData.intimacy[key] = value;
         localStorage.setItem(storageKey, JSON.stringify(savedData));
 
@@ -433,7 +455,10 @@
         }
     }
 
-    render();
+    // 読み込み完了後に確実に実行
+    document.addEventListener("DOMContentLoaded", () => {
+        render();
+    });
 </script>
 
 </body>
