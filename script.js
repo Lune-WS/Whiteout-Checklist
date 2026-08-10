@@ -369,6 +369,23 @@ function updateProgress() {
             if (isChecked(t.id)) checked++;
         }
     });
+    TIME_TASKS.forEach(task => {
+
+    TIME_GROUPS.forEach(group => {
+
+        const supported = task.times ? task.times.includes(group.id) : true;
+
+        if (!supported) return;
+
+        total++;
+
+        if (isChecked(`time_${group.id}_${task.id}`)) {
+            checked++;
+        }
+
+    });
+
+});
 
     const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
 
