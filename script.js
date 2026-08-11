@@ -45,6 +45,11 @@ function checkDailyReset() {
                 return;
             }
 
+            // ★追加：専門家管理（wh_expert_）のデータも絶対に削除しない！
+            if (key.startsWith("wh_expert_")) {
+                return;
+            }
+
             // 残したいデータ
             if (
                 key.includes("_hide_") ||
