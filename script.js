@@ -50,6 +50,11 @@ function checkDailyReset() {
                 return;
             }
 
+            // ★追加：幹部メニュー（officer_list）のデータも絶対に削除しない！
+            if (key === "officer_list") {
+                return;
+            }
+
             // 残したいデータ
             if (
                 key.includes("_hide_") ||
@@ -597,6 +602,21 @@ function deleteOfficer(id) {
     officers = officers.filter(o => String(o.id) !== String(id));
     localStorage.setItem("officer_list", JSON.stringify(officers));
     renderOfficers(); // 再描画
+}
+
+// ==========================================
+// 幹部メニューのチェック状態を保存する関数
+// ==========================================
+function toggleOfficer(id, checked) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    officers = officers.map(o => {
+        if (String(o.id) === String(id)) {
+            o.checked = checked;
+        }
+        return o;
+    });
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers();
 }
 
 // ==========================================
