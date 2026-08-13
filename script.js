@@ -377,7 +377,13 @@ function updateProgress() {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${currentCharacter}_${id}`) === "1";
 
-    DAILY_TASKS.forEach(t => { total++; if (isChecked(t.id)) checked++; });
+    // デイリータスクの集計
+    DAILY_TASKS.forEach(t => { 
+        total++; 
+        if (isChecked(t.id)) checked++; 
+    });
+
+    // 都市タスクの集計
     CITY_TASKS.forEach(t => {
         if (t.double) {
             total += 2;
@@ -388,23 +394,19 @@ function updateProgress() {
             if (isChecked(t.id)) checked++;
         }
     });
+
+    // 時間タスクの集計（キャラ別に正しく集計するように修正）
     TIME_TASKS.forEach(task => {
+        TIME_GROUPS.forEach(group => {
+            const supported = task.times ? task.times.includes(group.id) : true;
+            if (!supported) return;
 
-    TIME_GROUPS.forEach(group => {
-
-        const supported = task.times ? task.times.includes(group.id) : true;
-
-        if (!supported) return;
-
-        total++;
-
-        if (isChecked(`time_${group.id}_${task.id}`)) {
-            checked++;
-        }
-
+            total++;
+            if (isChecked(`time_${group.id}_${task.id}`)) {
+                checked++;
+            }
+        });
     });
-
-});
 
     const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
 
@@ -419,6 +421,7 @@ function updateProgress() {
     const charProg = document.getElementById(`prog_${currentCharacter}`);
     if (charProg) charProg.textContent = `${percent}%`;
 }
+
 function renderStationSummary() {
 
     const el = document.getElementById("stationToday");
@@ -445,6 +448,7 @@ function renderStationSummary() {
     }
 
 }
+
 // ==========================================
 // イベント描画 (★ 編集・チェック・目隠し対応版)
 // ==========================================
