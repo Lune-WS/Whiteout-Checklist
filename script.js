@@ -50,8 +50,18 @@ function checkDailyReset() {
                 return;
             }
 
-            // ★追加：幹部メニュー（officer_list）のデータも絶対に削除しない！
+// ★追加：専門家管理（wh_expert_）のデータも絶対に削除しない！
+            if (key.startsWith("wh_expert_")) {
+                return;
+            }
+
+            // 幹部メニュー（officer_list）のチェックのみ朝9時にリセットする
             if (key === "officer_list") {
+                try {
+                    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+                    officers = officers.map(o => ({ ...o, checked: false }));
+                    localStorage.setItem("officer_list", JSON.stringify(officers));
+                } catch (e) {}
                 return;
             }
 
@@ -66,7 +76,6 @@ function checkDailyReset() {
             ) {
                 return;
             }
-
             // それ以外はリセット
             localStorage.removeItem(key);
         });
