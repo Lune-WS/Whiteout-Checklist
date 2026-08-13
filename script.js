@@ -113,7 +113,13 @@ function getCharProgressPercent(charName) {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${charName}_${id}`) === "1";
 
-    DAILY_TASKS.forEach(t => { total++; if (isChecked(t.id)) checked++; });
+    // デイリータスク
+    DAILY_TASKS.forEach(t => { 
+        total++; 
+        if (isChecked(t.id)) checked++; 
+    });
+
+    // 都市タスク
     CITY_TASKS.forEach(t => {
         if (t.double) {
             total += 2;
@@ -123,6 +129,19 @@ function getCharProgressPercent(charName) {
             total++;
             if (isChecked(t.id)) checked++;
         }
+    });
+
+    // 時間タスク（ここに時間チェックの集計を追加）
+    TIME_TASKS.forEach(task => {
+        TIME_GROUPS.forEach(group => {
+            const supported = task.times ? task.times.includes(group.id) : true;
+            if (!supported) return;
+
+            total++;
+            if (isChecked(`time_${group.id}_${task.id}`)) {
+                checked++;
+            }
+        });
     });
 
     return total === 0 ? 0 : Math.round((checked / total) * 100);
