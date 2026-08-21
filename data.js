@@ -3,28 +3,40 @@
    data.js
 ========================================== */
 
-// ==========================================
-// キャラクター
-// ==========================================
 
 // ==========================================
-// キャラクター
+// キャラクター設定 (SettingManager)
 // ==========================================
 
-const CHARACTERS = [
-    "Lune",
-    "Melune",
-    "Chocolat",
-    "Vanille"
-];
-
-// キャラクターごとの所属同盟定義
-const CHARACTER_ALLIANCES = {
-    Lune: "MEL",
-    Melune: "MEL",
-    Chocolat: "RxR",
-    Vanille: "RxR"
+const SettingManager = {
+    // 現在の設定を取得する
+    get: function() {
+        const saved = localStorage.getItem("ws_settings");
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("設定の読み込みに失敗しました", e);
+            }
+        }
+        // 初回起動時や設定がない時のデフォルト値
+        return {
+            characters: ["Lune", "Melune", "Chocolat", "Vanille"],
+            alliances: {
+                Lune: "MEL",
+                Melune: "MEL",
+                Chocolat: "RxR",
+                Vanille: "RxR"
+            }
+        };
+    },
+    // 設定を保存して画面を更新する
+    save: function(data) {
+        localStorage.setItem("ws_settings", JSON.stringify(data));
+        location.reload(); 
+    }
 };
+
 // ==========================================
 // デイリー
 // ==========================================
