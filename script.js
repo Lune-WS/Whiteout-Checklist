@@ -3,6 +3,7 @@
    script.js (イベントチェックボックス追加 & 朝9時リセット実装版)
 ========================================== */
 
+
 // 倉庫回収の待ち時間テーブル (1〜30回対応)
 const STORAGE_INTERVALS = [
     0.5, 1, 1.5, 2.5, 5, 10, 10, 10, 10, 20, 
@@ -12,13 +13,6 @@ const STORAGE_INTERVALS = [
 
 let currentCharacter = localStorage.getItem(STORAGE?.character || "ws_current_character") || CHARACTERS[0];
 
-// キャラクター → 表示する同盟
-const CHARACTER_STATION_ALLIANCE = {
-    Lune: "MEL",
-    Melune: "MEL",
-    Chocolat: "RxR",
-    Vanille: "RxR"
-};
 
 // ------------------------------------------
 // ⏰ 毎日 朝9:00 自動リセット処理
@@ -155,28 +149,46 @@ function renderCharacters() {
     if (!container) return;
     container.innerHTML = "";
 
-    const icons = { Lune: "🌙", Melune: "🍈", Chocolat: "🍫", Vanille: "🍦" };
+    // 設定データを取得
+    const settings = SettingManager.get();
+    const characters = settings.characters;
+    const alliances = settings.alliances;
 
-    CHARACTERS.forEach(char => {
+    // カラフルにするための色リスト
+    const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"];
+
+    characters.forEach((char, index) => {
         const btn = document.createElement("button");
-        const isMain = (char === CHARACTERS[0]); 
+        const isMain = (index === 0);
         const isActive = (char === currentCharacter);
+        const color = colors[index % colors.length]; // 順番に色を割り当て
 
-        btn.className = `character-btn ${isActive ? "active" : ""} ${isMain ? "main-btn" : ""}`;
+        btn.className = `character-btn ${isActive ? "active" : ""}`;
         
-        const alliance = CHARACTER_ALLIANCES[char] || "";
+        // メインキャラなら少し大きく枠をつける、そうでなければカラフルに
+        btn.style.borderColor = isMain ? "#FFD700" : color;
+        btn.style.borderWidth = "2px";
+        btn.style.borderStyle = "solid";
+        btn.style.borderRadius = "12px";
+        btn.style.padding = "10px";
+        btn.style.minWidth = "100px";
+
+        const alliance = alliances[char] || "無所属";
         const charPercent = getCharProgressPercent(char);
 
+        // 文字を大きくしておしゃれにデザイン
         btn.innerHTML = `
-            <div style="font-size:10px; opacity:0.8; font-weight:bold;">[${alliance}]</div>
-            <div class="character-name ${isMain ? "main-character" : ""}">${icons[char] || "👤"} ${char}</div>
-            <div class="character-progress" id="prog_${char}">${charPercent}%</div>
+            <div style="font-size:11px; font-weight:bold; color:#666; margin-bottom:4px;">[${alliance}]</div>
+            <div style="font-size:18px; font-weight:900; color:#333; margin-bottom:2px;">${char}</div>
+            <div style="font-size:13px; font-weight:bold; color:${color};">${charPercent}%</div>
         `;
+        
         btn.onclick = () => {
             currentCharacter = char;
             localStorage.setItem(STORAGE?.character || "ws_current_character", char);
             init();
         };
+        
         container.appendChild(btn);
     });
 }
@@ -442,11 +454,12 @@ function updateProgress() {
 }
 
 function renderStationSummary() {
-
     const el = document.getElementById("stationToday");
     if (!el) return;
 
-    const alliance = CHARACTER_STATION_ALLIANCE[currentCharacter] || "MEL";
+    // 設定箱から取得するように変更
+    const settings = SettingManager.get();
+    const alliance = settings.alliances[currentCharacter] || "MEL";
 
     const urgent = Number(
         localStorage.getItem(`ws_station_${alliance}_now`) || 0
@@ -457,15 +470,10 @@ function renderStationSummary() {
     );
 
     if (urgent > 0) {
-
         el.innerHTML = `🔴 今すぐ閉鎖：${urgent}件<br>🟡 24時間以内：${today}件`;
-
     } else {
-
         el.innerHTML = `🟢 24時間以内：${today}件`;
-
     }
-
 }
 
 // ==========================================
@@ -860,3 +868,55 @@ setInterval(() => {
     // 繰り返しタスク（英雄募集・倉庫回収）の表示を再生成
     renderRepeat();
 }, 1000);
+
+// 設定画面の開閉
+document.getElementById("openSettings").onclick = () => {
+    const form = document.getElementById("settingsForm");
+    form.classList.toggle("hidden");
+    
+    // 現在の設定をフォームに反映させる
+    const settings = SettingManager.get();
+    document.getElementById("editChars").value = settings.characters.join(",");
+    document.getElementById("editAlliances").value = Object.entries(settings.alliances)
+        .map(([k, v]) => `${k}:${v}`).join(",");
+};
+
+// 設定画面を開いたときに、現在の保存データをそれぞれの入力欄に綺麗にセットする
+document.getElementById("openSettings").onclick = () => {
+    const form = document.getElementById("settingsForm");
+    form.classList.toggle("hidden");
+    
+    const settings = SettingManager.get();
+    // キャラクター名の欄にセット
+    document.getElementById("editChars").value = settings.characters.join(",");
+    
+    // 同盟の欄に 「キャラ名:同盟名,キャラ名:同盟名」 の形式でセット
+    const allianceText = Object.entries(settings.alliances)
+        .map(([char, ally]) => `${char}:${ally}`)
+        .join(",");
+    document.getElementById("editAlliances").value = allianceText;
+};
+
+// 保存処理
+document.getElementById("saveSettings").onclick = () => {
+    // 1. キャラクター名のリストを作る
+    const charsInput = document.getElementById("editChars").value;
+    const chars = charsInput.split(",").map(s => s.trim()).filter(s => s !== "");
+
+    // 2. 同盟の辞書を作る
+    const alliances = {};
+    const alliancesInput = document.getElementById("editAlliances").value;
+    alliancesInput.split(",").forEach(item => {
+        const parts = item.split(":");
+        if (parts.length === 2) {
+            const char = parts[0].trim();
+            const ally = parts[1].trim();
+            if (char && ally) {
+                alliances[char] = ally;
+            }
+        }
+    });
+
+    // まとめて保存
+    SettingManager.save({ characters: chars, alliances: alliances });
+};
