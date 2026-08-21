@@ -1404,3 +1404,6 @@ body{
     opacity: 0.4 !important;
     background: #e2edff !important;
 }
+.hidden {
+    display: none;
+}
