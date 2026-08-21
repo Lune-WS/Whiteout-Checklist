@@ -383,11 +383,24 @@
 <!-- Backup & Links -->
 <!-- ========================= -->
 
-<!-- ========================= -->
-<!-- Backup & Links -->
-<!-- ========================= -->
-
-<section class="backup-area">
+<!-- キャラ・同盟設定エリア -->
+<section class="card settings-area" style="margin-bottom: 15px; padding: 15px;">
+    <button id="openSettings" class="primary-btn">⚙ キャラ・同盟設定</button>
+    
+    <div id="settingsForm" class="input-form hidden" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+        <div style="margin-bottom: 10px;">
+            <label style="font-size:12px; font-weight:bold; display:block;">1. キャラクター名（カンマ区切り）</label>
+            <input type="text" id="editChars" style="width:100%; margin-top:4px;" placeholder="Lune,Melon,Chocolat,Vanille">
+        </div>
+        
+        <div style="margin-bottom: 10px;">
+            <label style="font-size:12px; font-weight:bold; display:block;">2. 所属同盟（キャラ名:同盟名 をカンマ区切り）</label>
+            <input type="text" id="editAlliances" style="width:100%; margin-top:4px;" placeholder="Lune:YKI,Melon:SHT,Chocolat:RxR,Vanille:RxR">
+        </div>
+        
+        <button id="saveSettings" class="success-btn" style="margin-top: 5px;">保存してリロード</button>
+    </div>
+</section>
 
     <!-- 本部駐屯計算機を開くボタン -->
     <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
