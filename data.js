@@ -125,6 +125,11 @@ const CITY_TASKS = [
     },
 
     {
+        id: "city_build_daily",
+        label: "🏗🎁 建築デイリー報酬"
+    },
+
+    {
         id: "city_lab",
         label: "⚗ 錬成実験室"
     },
