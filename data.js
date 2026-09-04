@@ -125,8 +125,14 @@ const CITY_TASKS = [
     },
 
     {
+        id: "city_commander",
+        label: "🎖 領主司令",
+        double: true
+    },
+
+    {
         id: "city_build_daily",
-        label: "🏗🎁 建築デイリー報酬"
+        label: "🏗 建築デイリー報酬"
     },
 
     {
@@ -145,17 +151,17 @@ const CITY_TASKS = [
     },
 
     {
-        id: "city_arena",
-        label: "🏟 競技場"
+        id: "city_alliance_coin",
+        label: "🤝 同盟コイン集め"
     },
 
     {
-        id: "city_alliance_coin",
-        label: "🤝 同盟コイン集め"
+        id: "city_arena",
+        label: "🏟 競技場"
     }
 
-
 ];
+
 // ==========================================
 // 時間チェック
 // ==========================================
@@ -236,7 +242,7 @@ const TIME_TASKS = [
 ];
 
 // ==========================================
-// 初期幹部メニュー
+// 初期幹部メニュー (メモ帳)
 // ==========================================
 
 const DEFAULT_OFFICERS = [
