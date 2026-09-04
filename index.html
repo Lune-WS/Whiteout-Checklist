@@ -147,8 +147,6 @@
 
     <!-- Daily -->
 
-<!-- Daily -->
-
 <section class="card daily-card">
 
     <h2>
@@ -324,25 +322,29 @@
 
         </section>
 
+    </section>
 
 
-    <!-- ========================= -->
-    <!-- Underground Memo -->
-    <!-- ========================= -->
 
-    <section class="card underground-card">
+    <!-- ========================================== -->
+    <!-- 地底メモ ＆ キャラ設定（2カラム横並びエリア） -->
+    <!-- ========================================== -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; margin-bottom: 15px;" class="two-column-layout">
 
-        <button
-            id="toggleMemo"
-            class="memo-button">
+        <!-- 地底メモ -->
+        <section class="card underground-card" style="margin: 0; height: 100%; box-sizing: border-box;">
+            <button
+                id="toggleMemo"
+                class="memo-button"
+                style="width: 100%;">
 
-            🌋 地底メモ ▼
+                🌋 地底メモ ▼
 
-        </button>
+            </button>
 
-        <div
-            id="memoBody"
-            class="memo-body hidden">
+            <div
+                id="memoBody"
+                class="memo-body hidden">
 
 <pre>
 【🌋 地底探検】
@@ -367,78 +369,72 @@
 ③ 55：15：30（2軍弓英雄）
 
 </pre>
-        </div>
+            </div>
+        </section>
 
-    </section>
+        <!-- キャラ・同盟設定エリア -->
+        <section class="card settings-area" style="margin: 0; padding: 15px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
+            <button id="openSettings" class="primary-btn" style="width: 100%;">⚙ キャラ・同盟設定</button>
+            
+            <div id="settingsForm" class="input-form hidden" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size:12px; font-weight:bold; display:block;">1. キャラクター名（カンマ区切り）</label>
+                    <input type="text" id="editChars" style="width:100%; margin-top:4px;" placeholder="Lune,Melon,Chocolat,Vanille">
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size:12px; font-weight:bold; display:block;">2. 所属同盟（キャラ名:同盟名 をカンマ区切り）</label>
+                    <input type="text" id="editAlliances" style="width:100%; margin-top:4px;" placeholder="Lune:YKI,Melon:SHT,Chocolat:RxR,Vanille:RxR">
+                </div>
+                
+                <button id="saveSettings" class="success-btn" style="margin-top: 5px; width: 100%;">保存してリロード</button>
+            </div>
+        </section>
 
-
-
-<!-- ========================= -->
-<!-- Backup & Links -->
-<!-- ========================= -->
-
-<!-- キャラ・同盟設定エリア -->
-<section class="card settings-area" style="margin-bottom: 15px; padding: 15px;">
-    <button id="openSettings" class="primary-btn">⚙ キャラ・同盟設定</button>
-    
-    <div id="settingsForm" class="input-form hidden" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-        <div style="margin-bottom: 10px;">
-            <label style="font-size:12px; font-weight:bold; display:block;">1. キャラクター名（カンマ区切り）</label>
-            <input type="text" id="editChars" style="width:100%; margin-top:4px;" placeholder="Lune,Melon,Chocolat,Vanille">
-        </div>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="font-size:12px; font-weight:bold; display:block;">2. 所属同盟（キャラ名:同盟名 をカンマ区切り）</label>
-            <input type="text" id="editAlliances" style="width:100%; margin-top:4px;" placeholder="Lune:YKI,Melon:SHT,Chocolat:RxR,Vanille:RxR">
-        </div>
-        
-        <button id="saveSettings" class="success-btn" style="margin-top: 5px;">保存してリロード</button>
     </div>
-</section>
 
-    <!-- 本部駐屯計算機を開くボタン -->
-    <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-        🏭 駐屯人数計算機を開く
-    </a>
 
-    <!-- 援軍計算機を開くボタン -->
-    <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-        🔢 援軍計算機を開く
-    </a>
 
-    <!-- 専門家・親密度管理を開くボタン -->
-    <a href="senmonka.html" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-        ❄️ 専門家・親密度管理を開く
-    </a>
+    <!-- ========================================== -->
+    <!-- 各種ツール・保存ボタン（横並びグリッドエリア） -->
+    <!-- ========================================== -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
 
-    <!-- 王城戦 差し込み計算機を開くボタン -->
-    <a href="calc.html" target="_blank" class="primary-btn" style="text-decoration: none; display: inline-block; text-align: center; line-height: normal;">
-    👑 王城戦 差し込み計算機を開く
-    </a>
+        <!-- 本部駐屯計算機を開くボタン -->
+        <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+            🏭 駐屯人数計算機を開く
+        </a>
 
-    <button
-        id="exportJson"
-        class="primary-btn">
+        <!-- 援軍計算機を開くボタン -->
+        <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+            🔢 援軍計算機を開く
+        </a>
 
-        💾 JSON保存
+        <!-- 専門家・親密度管理を開くボタン -->
+        <a href="senmonka.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+            ❄️ 専門家・親密度管理を開く
+        </a>
 
-    </button>
+        <!-- 王城戦 差し込み計算機を開くボタン -->
+        <a href="calc.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+            👑 王城戦 差し込み計算機を開く
+        </a>
 
-    <input
-        id="importJsonFile"
-        type="file"
-        accept=".json"
-        hidden>
+        <!-- JSON保存ボタン -->
+        <button id="exportJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">
+            💾 JSON保存
+        </button>
 
-    <button
-        id="importJson"
-        class="primary-btn">
+        <input id="importJsonFile" type="file" accept=".json" hidden>
 
-        📂 JSON読込
+        <!-- JSON読込ボタン -->
+        <button id="importJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">
+            📂 JSON読込
+        </button>
 
-    </button>
+    </div>
 
-</section>
+</div> <!-- /.container -->
 
 <!-- ========================= -->
 <!-- JavaScript -->
