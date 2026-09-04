@@ -1,6 +1,6 @@
 /* ==========================================
-   Whiteout Checklist V4
-   script.js (イベントチェックボックス追加 & 朝9時リセット実装版)
+   Whiteout Checklist V4.1
+   script.js (都市チェック追加・競技場移動・メモ帳全員表示対応版)
 ========================================== */
 
 
@@ -39,12 +39,7 @@ function checkDailyReset() {
                 return;
             }
 
-            // ★追加：専門家管理（wh_expert_）のデータも絶対に削除しない！
-            if (key.startsWith("wh_expert_")) {
-                return;
-            }
-
-// ★追加：専門家管理（wh_expert_）のデータも絶対に削除しない！
+            // 専門家管理（wh_expert_）のデータも絶対に削除しない！
             if (key.startsWith("wh_expert_")) {
                 return;
             }
@@ -125,7 +120,7 @@ function getCharProgressPercent(charName) {
         }
     });
 
-    // 時間タスク（ここに時間チェックの集計を追加）
+    // 時間タスク
     TIME_TASKS.forEach(task => {
         TIME_GROUPS.forEach(group => {
             const supported = task.times ? task.times.includes(group.id) : true;
@@ -149,23 +144,19 @@ function renderCharacters() {
     if (!container) return;
     container.innerHTML = "";
 
-    // 設定データを取得
     const settings = SettingManager.get();
     const characters = settings.characters;
     const alliances = settings.alliances;
-
-    // カラフルにするための色リスト
     const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"];
 
     characters.forEach((char, index) => {
         const btn = document.createElement("button");
         const isMain = (index === 0);
         const isActive = (char === currentCharacter);
-        const color = colors[index % colors.length]; // 順番に色を割り当て
+        const color = colors[index % colors.length];
 
         btn.className = `character-btn ${isActive ? "active" : ""}`;
         
-        // メインキャラなら少し大きく枠をつける、そうでなければカラフルに
         btn.style.borderColor = isMain ? "#FFD700" : color;
         btn.style.borderWidth = "2px";
         btn.style.borderStyle = "solid";
@@ -176,7 +167,6 @@ function renderCharacters() {
         const alliance = alliances[char] || "無所属";
         const charPercent = getCharProgressPercent(char);
 
-        // 文字を大きくしておしゃれにデザイン
         btn.innerHTML = `
             <div style="font-size:11px; font-weight:bold; color:#666; margin-bottom:4px;">[${alliance}]</div>
             <div style="font-size:18px; font-weight:900; color:#333; margin-bottom:2px;">${char}</div>
@@ -194,14 +184,13 @@ function renderCharacters() {
 }
 
 // ==========================================
-// 熊罠タイマー（キャラ別対応版）
+// 熊罠タイマー
 // ==========================================
 function renderBear() {
     const dateEl = document.getElementById("bearDate");
     const timeEl = document.getElementById("bearTime");
     if (!dateEl || !timeEl) return;
 
-    // ★ キャラクタ―ごとの時間を取得（なければデフォルト値）
     const savedTime = localStorage.getItem(`${currentCharacter}_bear_time`) || DEFAULT_BEAR_TIME;
     timeEl.textContent = savedTime;
 
@@ -303,7 +292,7 @@ function renderTime() {
 }
 
 // ==========================================
-// 繰り返し（0:00:00 形式＆リアルタイム秒数更新版）
+// 繰り返し
 // ==========================================
 function renderRepeat() {
     const container = document.getElementById("repeatContainer");
@@ -346,12 +335,11 @@ function renderRepeat() {
                     const m = Math.floor((totalSec % 3600) / 60);
                     const s = totalSec % 60;
 
-                    // 「0:00:05」や「02:15:30」のようなフォーマットに整形
                     const pad = (n) => String(n).padStart(2, '0');
                     if (h > 0) {
                         timeDisplay = `${h}:${pad(m)}:${pad(s)}`;
                     } else {
-                        timeDisplay = `${m}:${pad(s)}`; // 1時間未満なら 「分:秒」 (例: 04:30)
+                        timeDisplay = `${m}:${pad(s)}`;
                     }
                 }
             }
@@ -408,13 +396,11 @@ function updateProgress() {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${currentCharacter}_${id}`) === "1";
 
-    // デイリータスクの集計
     DAILY_TASKS.forEach(t => { 
         total++; 
         if (isChecked(t.id)) checked++; 
     });
 
-    // 都市タスクの集計
     CITY_TASKS.forEach(t => {
         if (t.double) {
             total += 2;
@@ -426,7 +412,6 @@ function updateProgress() {
         }
     });
 
-    // 時間タスクの集計（キャラ別に正しく集計するように修正）
     TIME_TASKS.forEach(task => {
         TIME_GROUPS.forEach(group => {
             const supported = task.times ? task.times.includes(group.id) : true;
@@ -457,7 +442,6 @@ function renderStationSummary() {
     const el = document.getElementById("stationToday");
     if (!el) return;
 
-    // 設定箱から取得するように変更
     const settings = SettingManager.get();
     const alliance = settings.alliances[currentCharacter] || "MEL";
 
@@ -477,7 +461,7 @@ function renderStationSummary() {
 }
 
 // ==========================================
-// イベント描画 (★ 編集・チェック・目隠し対応版)
+// イベント描画
 // ==========================================
 function renderEvents() {
     const container = document.getElementById("eventContainer");
@@ -491,11 +475,9 @@ function renderEvents() {
     container.innerHTML = events.map((e, index) => {
         const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
         
-        // 目隠し判定（キャラ別）
         const hideKey = `${currentCharacter}_hide_event_${eventId}`;
         const isHidden = localStorage.getItem(hideKey) === "1";
 
-        // ★ チェックボックス判定（キャラ別）
         const checkKey = `${currentCharacter}_check_event_${eventId}`;
         const isChecked = localStorage.getItem(checkKey) === "1";
 
@@ -519,7 +501,6 @@ function renderEvents() {
     initListSortable();
 }
 
-// ★ イベントの編集処理
 function editEvent(eventId) {
     let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
     const eventObj = events.find((e, index) => {
@@ -548,14 +529,12 @@ function editEvent(eventId) {
     renderEvents();
 }
 
-// ★ イベントの完了チェック切り替え
 function toggleEventCheck(eventId, checked) {
     const checkKey = `${currentCharacter}_check_event_${eventId}`;
     localStorage.setItem(checkKey, checked ? "1" : "0");
     renderEvents();
 }
 
-// キャラ固有の目隠し切り替え
 function toggleHideEvent(eventId) {
     const hideKey = `${currentCharacter}_hide_event_${eventId}`;
     const isHidden = localStorage.getItem(hideKey) === "1";
@@ -569,7 +548,6 @@ function toggleHideEvent(eventId) {
     renderEvents();
 }
 
-// イベント削除
 function deleteEvent(eventId) {
     let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
     events = events.filter((e, index) => {
@@ -580,7 +558,6 @@ function deleteEvent(eventId) {
     renderEvents();
 }
 
-// HTMLエスケープ用ヘルパー
 function escapeHtml(text) {
     return String(text)
         .replaceAll("&", "&amp;")
@@ -591,107 +568,74 @@ function escapeHtml(text) {
 }
 
 // ==========================================
-// 幹部メニュー描画 (並び替え対応版)
+// 幹部メニュー（メモ帳）描画
 // ==========================================
 function renderOfficers() {
     const container = document.getElementById("officerContainer");
     if (!container) return;
 
     const officerCard = document.getElementById("officerCard");
-
     if (officerCard) {
-        if (currentCharacter === "Lune") {
-            officerCard.style.display = ""; // Luneなら表示
-        } else {
-            officerCard.style.display = "none"; // Lune以外なら非表示
-        }
+        officerCard.style.display = ""; 
     }
 
     let officers = JSON.parse(localStorage.getItem("officer_list") || "null");
     if (!officers) {
-        officers = DEFAULT_OFFICERS.map((t, idx) => ({ id: idx + 1, text: t, checked: false }));
+        // 初期データ（作者不明の場合は空欄または「共通」など）
+        DEFAULT_OFFICERS.forEach((t, idx) => {
+            // 例として初期データはLune作成扱いにする、またはauthorなしにする等
+        });
+        officers = DEFAULT_OFFICERS.map((t, idx) => ({ id: idx + 1, text: t, checked: false, author: "" }));
         localStorage.setItem("officer_list", JSON.stringify(officers));
     }
 
-    container.innerHTML = officers.map(o => `
-        <div class="officer-item ${o.checked ? "checked" : ""}">
-            <input type="checkbox" ${o.checked ? "checked" : ""} onchange="toggleOfficer('${o.id}', this.checked)">
-            <span>${o.text}</span>
-            <button type="button" class="officer-delete" onclick="deleteOfficer('${o.id}')">❌</button>
-        </div>
-    `).join("");
+    container.innerHTML = officers.map(o => {
+        // 作成者（キャラ名）のタグ表示HTMLを作る
+        const authorTag = o.author ? `<span style="font-size: 10px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: bold; color: #555;">${escapeHtml(o.author)}</span>` : "";
+        
+        return `
+            <div class="officer-item ${o.checked ? "checked" : ""}" style="display:flex; align-items:center;">
+                <input type="checkbox" ${o.checked ? "checked" : ""} onchange="toggleOfficer('${o.id}', this.checked)">
+                <div style="flex-grow:1; display:flex; align-items:center; margin-left: 8px;">
+                    ${authorTag}
+                    <span>${escapeHtml(o.text)}</span>
+                </div>
+                <button type="button" class="officer-delete" onclick="deleteOfficer('${o.id}')">❌</button>
+            </div>
+        `;
+    }).join("");
 
-    // ★ 表示切り替え後にドラッグ＆ドロップ（並び替え）を再接続・更新する
-    if (typeof initSortable === "function") {
-        initSortable();
-    } else if (typeof setupSortable === "function") {
-        setupSortable();
-    } else if (typeof Sortable !== "undefined" && window.bottomSortable) {
-        // SortableJSを使っている場合の再適用
-        try {
-            window.bottomSortable.option("disabled", false);
-        } catch (e) {}
-    }
     initListSortable();
-}
-
-// 幹部メニューの項目を削除する関数
-function deleteOfficer(id) {
-    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
-    // 該当するID以外のものだけを残す
-    officers = officers.filter(o => String(o.id) !== String(id));
-    localStorage.setItem("officer_list", JSON.stringify(officers));
-    renderOfficers(); // 再描画
-}
-
-// ==========================================
-// 幹部メニューのチェック状態を保存する関数
-// ==========================================
-function toggleOfficer(id, checked) {
-    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
-    officers = officers.map(o => {
-        if (String(o.id) === String(id)) {
-            o.checked = checked;
-        }
-        return o;
-    });
-    localStorage.setItem("officer_list", JSON.stringify(officers));
-    renderOfficers();
 }
 
 // ==========================================
 // イベント・各種ボタン操作のセットアップ
 // ==========================================
 function setupEvents() {
-// 熊時間編集（キャラ別保存）
     const editBearBtn = document.getElementById("editBearTime");
     if (editBearBtn) {
         editBearBtn.onclick = () => {
             const cur = document.getElementById("bearTime")?.textContent || "21:00";
             const val = prompt(`【${currentCharacter}】の熊罠時間を入力してください`, cur);
             if (val) {
-                // ★ キャラクタ―ごとに時間を保存！
                 localStorage.setItem(`${currentCharacter}_bear_time`, val);
                 renderBear();
             }
         };
     }
     
-    // 地底メモ開閉
     const toggleMemoBtn = document.getElementById("toggleMemo");
     const memoBody = document.getElementById("memoBody");
     if (toggleMemoBtn && memoBody) {
         toggleMemoBtn.onclick = () => memoBody.classList.toggle("hidden");
     }
 
-    // イベントフォーム開閉
     const toggleEventBtn = document.getElementById("toggleEventForm");
     const eventForm = document.getElementById("eventForm");
     if (toggleEventBtn && eventForm) {
         toggleEventBtn.onclick = () => eventForm.classList.toggle("hidden");
     }
 
-    // イベント追加
     const addEventBtn = document.getElementById("addEventBtn");
     if (addEventBtn) {
         addEventBtn.onclick = () => {
@@ -712,15 +656,13 @@ function setupEvents() {
         };
     }
 
-    // 幹部フォーム開閉
     const toggleOfficerBtn = document.getElementById("toggleOfficerForm");
     const officerForm = document.getElementById("officerForm");
     if (toggleOfficerBtn && officerForm) {
         toggleOfficerBtn.onclick = () => officerForm.classList.toggle("hidden");
     }
 
-    // 幹部追加
-    const addOfficerBtn = document.getElementById("addOfficerBtn");
+   const addOfficerBtn = document.getElementById("addOfficerBtn");
     if (addOfficerBtn) {
         addOfficerBtn.onclick = () => {
             const input = document.getElementById("officerInput");
@@ -728,7 +670,8 @@ function setupEvents() {
             if (!val) return;
 
             const officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
-            officers.push({ id: Date.now(), text: val, checked: false });
+            // 追加したキャラクター名（currentCharacter）を保存データに持たせる
+            officers.push({ id: Date.now(), text: val, checked: false, author: currentCharacter });
             localStorage.setItem("officer_list", JSON.stringify(officers));
 
             input.value = "";
@@ -737,8 +680,6 @@ function setupEvents() {
         };
     }
     
-
-    // JSON保存
     const exportBtn = document.getElementById("exportJson");
     if (exportBtn) {
         exportBtn.onclick = () => {
@@ -755,7 +696,6 @@ function setupEvents() {
         };
     }
 
-    // JSON読込
     const importBtn = document.getElementById("importJson");
     const importFile = document.getElementById("importJsonFile");
     if (importBtn && importFile) {
@@ -777,9 +717,8 @@ function setupEvents() {
             reader.readAsText(file);
         };
     }
-    // ステーション管理を開く
-    const openStationBtn = document.getElementById("openStation");
 
+    const openStationBtn = document.getElementById("openStation");
     if (openStationBtn) {
         openStationBtn.onclick = () => {
             renderStationSummary();
@@ -789,7 +728,7 @@ function setupEvents() {
 }
 
 /* ==========================================
-   イベント＆幹部 リスト項目の並び替え機能（本体）
+   イベント＆メモ帳 リスト項目の並び替え機能
 ========================================== */
 function makeListSortable(containerId, storageKey) {
     const container = document.getElementById(containerId);
@@ -863,60 +802,46 @@ function initListSortable() {
     makeListSortable('eventContainer', STORAGE?.events || "ws_events");
     makeListSortable('officerContainer', 'officer_list');
 }
-// カウントダウンを1秒ごとに更新する処理
+
 setInterval(() => {
-    // 繰り返しタスク（英雄募集・倉庫回収）の表示を再生成
     renderRepeat();
 }, 1000);
 
-// 設定画面の開閉
-document.getElementById("openSettings").onclick = () => {
-    const form = document.getElementById("settingsForm");
-    form.classList.toggle("hidden");
-    
-    // 現在の設定をフォームに反映させる
-    const settings = SettingManager.get();
-    document.getElementById("editChars").value = settings.characters.join(",");
-    document.getElementById("editAlliances").value = Object.entries(settings.alliances)
-        .map(([k, v]) => `${k}:${v}`).join(",");
-};
+const openSettingsBtn = document.getElementById("openSettings");
+if (openSettingsBtn) {
+    openSettingsBtn.onclick = () => {
+        const form = document.getElementById("settingsForm");
+        form.classList.toggle("hidden");
+        
+        const settings = SettingManager.get();
+        document.getElementById("editChars").value = settings.characters.join(",");
+        
+        const allianceText = Object.entries(settings.alliances)
+            .map(([char, ally]) => `${char}:${ally}`)
+            .join(",");
+        document.getElementById("editAlliances").value = allianceText;
+    };
+}
 
-// 設定画面を開いたときに、現在の保存データをそれぞれの入力欄に綺麗にセットする
-document.getElementById("openSettings").onclick = () => {
-    const form = document.getElementById("settingsForm");
-    form.classList.toggle("hidden");
-    
-    const settings = SettingManager.get();
-    // キャラクター名の欄にセット
-    document.getElementById("editChars").value = settings.characters.join(",");
-    
-    // 同盟の欄に 「キャラ名:同盟名,キャラ名:同盟名」 の形式でセット
-    const allianceText = Object.entries(settings.alliances)
-        .map(([char, ally]) => `${char}:${ally}`)
-        .join(",");
-    document.getElementById("editAlliances").value = allianceText;
-};
+const saveSettingsBtn = document.getElementById("saveSettings");
+if (saveSettingsBtn) {
+    saveSettingsBtn.onclick = () => {
+        const charsInput = document.getElementById("editChars").value;
+        const chars = charsInput.split(",").map(s => s.trim()).filter(s => s !== "");
 
-// 保存処理
-document.getElementById("saveSettings").onclick = () => {
-    // 1. キャラクター名のリストを作る
-    const charsInput = document.getElementById("editChars").value;
-    const chars = charsInput.split(",").map(s => s.trim()).filter(s => s !== "");
-
-    // 2. 同盟の辞書を作る
-    const alliances = {};
-    const alliancesInput = document.getElementById("editAlliances").value;
-    alliancesInput.split(",").forEach(item => {
-        const parts = item.split(":");
-        if (parts.length === 2) {
-            const char = parts[0].trim();
-            const ally = parts[1].trim();
-            if (char && ally) {
-                alliances[char] = ally;
+        const alliances = {};
+        const alliancesInput = document.getElementById("editAlliances").value;
+        alliancesInput.split(",").forEach(item => {
+            const parts = item.split(":");
+            if (parts.length === 2) {
+                const char = parts[0].trim();
+                const ally = parts[1].trim();
+                if (char && ally) {
+                    alliances[char] = ally;
+                }
             }
-        }
-    });
+        });
 
-    // まとめて保存
-    SettingManager.save({ characters: chars, alliances: alliances });
-};
+        SettingManager.save({ characters: chars, alliances: alliances });
+    };
+}
