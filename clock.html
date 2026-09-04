@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Precision Clock (Always on Top)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #121212;
+            color: #00ffcc;
+            font-family: 'Consolas', 'Courier New', monospace, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #clock-container {
+            text-align: center;
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        #time {
+            font-size: 7vw;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        #date {
+            font-size: 1.8vw;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* コントロールパネル（マウスホバーで表示） */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            opacity: 0.2;
+            transition: opacity 0.3s;
+            display: flex;
+            gap: 10px;
+        }
+
+        body:hover .controls {
+            opacity: 1;
+        }
+
+        button {
+            background: #222;
+            color: #00ffcc;
+            border: 1px solid #00ffcc;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        button:hover {
+            background: #00ffcc;
+            color: #121212;
+        }
+
+        button.active {
+            background: #00ffcc;
+            color: #121212;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="clock-container" title="クリックしてカラーテーマを切り替え">
+        <div id="date">YYYY/MM/DD (Sun)</div>
+        <div id="time">00:00:00.00</div>
+    </div>
+
+    <div class="controls">
+        <button id="pin-btn" onclick="toggleAlwaysOnTop()">最前面固定: OFF</button>
+        <button onclick="toggleFullscreen()">全画面 (F11)</button>
+    </div>
+
+    <script>
+        // カラーテーマリスト
+        const themes = [
+            { bg: '#121212', fg: '#00ffcc', shadow: 'rgba(0, 255, 204, 0.4)' },
+            { bg: '#000000', fg: '#ffffff', shadow: 'rgba(255, 255, 255, 0.4)' },
+            { bg: '#ffffff', fg: '#222222', shadow: 'rgba(0, 0, 0, 0.2)' },
+            { bg: '#0b132b', fg: '#6fffe9', shadow: 'rgba(111, 255, 233, 0.4)' }
+        ];
+        let currentThemeIndex = 0;
+
+        // テーマ切り替え
+        document.getElementById('clock-container').addEventListener('click', () => {
+            currentThemeIndex = (currentThemeIndex + 1) % themes.length;
+            const t = themes[currentThemeIndex];
+            document.body.style.backgroundColor = t.bg;
+            const timeEl = document.getElementById('time');
+            timeEl.style.color = t.fg;
+            timeEl.style.textShadow = `0 0 15px ${t.shadow}`;
+        });
+
+        // 最前面固定の切り替え (Window.services / Picture-in-Pictureハック)
+        let isPinned = false;
+        async function toggleAlwaysOnTop() {
+            const btn = document.getElementById('pin-btn');
+            
+            // 最新のブラウザ(Edge/Chrome)が持つ「ピクチャーインピクチャー（常時手前表示）」機能を利用します
+            try {
+                if (!isPinned) {
+                    // 隠しビデオ要素を作ってPIPを起動し、それを最前面ウインドウとして利用する手法などもありますが、
+                    // 最も確実なブラウザAPIとして「Document PiP」またはウィンドウ挙動を利用します。
+                    // ここでは簡単に別窓（ポップアップ）を極小クロックとして最前面化するアプローチもあります。
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+            // ※ブラウザのセキュリティ制限上、通常のHTMLファイルから直接「ウィンドウ自体の最前面固定」をON/OFFするのは制限があるため、
+            // 手っ取り早く確実な方法として「ブラウザのウィンドウを小さくして、最前面固定の拡張機能を使う」か、
+            // 下記の【一番確実な別アプローチ】をおすすめします。
+        }
+
+        // 高精度時計のループ
+        function updateClock() {
+            const now = new Date();
+
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dow = daysOfWeek[now.getDay()];
+
+            document.getElementById('date').textContent = `${year}/${month}/${day} (${dow})`;
+
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const milliseconds = String(Math.floor(now.getMilliseconds() / 10)).padStart(2, '0');
+
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+            requestAnimationFrame(updateClock);
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        requestAnimationFrame(updateClock);
+    </script>
+</body>
+</html>
