@@ -615,7 +615,6 @@ function renderOfficers() {
 
 function deleteOfficer(id) {
     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
-    // 修正: 確実に文字列として比較して一致するものを除外する
     officers = officers.filter(o => String(o.id) !== String(id));
     localStorage.setItem("officer_list", JSON.stringify(officers));
     renderOfficers();
@@ -695,7 +694,6 @@ function setupEvents() {
             if (!val) return;
 
             const officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
-            // 追加したキャラクター名（currentCharacter）を保存データに持たせる
             officers.push({ id: Date.now(), text: val, checked: false, author: currentCharacter });
             localStorage.setItem("officer_list", JSON.stringify(officers));
 
@@ -810,7 +808,7 @@ function saveItemOrder(containerId, storageKey) {
             localStorage.setItem(storageKey, JSON.stringify(newEvents));
         }
     } else if (containerId === 'officerContainer') {
-        const officers = JSON.parse(localStorage.getItem(storageKey) || "[]"); // ← ここを修正しました！
+        const officers = JSON.parse(localStorage.getItem(storageKey) || "[]");
         const newOfficers = [];
         container.querySelectorAll('.officer-item').forEach(el => {
             const text = el.querySelector('span')?.textContent.trim();
