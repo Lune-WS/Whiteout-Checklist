@@ -268,7 +268,7 @@ function renderTime() {
 
     let html = `<table class="time-table"><thead><tr><th>タスク</th>`;
     TIME_GROUPS.forEach(g => {
-        html += `<th class="${g.className \vert{}\vert{} ""}">${g.title}</th>`;
+        html += `<th class="${g.className || ""}">${g.title}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
@@ -346,11 +346,11 @@ function renderRepeat() {
         }
 
         div.innerHTML = `
-            <div class="repeat-title">${task.icon}${task.label} (${count}/${task.max})</div>
+            <div class="repeat-title">${task.icon} ${task.label} (${count}/${task.max})</div>
             <div class="repeat-bottom">
                 <div class="repeat-bar">${stars || "☆"}</div>
                 <div class="repeat-time" style="width: auto; white-space: nowrap; font-family: monospace; font-weight: bold;">${timeDisplay}</div>
-                <button class="repeat-add primary-btn" onclick="addRepeat('${task.id}',${task.max})">＋</button>
+                <button class="repeat-add primary-btn" onclick="addRepeat('${task.id}', ${task.max})">＋</button>
             </div>
         `;
         container.appendChild(div);
@@ -432,7 +432,7 @@ function updateProgress() {
 
     if (fill) fill.style.width = `${percent}%`;
     if (percentEl) percentEl.textContent = `${percent}%`;
-    if (countEl) countEl.textContent = `${checked} /${total}`;
+    if (countEl) countEl.textContent = `${checked} / ${total}`;
 
     const charProg = document.getElementById(`prog_${currentCharacter}`);
     if (charProg) charProg.textContent = `${percent}%`;
@@ -483,4 +483,390 @@ function renderEvents() {
 
         return `
             <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""}">
-                <div
+                <div class="event-left" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
+                    <div>
+                        <div class="event-title">${escapeHtml(e.title)}</div>
+                        ${e.memo ? `<div class="event-memo">${escapeHtml(e.memo)}</div>` : ""}
+                    </div>
+                </div>
+                <div class="event-right">
+                    <button type="button" onclick="editEvent('${eventId}')" title="編集">✏️</button>
+                    <button type="button" onclick="toggleHideEvent('${eventId}')" title="目隠し">${isHidden ? "👁" : "🙈"}</button>
+                    <button type="button" onclick="deleteEvent('${eventId}')" title="削除">❌</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+    initListSortable();
+}
+
+function editEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const eventObj = events.find((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id === String(eventId);
+    });
+
+    if (!eventObj) return;
+
+    const newTitle = prompt("イベント名を修正:", eventObj.title);
+    if (newTitle === null) return;
+    
+    const trimmedTitle = newTitle.trim();
+    if (!trimmedTitle) {
+        alert("イベント名を入力してください。");
+        return;
+    }
+
+    const newMemo = prompt("備考を修正 (任意):", eventObj.memo || "");
+    if (newMemo === null) return;
+
+    eventObj.title = trimmedTitle;
+    eventObj.memo = newMemo.trim();
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    renderEvents();
+}
+
+function toggleEventCheck(eventId, checked) {
+    const checkKey = `${currentCharacter}_check_event_${eventId}`;
+    localStorage.setItem(checkKey, checked ? "1" : "0");
+    renderEvents();
+}
+
+function toggleHideEvent(eventId) {
+    const hideKey = `${currentCharacter}_hide_event_${eventId}`;
+    const isHidden = localStorage.getItem(hideKey) === "1";
+    
+    if (isHidden) {
+        localStorage.removeItem(hideKey);
+    } else {
+        localStorage.setItem(hideKey, "1");
+    }
+    
+    renderEvents();
+}
+
+function deleteEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events = events.filter((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id !== String(eventId);
+    });
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    renderEvents();
+}
+
+function escapeHtml(text) {
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+// ==========================================
+// 幹部メニュー（メモ帳）描画
+// ==========================================
+function renderOfficers() {
+    const container = document.getElementById("officerContainer");
+    if (!container) return;
+
+    const officerCard = document.getElementById("officerCard");
+    if (officerCard) {
+        officerCard.style.display = ""; 
+    }
+
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "null");
+    if (!officers) {
+        officers = DEFAULT_OFFICERS.map((t, idx) => ({ id: idx + 1, text: t, checked: false, author: "" }));
+        localStorage.setItem("officer_list", JSON.stringify(officers));
+    }
+
+    container.innerHTML = officers.map(o => {
+        // 作成者（キャラ名）のタグ表示HTMLを作る
+        const authorTag = o.author ? `<span style="font-size: 10px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: bold; color: #555;">${escapeHtml(o.author)}</span>` : "";
+        
+        return `
+            <div class="officer-item ${o.checked ? "checked" : ""}" style="display:flex; align-items:center;">
+                <input type="checkbox" ${o.checked ? "checked" : ""} onchange="toggleOfficer('${o.id}', this.checked)">
+                <div style="flex-grow:1; display:flex; align-items:center; margin-left: 8px;">
+                    ${authorTag}
+                    <span>${escapeHtml(o.text)}</span>
+                </div>
+                <button type="button" class="officer-delete" onclick="deleteOfficer('${o.id}')">❌</button>
+            </div>
+        `;
+    }).join("");
+
+    if (typeof initSortable === "function") {
+        initSortable();
+    } else if (typeof setupSortable === "function") {
+        setupSortable();
+    } else if (typeof Sortable !== "undefined" && window.bottomSortable) {
+        try {
+            window.bottomSortable.option("disabled", false);
+        } catch (e) {}
+    }
+    initListSortable();
+}
+
+function deleteOfficer(id) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    // 修正: 確実に文字列として比較して一致するものを除外する
+    officers = officers.filter(o => String(o.id) !== String(id));
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers();
+}
+
+function toggleOfficer(id, checked) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    officers = officers.map(o => {
+        if (String(o.id) === String(id)) {
+            o.checked = checked;
+        }
+        return o;
+    });
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers();
+}
+
+// ==========================================
+// イベント・各種ボタン操作のセットアップ
+// ==========================================
+function setupEvents() {
+    const editBearBtn = document.getElementById("editBearTime");
+    if (editBearBtn) {
+        editBearBtn.onclick = () => {
+            const cur = document.getElementById("bearTime")?.textContent || "21:00";
+            const val = prompt(`【${currentCharacter}】の熊罠時間を入力してください`, cur);
+            if (val) {
+                localStorage.setItem(`${currentCharacter}_bear_time`, val);
+                renderBear();
+            }
+        };
+    }
+    
+    const toggleMemoBtn = document.getElementById("toggleMemo");
+    const memoBody = document.getElementById("memoBody");
+    if (toggleMemoBtn && memoBody) {
+        toggleMemoBtn.onclick = () => memoBody.classList.toggle("hidden");
+    }
+
+    const toggleEventBtn = document.getElementById("toggleEventForm");
+    const eventForm = document.getElementById("eventForm");
+    if (toggleEventBtn && eventForm) {
+        toggleEventBtn.onclick = () => eventForm.classList.toggle("hidden");
+    }
+
+    const addEventBtn = document.getElementById("addEventBtn");
+    if (addEventBtn) {
+        addEventBtn.onclick = () => {
+            const titleInput = document.getElementById("eventTitle");
+            const memoInput = document.getElementById("eventMemo");
+            const title = titleInput.value.trim();
+            const memo = memoInput.value.trim();
+            if (!title) return;
+
+            const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+            events.push({ id: Date.now(), title, memo });
+            localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+
+            titleInput.value = "";
+            memoInput.value = "";
+            eventForm.classList.add("hidden");
+            renderEvents();
+        };
+    }
+
+    const toggleOfficerBtn = document.getElementById("toggleOfficerForm");
+    const officerForm = document.getElementById("officerForm");
+    if (toggleOfficerBtn && officerForm) {
+        toggleOfficerBtn.onclick = () => officerForm.classList.toggle("hidden");
+    }
+
+    const addOfficerBtn = document.getElementById("addOfficerBtn");
+    if (addOfficerBtn) {
+        addOfficerBtn.onclick = () => {
+            const input = document.getElementById("officerInput");
+            const val = input.value.trim();
+            if (!val) return;
+
+            const officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+            // 追加したキャラクター名（currentCharacter）を保存データに持たせる
+            officers.push({ id: Date.now(), text: val, checked: false, author: currentCharacter });
+            localStorage.setItem("officer_list", JSON.stringify(officers));
+
+            input.value = "";
+            officerForm.classList.add("hidden");
+            renderOfficers();
+        };
+    }
+    
+    const exportBtn = document.getElementById("exportJson");
+    if (exportBtn) {
+        exportBtn.onclick = () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                data[k] = localStorage.getItem(k);
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `whiteout_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        };
+    }
+
+    const importBtn = document.getElementById("importJson");
+    const importFile = document.getElementById("importJsonFile");
+    if (importBtn && importFile) {
+        importBtn.onclick = () => importFile.click();
+        importFile.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+                    alert("復元完了しました！");
+                    init();
+                } catch (err) {
+                    alert("ファイルの読み込みに失敗しました。");
+                }
+            };
+            reader.readAsText(file);
+        };
+    }
+
+    const openStationBtn = document.getElementById("openStation");
+    if (openStationBtn) {
+        openStationBtn.onclick = () => {
+            renderStationSummary();
+            window.location.href = "station.html";
+        };
+    }
+}
+
+/* ==========================================
+   イベント＆メモ帳 リスト項目の並び替え機能
+========================================== */
+function makeListSortable(containerId, storageKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let draggedItem = null;
+
+    container.querySelectorAll('.event-item, .officer-item').forEach(item => {
+        item.setAttribute('draggable', 'true');
+        item.style.cursor = 'grab';
+
+        item.addEventListener('dragstart', (e) => {
+            if (['INPUT', 'BUTTON'].includes(e.target.tagName)) {
+                e.preventDefault();
+                return;
+            }
+            draggedItem = item;
+            item.classList.add('item-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('item-dragging');
+            draggedItem = null;
+            saveItemOrder(containerId, storageKey);
+        });
+
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!draggedItem || draggedItem === item) return;
+
+            const rect = item.getBoundingClientRect();
+            const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+            container.insertBefore(draggedItem, next ? item.nextSibling : item);
+        });
+    });
+}
+
+function saveItemOrder(containerId, storageKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (containerId === 'eventContainer') {
+        const events = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const newEvents = [];
+        container.querySelectorAll('.event-item').forEach(el => {
+            const title = el.querySelector('.event-title')?.textContent.trim();
+            const found = events.find(e => e.title === title);
+            if (found) newEvents.push(found);
+        });
+        if (newEvents.length > 0) {
+            localStorage.setItem(storageKey, JSON.stringify(newEvents));
+        }
+    } else if (containerId === 'officerContainer') {
+        const officers = JSON.parse(localStorage.getItem(storageKey) || "[]"); // ← ここを修正しました！
+        const newOfficers = [];
+        container.querySelectorAll('.officer-item').forEach(el => {
+            const text = el.querySelector('span')?.textContent.trim();
+            const found = officers.find(o => o.text === text);
+            if (found) newOfficers.push(found);
+        });
+        if (newOfficers.length > 0) {
+            localStorage.setItem(storageKey, JSON.stringify(newOfficers));
+        }
+    }
+}
+
+function initListSortable() {
+    makeListSortable('eventContainer', STORAGE?.events || "ws_events");
+    makeListSortable('officerContainer', 'officer_list');
+}
+
+setInterval(() => {
+    renderRepeat();
+}, 1000);
+
+const openSettingsBtn = document.getElementById("openSettings");
+if (openSettingsBtn) {
+    openSettingsBtn.onclick = () => {
+        const form = document.getElementById("settingsForm");
+        form.classList.toggle("hidden");
+        
+        const settings = SettingManager.get();
+        document.getElementById("editChars").value = settings.characters.join(",");
+        
+        const allianceText = Object.entries(settings.alliances)
+            .map(([char, ally]) => `${char}:${ally}`)
+            .join(",");
+        document.getElementById("editAlliances").value = allianceText;
+    };
+}
+
+const saveSettingsBtn = document.getElementById("saveSettings");
+if (saveSettingsBtn) {
+    saveSettingsBtn.onclick = () => {
+        const charsInput = document.getElementById("editChars").value;
+        const chars = charsInput.split(",").map(s => s.trim()).filter(s => s !== "");
+
+        const alliances = {};
+        const alliancesInput = document.getElementById("editAlliances").value;
+        alliancesInput.split(",").forEach(item => {
+            const parts = item.split(":");
+            if (parts.length === 2) {
+                const char = parts[0].trim();
+                const ally = parts[1].trim();
+                if (char && ally) {
+                    alliances[char] = ally;
+                }
+            }
+        });
+
+        SettingManager.save({ characters: chars, alliances: alliances });
+    };
+}
