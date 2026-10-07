@@ -3,7 +3,6 @@
    script.js (都市チェック追加・競技場移動・メモ帳全員表示対応版)
 ========================================== */
 
-
 // 倉庫回収の待ち時間テーブル (1〜30回対応)
 const STORAGE_INTERVALS = [
     0.5, 1, 1.5, 2.5, 5, 10, 10, 10, 10, 20, 
@@ -11,8 +10,8 @@ const STORAGE_INTERVALS = [
     120, 120, 120, 120, 120, 120, 120, 120, 120, 120
 ];
 
-let currentCharacter = localStorage.getItem(STORAGE?.character || "ws_current_character") || CHARACTERS[0];
-
+// ▼ ここを安全な書き方に変更します（SettingManagerが読み込まれていない時の対策）
+let currentCharacter = localStorage.getItem("ws_current_character") || "Lune";
 
 // ------------------------------------------
 // ⏰ 毎日 朝9:00 自動リセット処理
