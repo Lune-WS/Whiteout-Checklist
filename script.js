@@ -10,7 +10,7 @@ const STORAGE_INTERVALS = [
     120, 120, 120, 120, 120, 120, 120, 120, 120, 120
 ];
 
-// ▼ ここを安全な書き方に変更します（SettingManagerが読み込まれていない時の対策）
+// SettingManagerが読み込まれていない時の対策
 let currentCharacter = localStorage.getItem("ws_current_character") || "Lune";
 
 // ------------------------------------------
@@ -291,7 +291,7 @@ function renderTime() {
 }
 
 // ==========================================
-// 繰り返し
+// 繰り返し (修正レイアウト対応)
 // ==========================================
 function renderRepeat() {
     const container = document.getElementById("repeatContainer");
@@ -313,6 +313,8 @@ function renderRepeat() {
         const stars = "★".repeat(Math.min(count, 10)) + (count > 10 ? ` +${count - 10}` : "");
 
         let timeDisplay = nextTimeStr;
+        let isReady = false;
+
         if (nextTimeStr && nextTimeStr !== "--:--") {
             const now = new Date();
             let targetDate = new Date(nextTimeStr);
@@ -327,7 +329,8 @@ function renderRepeat() {
             const diffMs = targetDate - now;
             if (!isNaN(diffMs)) {
                 if (diffMs <= 0) {
-                    timeDisplay = "完了可能";
+                    timeDisplay = "READY";
+                    isReady = true;
                 } else {
                     const totalSec = Math.ceil(diffMs / 1000);
                     const h = Math.floor(totalSec / 3600);
@@ -342,14 +345,20 @@ function renderRepeat() {
                     }
                 }
             }
+        } else {
+            timeDisplay = "READY";
+            isReady = true;
         }
 
         div.innerHTML = `
-            <div class="repeat-title">${task.icon} ${task.label} (${count}/${task.max})</div>
+            <div class="repeat-header">
+                <div class="repeat-title">${task.icon} ${task.label}</div>
+                <div class="repeat-count-badge">${count} / ${task.max}</div>
+            </div>
+            <div class="repeat-stars-row">${stars || "☆"}</div>
             <div class="repeat-bottom">
-                <div class="repeat-bar">${stars || "☆"}</div>
-                <div class="repeat-time" style="width: auto; white-space: nowrap; font-family: monospace; font-weight: bold;">${timeDisplay}</div>
-                <button class="repeat-add primary-btn" onclick="addRepeat('${task.id}', ${task.max})">＋</button>
+                <div class="repeat-time ${isReady ? 'ready' : ''}">${timeDisplay}</div>
+                <button class="repeat-add-btn" onclick="addRepeat('${task.id}', ${task.max})">＋ 実行</button>
             </div>
         `;
         container.appendChild(div);
@@ -585,7 +594,6 @@ function renderOfficers() {
     }
 
     container.innerHTML = officers.map(o => {
-        // 作成者（キャラ名）のタグ表示HTMLを作る
         const authorTag = o.author ? `<span style="font-size: 10px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: bold; color: #555;">${escapeHtml(o.author)}</span>` : "";
         
         return `
