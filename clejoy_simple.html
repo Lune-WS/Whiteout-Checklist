@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クレジョイ盾兵割り振り計算機</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 15px; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; margin-top: 0; font-size: 20px; }
+        label { display: block; margin-top: 12px; font-size: 14px; font-weight: bold; }
+        input, select { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+        button.calc-btn { width: 100%; background: #2ea44f; color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        button.calc-btn:hover { background: #2c974b; }
+        .result-card { margin-top: 20px; padding: 15px; background: #eef2f7; border-radius: 6px; text-align: center; display: none; }
+        .result-val { font-size: 28px; font-weight: bold; color: #1e88e5; margin: 8px 0; }
+        .copy-btn { background: #007bff; color: #fff; border: none; padding: 8px 16px; font-size: 14px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .copy-btn:active { background: #0056b3; }
+        .history-section { margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px; }
+        .history-title { font-size: 14px; font-weight: bold; color: #555; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .clear-btn { background: none; border: none; color: #d9534f; cursor: pointer; font-size: 12px; text-decoration: underline; padding: 0; }
+        .history-item { background: #fafafa; border: 1px solid #ddd; border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .history-info { line-height: 1.4; }
+        .history-val { font-weight: bold; color: #2c3e50; font-size: 15px; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>クレジョイ盾兵計算機</h2>
+
+    <label>保有 盾兵数:</label>
+    <input type="number" id="totalShield" placeholder="例: 300000" inputmode="numeric">
+
+    <label>サブ援軍等で差し引く盾兵数 (任意):</label>
+    <input type="number" id="subShield" placeholder="例: 20000（なければ空欄）" inputmode="numeric">
+
+    <label>割る行軍数:</label>
+    <select id="marchCount">
+        <option value="5">5行軍</option>
+        <option value="6" selected>6行軍</option>
+    </select>
+
+    <button class="calc-btn" onclick="calculate()">計算する</button>
+
+    <div class="result-card" id="resultCard">
+        <div>1部隊あたりの盾兵数</div>
+        <div class="result-val" id="resultValue">0</div>
+        <button class="copy-btn" onclick="copyResult()">コピーする</button>
+    </div>
+
+    <div class="history-section">
+        <div class="history-title">
+            <span>直近の計算履歴 (最大5件)</span>
+            <button class="clear-btn" onclick="clearHistory()">履歴削除</button>
+        </div>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast">コピーしました！</div>
+
+<script>
+const STORAGE_KEY = 'clejoy_calc_history';
+
+// 起動時に履歴読み込み
+window.onload = function() {
+    renderHistory();
+};
+
+function calculate() {
+    const totalShield = parseFloat(document.getElementById('totalShield').value) || 0;
+    const subShield = parseFloat(document.getElementById('subShield').value) || 0;
+    const marchCount = parseInt(document.getElementById('marchCount').value) || 6;
+
+    if (totalShield <= 0) {
+        alert("盾兵数を入力してください。");
+        return;
+    }
+
+    const availableShield = Math.max(0, totalShield - subShield);
+    const perMarch = Math.floor(availableShield / marchCount);
+
+    // 結果表示
+    document.getElementById('resultValue').innerText = perMarch.toLocaleString();
+    document.getElementById('resultCard').style.display = 'block';
+
+    // 履歴へ保存
+    saveHistory({
+        total: totalShield,
+        sub: subShield,
+        march: marchCount,
+        perMarch: perMarch,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    });
+}
+
+function copyResult() {
+    const valText = document.getElementById('resultValue').innerText.replace(/,/g, '');
+    if (!valText || valText === '0') return;
+
+    navigator.clipboard.writeText(valText).then(() => {
+        showToast("数値 (" + valText + ") をコピーしました");
+    }).catch(err => {
+        // フォールバック
+        const tempInput = document.createElement('input');
+        tempInput.value = valText;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        showToast("数値 (" + valText + ") をコピーしました");
+    });
+}
+
+function saveHistory(data) {
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // 先頭に追加
+    history.unshift(data);
+    // 最大5件に制限
+    if (history.length > 5) {
+        history = history.slice(0, 5);
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+    renderHistory();
+}
+
+function renderHistory() {
+    const historyList = document.getElementById('historyList');
+    const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    if (history.length === 0) {
+        historyList.innerHTML = '<div style="color: #999; font-size: 12px; text-align: center; padding: 10px;">履歴はありません</div>';
+        return;
+    }
+
+    let html = '';
+    history.forEach((item, index) => {
+        const subInfo = item.sub > 0 ? ` (引く: ${item.sub.toLocaleString()})` : '';
+        html += `
+            <div class="history-item">
+                <div class="history-info">
+                    <span style="color:#888;">[${item.time}]</span> 盾: ${item.total.toLocaleString()}${subInfo} / ${item.march}行軍<br>
+                    <span class="history-val">1軍: ${item.perMarch.toLocaleString()}</span>
+                </div>
+                <button class="copy-btn" style="padding: 5px 10px; font-size: 12px;" onclick="copyValue('${item.perMarch}')">コピー</button>
+            </div>
+        `;
+    });
+    historyList.innerHTML = html;
+}
+
+function copyValue(val) {
+    navigator.clipboard.writeText(val).then(() => {
+        showToast("数値 (" + val + ") をコピーしました");
+    });
+}
+
+function clearHistory() {
+    if (confirm("履歴を削除しますか？")) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderHistory();
+    }
+}
+
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.style.display = 'block';
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
