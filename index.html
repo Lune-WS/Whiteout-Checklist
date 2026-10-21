@@ -23,10 +23,8 @@
     <p>For Whiteout Survival</p>
 
 </header>
-<!-- ========================= -->
-<!-- Header -->
-<!-- ========================= -->
 
+<!-- Header -->
 <header class="top-header">
 
     <div class="character-bar" id="characterBar">
@@ -73,29 +71,29 @@
 
         <div class="station-card">
 
-    <div class="station-title">
+            <div class="station-title">
 
-        🏭 ステーション
+                🏭 ステーション
 
-    </div>
+            </div>
 
-    <div
-        id="stationToday"
-        class="station-count">
+            <div
+                id="stationToday"
+                class="station-count">
 
-        🟢 今日の閉鎖：0件
+                🟢 今日の閉鎖：0件
 
-    </div>
+            </div>
 
-    <button
-        id="openStation"
-        class="primary-btn">
+            <button
+                id="openStation"
+                class="primary-btn">
 
-        📋 管理を開く
+                📋 管理を開く
 
-    </button>
+            </button>
 
-    </div>
+        </div>
 
         <div class="progress-card">
 
@@ -139,213 +137,109 @@
 
 </header>
 
-<!-- ========================= -->
-<!-- Main Dashboard -->
-<!-- ========================= -->
+<!-- モード切替スイッチ -->
+<div style="display:flex; gap:12px; margin-bottom:12px; align-items:center;">
+    <span style="font-weight:bold; font-size:14px;">表示モード:</span>
+    <label style="cursor:pointer; font-size:14px;">
+        <input type="radio" id="modeShort" name="ui_mode" onchange="toggleShortMode(true)"> ⚡ 時短モード
+    </label>
+    <label style="cursor:pointer; font-size:14px;">
+        <input type="radio" id="modeFull" name="ui_mode" checked onchange="toggleShortMode(false)"> 📜 フルモード
+    </label>
+</div>
 
+<!-- Main Dashboard -->
 <main class="dashboard">
 
     <!-- Daily -->
+    <section class="card daily-card">
 
-<section class="card daily-card">
+        <h2>📋 デイリー</h2>
 
-    <h2>
-        📋 デイリー
-    </h2>
+        <div id="dailyContainer" class="task-container"></div>
 
-    <div
-        id="dailyContainer"
-        class="task-container">
-    </div>
+        <h3 class="extra-title">⭐ おまけ</h3>
 
-    <h3 class="extra-title">
-        ⭐ おまけ
-    </h3>
+        <div id="dailyExtraContainer" class="task-container"></div>
 
-    <div
-        id="dailyExtraContainer"
-        class="task-container">
-    </div>
+        <section class="card repeat-card">
+            <h2>🔄 繰り返し</h2>
+            <div id="repeatContainer"></div>
+        </section>
 
-    <section class="card repeat-card">
-
-    <h2>🔄 繰り返し</h2>
-
-    <div id="repeatContainer"></div>
-
-</section>
-
-</section>
-
+    </section>
 
     <!-- City -->
-
     <section class="card city-card">
-
-        <h2>
-
-            🏰 都市チェック
-
-        </h2>
-
-        <div
-            id="cityContainer"
-            class="task-container">
-
-        </div>
-
+        <h2>🏰 都市チェック</h2>
+        <div id="cityContainer" class="task-container"></div>
     </section>
 
     <!-- Time -->
-
     <section class="card time-card">
+        <h2>⏰ 時間チェック</h2>
+        <div id="timeContainer"></div>
+    </section>
 
-        <h2>
+</main>
 
-            ⏰ 時間チェック
+<!-- Event Area -->
+<section class="bottom-area">
 
-        </h2>
+    <section class="card event-card">
 
-        <div
-            id="timeContainer">
+        <div class="card-header">
 
+            <h2>🎪 イベント</h2>
+
+            <div style="display:flex; gap:8px;">
+                <button id="togglePresetBtn" class="primary-btn" style="background: linear-gradient(135deg, #a1c4fd, #c2e9fb); color:#1e3c72; font-weight:bold;" onclick="openPresetModal()">⚡ 定例セット</button>
+                <button id="toggleEventForm" class="primary-btn">＋追加</button>
+            </div>
+
+        </div>
+
+        <div id="eventForm" class="input-form hidden">
+
+            <input id="eventTitle" type="text" placeholder="イベント名">
+            <input id="eventMemo" type="text" placeholder="備考・時間（任意）">
+            <input id="eventStartDate" type="date">
+            <input id="eventEndDate" type="date">
+
+            <button id="addEventBtn" class="success-btn">追加</button>
+
+        </div>
+
+        <div id="eventContainer" class="event-container">
+            <!-- script.jsで生成 -->
         </div>
 
     </section>
 
-    
+    <section id="officerCard" class="card officer-card">
 
-</main>
-    <!-- ========================= -->
-    <!-- Event -->
-    <!-- ========================= -->
+        <div class="card-header">
+            <h2>📝 メモ帳</h2>
+            <button id="toggleOfficerForm" class="primary-btn">＋追加</button>
+        </div>
 
-    <section class="bottom-area">
+        <div id="officerForm" class="input-form hidden">
+            <input id="officerInput" type="text" placeholder="内容">
+            <button id="addOfficerBtn" class="success-btn">追加</button>
+        </div>
 
-        <section class="card event-card">
-
-            <div class="card-header">
-
-                <h2>🎪 イベント</h2>
-
-                <button
-                    id="toggleEventForm"
-                    class="primary-btn">
-
-                    ＋追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="eventForm"
-                class="input-form hidden">
-
-                <input
-                    id="eventTitle"
-                    type="text"
-                    placeholder="イベント名">
-
-                <input
-                    id="eventMemo"
-                    type="text"
-                    placeholder="備考（任意）">
-
-                <button
-                    id="addEventBtn"
-                    class="success-btn">
-
-                    追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="eventContainer"
-                class="event-container">
-
-                <!-- script.jsで生成 -->
-
-            </div>
-
-        </section>
-
-
-
-        <section
-            id="officerCard"
-            class="card officer-card">
-
-            <div class="card-header">
-
-                <h2>
-
-                    📝 メモ帳
-
-                </h2>
-
-                <button
-                    id="toggleOfficerForm"
-                    class="primary-btn">
-
-                    ＋追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="officerForm"
-                class="input-form hidden">
-
-                <input
-                    id="officerInput"
-                    type="text"
-                    placeholder="内容">
-
-                <button
-                    id="addOfficerBtn"
-                    class="success-btn">
-
-                    追加
-
-                </button>
-
-            </div>
-
-            <div
-                id="officerContainer">
-
-            </div>
-
-        </section>
+        <div id="officerContainer"></div>
 
     </section>
 
+</section>
 
+<!-- 地底メモ ＆ キャラ設定 -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; margin-bottom: 15px;" class="two-column-layout">
 
-    <!-- ========================================== -->
-    <!-- 地底メモ ＆ キャラ設定（2カラム横並びエリア） -->
-    <!-- ========================================== -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; margin-bottom: 15px;" class="two-column-layout">
-
-        <!-- 地底メモ -->
-        <section class="card underground-card" style="margin: 0; height: 100%; box-sizing: border-box;">
-            <button
-                id="toggleMemo"
-                class="memo-button"
-                style="width: 100%;">
-
-                🌋 地底メモ ▼
-
-            </button>
-
-            <div
-                id="memoBody"
-                class="memo-body hidden">
-
+    <section class="card underground-card" style="margin: 0; height: 100%; box-sizing: border-box;">
+        <button id="toggleMemo" class="memo-button" style="width: 100%;">🌋 地底メモ ▼</button>
+        <div id="memoBody" class="memo-body hidden">
 <pre>
 【🌋 地底探検】
 
@@ -367,78 +261,137 @@
 ① 60：40：0（3軍弓英雄）
 ② 55：10：35（1軍弓英雄）
 ③ 55：15：30（2軍弓英雄）
-
 </pre>
+        </div>
+    </section>
+
+    <section class="card settings-area" style="margin: 0; padding: 15px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
+        <button id="openSettings" class="primary-btn" style="width: 100%;">⚙ キャラ・同盟設定</button>
+
+        <div id="settingsForm" class="input-form hidden" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:12px; font-weight:bold; display:block;">1. キャラクター名（カンマ区切り）</label>
+                <input type="text" id="editChars" style="width:100%; margin-top:4px;" placeholder="Lune,Melon,Chocolat,Vanille">
             </div>
-        </section>
 
-        <!-- キャラ・同盟設定エリア -->
-        <section class="card settings-area" style="margin: 0; padding: 15px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;">
-            <button id="openSettings" class="primary-btn" style="width: 100%;">⚙ キャラ・同盟設定</button>
-            
-            <div id="settingsForm" class="input-form hidden" style="margin-top: 10px; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size:12px; font-weight:bold; display:block;">1. キャラクター名（カンマ区切り）</label>
-                    <input type="text" id="editChars" style="width:100%; margin-top:4px;" placeholder="Lune,Melon,Chocolat,Vanille">
-                </div>
-                
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size:12px; font-weight:bold; display:block;">2. 所属同盟（キャラ名:同盟名 をカンマ区切り）</label>
-                    <input type="text" id="editAlliances" style="width:100%; margin-top:4px;" placeholder="Lune:YKI,Melon:SHT,Chocolat:RxR,Vanille:RxR">
-                </div>
-                
-                <button id="saveSettings" class="success-btn" style="margin-top: 5px; width: 100%;">保存してリロード</button>
+            <div style="margin-bottom: 10px;">
+                <label style="font-size:12px; font-weight:bold; display:block;">2. 所属同盟（キャラ名:同盟名 をカンマ区切り）</label>
+                <input type="text" id="editAlliances" style="width:100%; margin-top:4px;" placeholder="Lune:YKI,Melon:SHT,Chocolat:RxR,Vanille:RxR">
             </div>
-        </section>
 
-    </div>
+            <button id="saveSettings" class="success-btn" style="margin-top: 5px; width: 100%;">保存してリロード</button>
+        </div>
+    </section>
 
+</div>
 
-
-    <!-- ========================================== -->
-    <!-- 各種ツール・保存ボタン（横並びグリッドエリア） -->
-    <!-- ========================================== -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
-
-        <!-- 本部駐屯計算機を開くボタン -->
-        <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-            🏭 駐屯人数計算機を開く
-        </a>
-
-        <!-- 援軍計算機を開くボタン -->
-        <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-            🔢 援軍計算機を開く
-        </a>
-
-        <!-- 専門家・親密度管理を開くボタン -->
-        <a href="senmonka.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-            ❄️ 専門家・親密度管理を開く
-        </a>
-
-        <!-- 王城戦 差し込み計算機を開くボタン -->
-        <a href="calc.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-            👑 王城戦 差し込み計算機を開く
-        </a>
-
-        <!-- JSON保存ボタン -->
-        <button id="exportJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">
-            💾 JSON保存
-        </button>
-
-        <input id="importJsonFile" type="file" accept=".json" hidden>
-
-        <!-- JSON読込ボタン -->
-        <button id="importJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">
-            📂 JSON読込
-        </button>
-
-    </div>
+<!-- ツール・保存ボタン群 -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
+    <a href="clejoy_simple.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #42a5f5, #1e88e5);">
+        🛡 クレジョイ盾兵計算機を開く
+    </a>
+    <a href="https://lithium-ion111.github.io/whiteoutsurvival-numberofsoldier/" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        🏭 駐屯人数計算機を開く
+    </a>
+    <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        🔢 援軍計算機を開く
+    </a>
+    <a href="senmonka.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        ❄️ 専門家・親密度管理を開く
+    </a>
+    <a href="calc.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        👑 王城戦 差し込み計算機を開く
+    </a>
+    <button id="exportJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">💾 JSON保存</button>
+    <input id="importJsonFile" type="file" accept=".json" hidden>
+    <button id="importJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">📂 JSON読込</button>
+</div>
 
 </div> <!-- /.container -->
 
-<!-- ========================= -->
-<!-- JavaScript -->
-<!-- ========================= -->
+<!-- 定例セット ポップアップ モーダル -->
+<div id="presetModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>⚡ 定例イベント一括追加</h3>
+            <button onclick="closePresetModal()" class="modal-close-btn">✖</button>
+        </div>
+
+        <div class="modal-body">
+
+            <!-- 日付調整用入力フォーム -->
+            <div style="background:#f0f4ff; padding:10px 12px; border-radius:10px; margin-bottom:14px; border:1px solid #d0deff;">
+                <label style="font-size:12px; font-weight:bold; color:#334155; display:block; margin-bottom:4px;">📅 追加する開催期間（必要に応じて変更OK）</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input type="date" id="presetStartDate" style="flex:1; padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
+                    <span style="font-size:12px; color:#64748b;">〜</span>
+                    <input type="date" id="presetEndDate" style="flex:1; padding:6px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
+                </div>
+            </div>
+
+            <!-- 1. 4週間サイクル -->
+            <div class="preset-group">
+                <h4>🔄 4週間サイクル (同盟大作戦・雪原行商など)</h4>
+                <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('❄️ 氷原の支配者', 7)">❄️ 氷原の支配者</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🤝 同盟総動員', 7)">🤝 同盟総動員</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🏆 SvS 決戦', 7)">🏆 SvS 決戦</button>
+                    <button class="preset-btn" onclick="addPresetEvent('⚔️ 同盟大作戦', 7)">⚔️ 同盟大作戦</button>
+                    <button class="preset-btn" style="grid-column: span 2; background:#e0f2fe; border-color:#bae6fd; color:#0369a1;" onclick="addGyoshoSet()">🐫 雪原行商（護送3回＋支援＋略奪セットを一括追加）</button>
+                </div>
+            </div>
+
+            <!-- 2. 燃霜鉱区 -->
+            <div class="preset-group">
+                <h4>🌋 燃霜鉱区（エントリー時間選択）</h4>
+                <p style="font-size:12px; color:#666; margin-bottom:6px;">選択中のキャラ: <strong id="modalCharName">Lune</strong></p>
+                <div class="time-select-grid">
+                    <button class="time-select-btn" onclick="addNensoEvent('11:00')">11:00</button>
+                    <button class="time-select-btn" onclick="addNensoEvent('14:00')">14:00</button>
+                    <button class="time-select-btn" onclick="addNensoEvent('20:00')">20:00</button>
+                    <button class="time-select-btn" onclick="addNensoEvent('23:00')">23:00</button>
+                    <button class="time-select-btn" onclick="addNensoEvent('1:00')">1:00 (翌日)</button>
+                    <button class="time-select-btn" onclick="addNensoEvent('3:00')">3:00 (翌日)</button>
+                </div>
+            </div>
+
+            <!-- 3. 2日開催・定期イベント -->
+            <div class="preset-group">
+                <h4>🛡️ 2日開催 / 隔週系</h4>
+                <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('🛡️ クレジョイ', 2)">🛡️ クレジョイ</button>
+                    <button class="preset-btn" onclick="addPresetEvent('⚔️ 全軍参戦', 2)">⚔️ 全軍参戦</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🐾 野獣駆逐', 2)">🐾 野獣駆逐</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🎖️ 士官計画', 2)">🎖️ 士官計画</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🛡️ 軍備競技', 2)">🛡️ 軍備競技</button>
+                </div>
+            </div>
+
+            <!-- 4. 3日開催 / 月1イベント -->
+            <div class="preset-group">
+                <h4>🌙 3日開催 / 月1イベント</h4>
+                <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('🌙 夢幻追憶', 3)">🌙 夢幻追憶</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🎣 釣り大決戦', 3)">🎣 釣り大決戦</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🚜 氷原除雪隊', 3)">🚜 氷原除雪隊</button>
+                </div>
+            </div>
+
+<!-- 5. 週末イベント -->
+            <div class="preset-group">
+                <h4>👑 週末イベント</h4>
+                <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('👑 王城戦', 1)">👑 王城戦 (1日)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🐉 霜竜の決戦', 1)">🐉 霜竜の決戦 (1日)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🏭 兵器工場', 1)">🏭 兵器工場 (1日)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('⛰️ 峡谷合戦', 1)">⛰️ 峡谷合戦 (1日)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🥊 大乱闘', 2)">🥊 大乱闘 (2日間)</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
 
 <script src="data.js"></script>
 <script src="script.js"></script>
