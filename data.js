@@ -285,3 +285,14 @@ const STORAGE = {
     backup: "ws_backup"
 
 };
+// data.js の最後に追加
+
+// 一括完了用のタスクIDリストを取得する関数
+function getQuickTaskIds(timeGroupId = null) {
+    if (timeGroupId) {
+        return TIME_TASKS
+            .filter(t => !t.times || t.times.includes(timeGroupId))
+            .map(t => `time_${timeGroupId}_${t.id}`);
+    }
+    return DAILY_TASKS.map(t => t.id);
+}
