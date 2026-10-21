@@ -1,21 +1,23 @@
 /* ==========================================
-   Whiteout Checklist V4.1
-   script.js (都市チェック追加・競技場移動・メモ帳全員表示対応版)
+   Whiteout Checklist V4.7
+   script.js (雪原行商・兵器工場・峡谷合戦対応版)
 ========================================== */
 
-// 倉庫回収の待ち時間テーブル (1〜30回対応)
 const STORAGE_INTERVALS = [
     0.5, 1, 1.5, 2.5, 5, 10, 10, 10, 10, 20, 
     30, 45, 60, 60, 72, 108, 108, 108, 108, 120, 
     120, 120, 120, 120, 120, 120, 120, 120, 120, 120
 ];
 
-// SettingManagerが読み込まれていない時の対策
+const NENSO_DEFAULT_TIMES = {
+    "Lune": "14:00",
+    "Melune": "11:00",
+    "Chocolat": "20:00",
+    "Vanille": "23:00"
+};
+
 let currentCharacter = localStorage.getItem("ws_current_character") || "Lune";
 
-// ------------------------------------------
-// ⏰ 毎日 朝9:00 自動リセット処理
-// ------------------------------------------
 function checkDailyReset() {
     const lastResetStr = localStorage.getItem("ws_last_reset_date");
     const now = new Date();
@@ -30,20 +32,11 @@ function checkDailyReset() {
     const resetTimeISO = resetTime.toISOString();
 
     if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
-
         Object.keys(localStorage).forEach(key => {
-
-            // ステーション管理データは削除しない
-            if (key === "wsStationManagerStateV4" || key.startsWith("ws_station")) {
+            if (key === "wsStationManagerStateV4" || key.startsWith("ws_station") || key.startsWith("wh_expert_")) {
                 return;
             }
 
-            // 専門家管理（wh_expert_）のデータも絶対に削除しない！
-            if (key.startsWith("wh_expert_")) {
-                return;
-            }
-
-            // 幹部メニュー（officer_list）のチェックのみ朝9時にリセットする
             if (key === "officer_list") {
                 try {
                     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
@@ -53,7 +46,6 @@ function checkDailyReset() {
                 return;
             }
 
-            // 残したいデータ
             if (
                 key.includes("_hide_") ||
                 key.startsWith("ws_") ||
@@ -64,7 +56,6 @@ function checkDailyReset() {
             ) {
                 return;
             }
-            // それ以外はリセット
             localStorage.removeItem(key);
         });
 
@@ -72,9 +63,8 @@ function checkDailyReset() {
     }
 }
 
-// 初期化処理
 function init() {
-    checkDailyReset(); // 朝9時のリセット判定を最初に実行
+    checkDailyReset();
     renderCharacters();
     renderBear();
     renderStationSummary();
@@ -86,28 +76,25 @@ function init() {
     renderOfficers();
     updateProgress();
     setupEvents();
+    applyModeState();
 }
 
 document.addEventListener("DOMContentLoaded", init);
 
-// 安全にラベル文字列を取得するヘルパー関数
 function getItemLabel(item) {
     if (typeof item === "string") return item;
     return item ? (item.label || item.name || item.title || "") : "";
 }
 
-// キャラごとの進捗率(%)を計算する関数
 function getCharProgressPercent(charName) {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${charName}_${id}`) === "1";
 
-    // デイリータスク
     DAILY_TASKS.forEach(t => { 
         total++; 
         if (isChecked(t.id)) checked++; 
     });
 
-    // 都市タスク
     CITY_TASKS.forEach(t => {
         if (t.double) {
             total += 2;
@@ -119,7 +106,6 @@ function getCharProgressPercent(charName) {
         }
     });
 
-    // 時間タスク
     TIME_TASKS.forEach(task => {
         TIME_GROUPS.forEach(group => {
             const supported = task.times ? task.times.includes(group.id) : true;
@@ -135,9 +121,6 @@ function getCharProgressPercent(charName) {
     return total === 0 ? 0 : Math.round((checked / total) * 100);
 }
 
-// ==========================================
-// キャラクター切り替え
-// ==========================================
 function renderCharacters() {
     const container = document.getElementById("characterBar");
     if (!container) return;
@@ -155,7 +138,6 @@ function renderCharacters() {
         const color = colors[index % colors.length];
 
         btn.className = `character-btn ${isActive ? "active" : ""}`;
-        
         btn.style.borderColor = isMain ? "#FFD700" : color;
         btn.style.borderWidth = "2px";
         btn.style.borderStyle = "solid";
@@ -182,9 +164,6 @@ function renderCharacters() {
     });
 }
 
-// ==========================================
-// 熊罠タイマー
-// ==========================================
 function renderBear() {
     const dateEl = document.getElementById("bearDate");
     const timeEl = document.getElementById("bearTime");
@@ -205,13 +184,18 @@ function renderBear() {
     dateEl.textContent = `${next.getMonth() + 1}/${next.getDate()}`;
 }
 
-// ==========================================
-// デイリー & おまけ
-// ==========================================
 function renderDaily() {
     const container = document.getElementById("dailyContainer");
     if (!container) return;
     container.innerHTML = "";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "quick-action-bar cute-bar";
+    headerDiv.innerHTML = `
+        <button class="quick-btn cute-btn daily-all" onclick="completeAllDaily(true)">⚡ デイリー一括完了</button>
+        <button class="quick-btn cute-btn reset" onclick="completeAllDaily(false)">↺ 解除</button>
+    `;
+    container.appendChild(headerDiv);
 
     DAILY_TASKS.forEach(task => {
         const checked = localStorage.getItem(`${currentCharacter}_${task.id}`) === "1";
@@ -225,13 +209,27 @@ function renderDaily() {
     });
 }
 
-// ==========================================
-// 都市チェック
-// ==========================================
+function completeAllDaily(state) {
+    DAILY_TASKS.forEach(task => {
+        localStorage.setItem(`${currentCharacter}_${task.id}`, state ? "1" : "0");
+    });
+    renderDaily();
+    updateProgress();
+}
+
 function renderCity() {
     const container = document.getElementById("cityContainer");
     if (!container) return;
     container.innerHTML = "";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "quick-action-bar cute-bar";
+    headerDiv.innerHTML = `
+        <button class="quick-btn cute-btn day" onclick="completeCityByTime('am', true)">🌅 昼一括</button>
+        <button class="quick-btn cute-btn night" onclick="completeCityByTime('pm', true)">🌙 夜一括</button>
+        <button class="quick-btn cute-btn reset" onclick="resetCityDouble()">↺ クリア</button>
+    `;
+    container.appendChild(headerDiv);
 
     CITY_TASKS.forEach(task => {
         const div = document.createElement("div");
@@ -258,16 +256,37 @@ function renderCity() {
     });
 }
 
-// ==========================================
-// 時間チェック
-// ==========================================
+function completeCityByTime(timeType, state) {
+    CITY_TASKS.forEach(task => {
+        if (task.double) {
+            localStorage.setItem(`${currentCharacter}_${task.id}_${timeType}`, state ? "1" : "0");
+        }
+    });
+    renderCity();
+    updateProgress();
+}
+
+function resetCityDouble() {
+    CITY_TASKS.forEach(task => {
+        if (task.double) {
+            localStorage.setItem(`${currentCharacter}_${task.id}_am`, "0");
+            localStorage.setItem(`${currentCharacter}_${task.id}_pm`, "0");
+        }
+    });
+    renderCity();
+    updateProgress();
+}
+
 function renderTime() {
     const container = document.getElementById("timeContainer");
     if (!container) return;
 
     let html = `<table class="time-table"><thead><tr><th>タスク</th>`;
     TIME_GROUPS.forEach(g => {
-        html += `<th class="${g.className || ""}">${g.title}</th>`;
+        html += `<th class="${g.className || ""}">
+            <div>${g.title}</div>
+            <button class="time-quick-btn" onclick="completeTimeGroup('${g.id}', true)">一括</button>
+        </th>`;
     });
     html += `</tr></thead><tbody>`;
 
@@ -290,9 +309,18 @@ function renderTime() {
     container.innerHTML = html;
 }
 
-// ==========================================
-// 繰り返し (修正レイアウト対応)
-// ==========================================
+function completeTimeGroup(groupId, state) {
+    TIME_TASKS.forEach(task => {
+        const isSupported = task.times ? task.times.includes(groupId) : true;
+        if (isSupported) {
+            const key = `time_${groupId}_${task.id}`;
+            localStorage.setItem(`${currentCharacter}_${key}`, state ? "1" : "0");
+        }
+    });
+    renderTime();
+    updateProgress();
+}
+
 function renderRepeat() {
     const container = document.getElementById("repeatContainer");
     if (!container) return;
@@ -338,11 +366,7 @@ function renderRepeat() {
                     const s = totalSec % 60;
 
                     const pad = (n) => String(n).padStart(2, '0');
-                    if (h > 0) {
-                        timeDisplay = `${h}:${pad(m)}:${pad(s)}`;
-                    } else {
-                        timeDisplay = `${m}:${pad(s)}`;
-                    }
+                    timeDisplay = h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
                 }
             }
         } else {
@@ -397,9 +421,6 @@ function toggleTask(id, checked) {
     updateProgress();
 }
 
-// ==========================================
-// 進捗更新
-// ==========================================
 function updateProgress() {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${currentCharacter}_${id}`) === "1";
@@ -453,13 +474,8 @@ function renderStationSummary() {
     const settings = SettingManager.get();
     const alliance = settings.alliances[currentCharacter] || "MEL";
 
-    const urgent = Number(
-        localStorage.getItem(`ws_station_${alliance}_now`) || 0
-    );
-
-    const today = Number(
-        localStorage.getItem(`ws_station_${alliance}_today`) || 0
-    );
+    const urgent = Number(localStorage.getItem(`ws_station_${alliance}_now`) || 0);
+    const today = Number(localStorage.getItem(`ws_station_${alliance}_today`) || 0);
 
     if (urgent > 0) {
         el.innerHTML = `🔴 今すぐ閉鎖：${urgent}件<br>🟡 24時間以内：${today}件`;
@@ -468,9 +484,6 @@ function renderStationSummary() {
     }
 }
 
-// ==========================================
-// イベント描画
-// ==========================================
 function renderEvents() {
     const container = document.getElementById("eventContainer");
     if (!container) return;
@@ -482,20 +495,45 @@ function renderEvents() {
 
     container.innerHTML = events.map((e, index) => {
         const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
-        
         const hideKey = `${currentCharacter}_hide_event_${eventId}`;
         const isHidden = localStorage.getItem(hideKey) === "1";
-
         const checkKey = `${currentCharacter}_check_event_${eventId}`;
         const isChecked = localStorage.getItem(checkKey) === "1";
+
+        let dateBadge = "";
+        if (e.startDate && e.endDate) {
+            const start = new Date(e.startDate + "T00:00:00");
+            const end = new Date(e.endDate + "T23:59:59");
+            const now = new Date();
+
+            const startFormat = `${start.getMonth()+1}/${start.getDate()}`;
+            const endFormat = `${end.getMonth()+1}/${end.getDate()}`;
+
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const endDayStart = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+            const diffDays = Math.round((endDayStart - todayStart) / (1000 * 60 * 60 * 24));
+
+            if (now < start) {
+                dateBadge = `<span class="event-badge upcoming">📅 ${startFormat}〜${endFormat} (予告)</span>`;
+            } else if (now <= end) {
+                if (diffDays === 0) {
+                    dateBadge = `<span class="event-badge active" style="background:#ff4d4f; color:#fff;">🔥 本日最終日 (今日まで！)</span>`;
+                } else {
+                    dateBadge = `<span class="event-badge active">🔥 開催中 (あと${diffDays}日)</span>`;
+                }
+            } else {
+                dateBadge = `<span class="event-badge ended">⌛ 終了</span>`;
+            }
+        }
 
         return `
             <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""}">
                 <div class="event-left" style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
                     <div>
-                        <div class="event-title">${escapeHtml(e.title)}</div>
-                        ${e.memo ? `<div class="event-memo">${escapeHtml(e.memo)}</div>` : ""}
+                        <div class="event-title">${escapeHtml(e.title)} ${dateBadge}</div>
+                        ${e.memo ? `<div class="event-memo">⏰ ${escapeHtml(e.memo)}</div>` : ""}
                     </div>
                 </div>
                 <div class="event-right">
@@ -527,7 +565,7 @@ function editEvent(eventId) {
         return;
     }
 
-    const newMemo = prompt("備考を修正 (任意):", eventObj.memo || "");
+    const newMemo = prompt("備考・時間を修正 (任意):", eventObj.memo || "");
     if (newMemo === null) return;
 
     eventObj.title = trimmedTitle;
@@ -575,9 +613,6 @@ function escapeHtml(text) {
         .replaceAll("'", "&#39;");
 }
 
-// ==========================================
-// 幹部メニュー（メモ帳）描画
-// ==========================================
 function renderOfficers() {
     const container = document.getElementById("officerContainer");
     if (!container) return;
@@ -608,15 +643,6 @@ function renderOfficers() {
         `;
     }).join("");
 
-    if (typeof initSortable === "function") {
-        initSortable();
-    } else if (typeof setupSortable === "function") {
-        setupSortable();
-    } else if (typeof Sortable !== "undefined" && window.bottomSortable) {
-        try {
-            window.bottomSortable.option("disabled", false);
-        } catch (e) {}
-    }
     initListSortable();
 }
 
@@ -639,9 +665,146 @@ function toggleOfficer(id, checked) {
     renderOfficers();
 }
 
-// ==========================================
-// イベント・各種ボタン操作のセットアップ
-// ==========================================
+// ------------------------------------------
+// ⚡ 定例プリセット モーダル処理
+// ------------------------------------------
+function openPresetModal() {
+    const modal = document.getElementById("presetModal");
+    const charNameEl = document.getElementById("modalCharName");
+    if (charNameEl) {
+        charNameEl.textContent = currentCharacter;
+    }
+
+    const now = new Date();
+    const startDate = now.toISOString().slice(0, 10);
+    const endDateObj = new Date();
+    endDateObj.setDate(now.getDate() + 6);
+    const endDate = endDateObj.toISOString().slice(0, 10);
+
+    const startInput = document.getElementById("presetStartDate");
+    const endInput = document.getElementById("presetEndDate");
+    if (startInput) startInput.value = startDate;
+    if (endInput) endInput.value = endDate;
+
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closePresetModal() {
+    const modal = document.getElementById("presetModal");
+    if (modal) modal.classList.add("hidden");
+}
+
+// モーダルの日付入力値を使って定例イベントを追加
+function addPresetEvent(title, days) {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    let endDate = document.getElementById("presetEndDate")?.value;
+
+    if (!startDate) {
+        startDate = new Date().toISOString().slice(0, 10);
+    }
+    
+    // 手動で日付変更していない（または1日イベント指定）場合は自動で終了日を合わせる
+    if (!endDate || days === 1) {
+        const endDateObj = new Date(startDate);
+        endDateObj.setDate(endDateObj.getDate() + (days - 1));
+        endDate = endDateObj.toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events.push({
+        id: Date.now(),
+        title: title,
+        memo: days === 1 ? "1日開催イベント" : `${days}日間イベント`,
+        startDate: startDate,
+        endDate: endDate
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+// 🐫 雪原行商（護送3回＋支援＋略奪セットを一括追加）
+function addGyoshoSet() {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    let endDate = document.getElementById("presetEndDate")?.value;
+
+    if (!startDate) startDate = new Date().toISOString().slice(0, 10);
+    if (!endDate) {
+        const endDateObj = new Date(startDate);
+        endDateObj.setDate(endDateObj.getDate() + 6);
+        endDate = endDateObj.toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const nowId = Date.now();
+
+    const gyoshoItems = [
+        { title: "🐫 雪原行商: 護送 1回目", memo: "17:00 スタート" },
+        { title: "🐫 雪原行商: 護送 2回目", memo: "21:00 スタート" },
+        { title: "🐫 雪原行商: 護送 3回目", memo: "1:00 スタート" },
+        { title: "🤝 雪原行商: 支援護送", memo: "同盟員の護送を支援" },
+        { title: "⚔️ 雪原行商: 略奪", memo: "4回完了でチェック" }
+    ];
+
+    gyoshoItems.forEach((item, idx) => {
+        events.push({
+            id: nowId + idx,
+            title: item.title,
+            memo: item.memo,
+            startDate: startDate,
+            endDate: endDate
+        });
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+function addNensoEvent(selectedTime) {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    if (!startDate) {
+        startDate = new Date().toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events.push({
+        id: Date.now(),
+        title: "🌋 燃霜鉱区",
+        memo: `エントリー: ${selectedTime} (${currentCharacter})`,
+        startDate: startDate,
+        endDate: startDate
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+function applyModeState() {
+    const isShortMode = localStorage.getItem("ws_mode_short") === "1";
+    const body = document.body;
+    
+    if (isShortMode) {
+        body.classList.add("short-mode");
+    } else {
+        body.classList.remove("short-mode");
+    }
+
+    const radioShort = document.getElementById("modeShort");
+    const radioFull = document.getElementById("modeFull");
+    if (radioShort && radioFull) {
+        radioShort.checked = isShortMode;
+        radioFull.checked = !isShortMode;
+    }
+}
+
+function toggleShortMode(enabled) {
+    localStorage.setItem("ws_mode_short", enabled ? "1" : "0");
+    applyModeState();
+}
+
 function setupEvents() {
     const editBearBtn = document.getElementById("editBearTime");
     if (editBearBtn) {
@@ -672,16 +835,24 @@ function setupEvents() {
         addEventBtn.onclick = () => {
             const titleInput = document.getElementById("eventTitle");
             const memoInput = document.getElementById("eventMemo");
+            const startInput = document.getElementById("eventStartDate");
+            const endInput = document.getElementById("eventEndDate");
+
             const title = titleInput.value.trim();
             const memo = memoInput.value.trim();
+            const startDate = startInput.value;
+            const endDate = endInput.value;
+
             if (!title) return;
 
             const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
-            events.push({ id: Date.now(), title, memo });
+            events.push({ id: Date.now(), title, memo, startDate, endDate });
             localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
 
             titleInput.value = "";
             memoInput.value = "";
+            startInput.value = "";
+            endInput.value = "";
             eventForm.classList.add("hidden");
             renderEvents();
         };
@@ -757,9 +928,6 @@ function setupEvents() {
     }
 }
 
-/* ==========================================
-   イベント＆メモ帳 リスト項目の並び替え機能
-========================================== */
 function makeListSortable(containerId, storageKey) {
     const container = document.getElementById(containerId);
     if (!container) return;
