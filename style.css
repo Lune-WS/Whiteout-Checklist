@@ -1,6 +1,6 @@
 /* ==========================================
-   Whiteout Checklist V4.6
-   style.css (都市チェック見た目調整・押しやすいチェックボックス対応版)
+   Whiteout Checklist V4.8
+   style.css (デザイン復元＆定例セットモーダル対応版)
 ========================================== */
 
 :root{
@@ -105,7 +105,7 @@ body{
 .primary-btn:hover{ background:var(--blue2); }
 .success-btn{ border:none; cursor:pointer; border-radius:8px; padding:8px 14px; background:var(--success); color:white; }
 .input-form{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
-.input-form.hidden{ display:none; }
+.input-form.hidden{ display:none !important; }
 .input-form input{ flex:1; min-width:140px; padding:8px; border:1px solid var(--border); border-radius:8px; }
 
 .event-container{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
@@ -134,7 +134,7 @@ body{
 .memo-button{ width:100%; text-align:left; padding:12px 16px; border:none; border-radius:10px; cursor:pointer; background:#edf4ff; color:var(--blue); font-weight:bold; font-size:16px; }
 .memo-button:hover{ background:#dce8ff; }
 .memo-body{ margin-top:12px; padding:14px; background:#f8fbff; border-radius:10px; }
-.memo-body.hidden{ display:none; }
+.memo-body.hidden{ display:none !important; }
 .memo-body pre{ white-space:pre-wrap; line-height:1.8; font-family: Consolas, "Yu Gothic UI", monospace; }
 
 ::-webkit-scrollbar{ width:9px; }
@@ -165,10 +165,12 @@ body.short-mode .two-column-layout { display: none !important; }
 .event-badge.upcoming { background: #eef2ff; color: #4338ca; }
 .event-badge.ended { background: #f3f4f6; color: #9ca3af; }
 
-/* 🪟 定例セット モーダル ポップアップ */
+/* 🪟 定例セット モーダル ポップアップ (非表示クラスの確実化) */
+.hidden { display: none !important; }
+
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(2px); }
-.modal-overlay.hidden { display: none; }
-.modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 520px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-overlay.hidden { display: none !important; }
+.modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 540px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
 .modal-close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #a0aec0; }
 
@@ -179,19 +181,17 @@ body.short-mode .two-column-layout { display: none !important; }
 .preset-btn:hover { background: #edf2f7; border-color: #cbd5e0; }
 
 .time-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.time-select-btn { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; border-radius: 8px; padding: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px; }
+.time-select-btn { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; border-radius: 8px; padding: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px; text-align: center; }
 .time-select-btn:hover { background: #3182ce; color: white; }
 
 /* ==========================================
    🏰 都市チェック用デザインバランス調整
 ========================================== */
 
-/* カード自体が縦に伸びすぎるのを抑える */
 .city-card {
     align-self: start;
 }
 
-/* 各行のレイアウトと文字サイズ（16px） */
 .city-item {
     display: flex;
     align-items: center;
@@ -225,7 +225,6 @@ body.short-mode .two-column-layout { display: none !important; }
    ☑ 大きくて押しやすいチェックボックス設定
 ========================================== */
 
-/* 基本チェックボックス（28px） */
 .task-item input[type="checkbox"],
 .event-item input[type="checkbox"],
 .officer-item input[type="checkbox"],
@@ -238,7 +237,6 @@ body.short-mode .two-column-layout { display: none !important; }
     transition: transform 0.1s ease;
 }
 
-/* 都市チェック専用：絶妙なサイズ（24px） */
 .city-check input[type="checkbox"] {
     width: 24px !important;
     height: 24px !important;
@@ -247,7 +245,6 @@ body.short-mode .two-column-layout { display: none !important; }
     border-radius: 5px;
 }
 
-/* タップ感のフィードバック */
 input[type="checkbox"]:active {
     transform: scale(0.92);
 }
