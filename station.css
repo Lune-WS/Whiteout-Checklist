@@ -7,7 +7,7 @@ body {
     background: #f8fafc;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #1e293b;
-    font-size: 15px; /* 全体の基準文字サイズをアップ */
+    font-size: 15px;
 }
 
 .app-shell {
@@ -45,13 +45,10 @@ body {
 
 h1 {
     margin: 0;
-    font-size: 24px; /* タイトルも大きく */
+    font-size: 24px;
 }
 
-/* ======================
-   コンパクト同盟パネル
-====================== */
-
+/* コンパクト同盟パネル */
 .alliance-compact-panel {
     display: flex;
     align-items: center;
@@ -77,10 +74,7 @@ h1 {
     background: #fff;
 }
 
-/* ======================
-   ボタン共通
-====================== */
-
+/* ボタン共通 */
 .btn {
     border: none;
     border-radius: 8px;
@@ -113,10 +107,7 @@ h1 {
 }
 .btn-danger:hover { background: #fecaca; }
 
-/* ======================
-   サマリー
-====================== */
-
+/* サマリー */
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -133,6 +124,9 @@ h1 {
 }
 
 .summary-card__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     font-weight: 700;
     font-size: 14px;
     color: #475569;
@@ -148,10 +142,21 @@ h1 {
     margin-top: 4px;
 }
 
-/* ======================
-   ツールバー
-====================== */
+.copy-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-size: 13px;
+}
 
+.copy-btn:hover {
+    opacity: .9;
+}
+
+/* ツールバー */
 .toolbar {
     display: flex;
     justify-content: space-between;
@@ -196,10 +201,7 @@ h1 {
     width: 180px;
 }
 
-/* ======================
-   ステーション一覧（文字を大きく見やすく）
-====================== */
-
+/* ステーション一覧＆カードデザイン */
 #stations {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -209,9 +211,8 @@ h1 {
 
 .station-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    gap: 10px;
     background: white;
     border-radius: 14px;
     padding: 16px 20px;
@@ -219,83 +220,169 @@ h1 {
     border: 1px solid #e2e8f0;
 }
 
-.station-info-group {
+.station-header {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 130px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
 }
+
+.station-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ゲーム内アイコン風CSSバッジ */
+.game-icon-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    border: 2px solid #ffffff;
+    flex-shrink: 0;
+}
+
+/* ゲーム内の色合いに合わせた背景グラデーション */
+.bg-tech { background: linear-gradient(135deg, #0284c7, #0369a1); }      /* 技術: 青 */
+.bg-build { background: linear-gradient(135deg, #15803d, #166534); }     /* 建築: 緑 */
+.bg-prod { background: linear-gradient(135deg, #ea580c, #c2410c); }      /* 生産: オレンジ(スパナ) */
+.bg-gather { background: linear-gradient(135deg, #0284c7, #075985); }    /* 採集: 青(車) */
+.bg-train { background: linear-gradient(135deg, #ea580c, #9a3412); }     /* 訓練: オレンジ */
+.bg-weapon { background: linear-gradient(135deg, #0284c7, #1e40af); }    /* 武器: 水色/青 */
+.bg-defense { background: linear-gradient(135deg, #0d9488, #115e59); }   /* 防御: 深緑/緑 */
+.bg-expedition { background: linear-gradient(135deg, #0284c7, #0369a1); }/* 遠征: 水色 */
 
 .station-name {
     font-weight: 700;
-    font-size: 20px; /* ステーション名を大きく */
+    font-size: 18px;
 }
 
 .station-date {
-    font-size: 18px; /* 日付を大きく */
+    font-size: 16px;
     font-weight: 600;
     color: #334155;
     white-space: nowrap;
 }
 
-.station-input {
-    flex: 1;
-    max-width: 160px;
+.schedule-future {
+    font-size: 12px;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.station-input input {
+/* クイック時間入力ボタン群 */
+.quick-time-presets {
+    display: flex;
+    gap: 4px;
     width: 100%;
-    padding: 9px 10px;
+}
+
+.quick-time-presets button {
+    flex: 1;
+    padding: 7px 0;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.quick-time-presets button:active {
+    transform: scale(0.96);
+    background: #e2e8f0;
+}
+
+.quick-time-presets .btn-clear {
+    flex: 0 0 32px;
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+/* 手動入力欄とアクションボタン */
+.station-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.station-input-group input {
+    flex: 1;
+    padding: 9px 12px;
     text-align: center;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
     font-family: monospace;
-    font-size: 13px; /* 入力文字を大きく */
+    font-size: 14px;
     background: #f8fafc;
 }
 
-.station-input input:focus {
+.station-input-group input:focus {
     outline: none;
     background: #fff;
     border-color: #2563eb;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-.station-buttons {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-.station-buttons button {
+.btn-action-save,
+.btn-action-now,
+.btn-action-reset {
     border: none;
     border-radius: 8px;
-    padding: 9px 13px;
+    padding: 9px 14px;
     cursor: pointer;
-    font-size: 14px; /* ボタン文字を大きく */
+    font-size: 13px;
     font-weight: 600;
-    transition: opacity 0.2s;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
 }
 
-.station-buttons button:hover {
-    opacity: 0.85;
-}
-
-.btn-action-save {
-    background: #2563eb;
-    color: white;
+.btn-action-save:active,
+.btn-action-now:active,
+.btn-action-reset:active {
+    transform: scale(0.97);
 }
 
 .btn-action-now {
     background: #10b981;
     color: white;
 }
+.btn-action-now:hover {
+    background: #059669;
+}
+
+.btn-action-save {
+    background: #2563eb;
+    color: white;
+}
+.btn-action-save:hover {
+    background: #1d4ed8;
+}
 
 .btn-action-reset {
     background: #f1f5f9;
     color: #64748b;
-    font-size: 15px !important; /* 削除アイコンを少し強調 */
+    font-size: 15px;
+    padding: 9px 12px;
+}
+.btn-action-reset:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .empty-state {
@@ -309,11 +396,15 @@ h1 {
     font-size: 15px;
 }
 
-/* ======================
-   スマホ対応
-====================== */
-
 @media(max-width: 900px) {
+    .app-shell {
+        padding: 12px;
+    }
+
+    .page-header {
+        padding: 16px;
+    }
+
     .header-top {
         flex-direction: column;
         align-items: stretch;
@@ -333,25 +424,28 @@ h1 {
     }
 
     .station-row {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+        padding: 14px;
+        gap: 10px;
     }
 
-    .station-info-group {
+    .station-header {
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
     }
 
-    .station-input {
-        max-width: 100%;
+    .station-name {
+        font-size: 16px;
     }
 
-    .station-buttons {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-        gap: 8px;
+    .btn-action-now {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .quick-time-presets button {
+        padding: 8px 0;
+        font-size: 12px;
     }
 
     .summary-grid {
@@ -360,6 +454,7 @@ h1 {
 
     .toolbar {
         display: block;
+        padding: 12px;
     }
 
     .toolbar-group {
@@ -369,23 +464,4 @@ h1 {
     #searchInput {
         width: 100%;
     }
-}
-.summary-card__title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.copy-btn{
-    border:none;
-    background:#2563eb;
-    color:white;
-    border-radius:8px;
-    padding:4px 10px;
-    cursor:pointer;
-    font-size:13px;
-}
-
-.copy-btn:hover{
-    opacity:.9;
 }
