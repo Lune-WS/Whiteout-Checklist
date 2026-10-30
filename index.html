@@ -285,7 +285,7 @@
 
 </div>
 
-<!-- ツール・保存ボタン群 -->
+<!-- index.html の下部ツールボタン群 -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
     <a href="clejoy_simple.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #42a5f5, #1e88e5);">
         🛡 クレジョイ盾兵計算機を開く
@@ -296,11 +296,11 @@
     <a href="whosaba.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
         🔢 援軍計算機を開く
     </a>
-    <a href="https://lune-ws.github.io/Whiteout-Checklist/howasaba%E5%B0%82%E9%96%80%E5%AE%B6%E5%84%AA%E5%85%88%E9%A0%86%E4%BD%8D%E8%A1%A8.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-        ❄️ 専門家・親密度管理を開く
+    <a href="howasaba%E5%B0%82%E9%96%80%E5%AE%B6%E5%84%AA%E5%85%88%E9%A0%86%E4%BD%8D%E8%A1%A8.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        ❄️ 専門家表を開く
     </a>
-    <a href="https://lune-ws.github.io/Whiteout-Checklist/clock.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
-        👑 王城戦 差し込みタイマーを開く
+    <a href="clock.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        👑 差し込み計算機を開く
     </a>
     <button id="exportJson" class="primary-btn" style="width: 100%; box-sizing: border-box;">💾 JSON保存</button>
     <input id="importJsonFile" type="file" accept=".json" hidden>
@@ -344,12 +344,13 @@
                 </div>
             </div>
 
-            <!-- 2. エントリー・定期申請 -->
+            <!-- 2. エントリー・定期申請（峡谷と兵器を完全に分離） -->
             <div class="preset-group">
                 <h4>📌 エントリー・定期申請</h4>
                 <div class="preset-btn-grid">
                     <button class="preset-btn" onclick="addPresetEvent('🚩 同盟争覇戦 エントリー', 2, '月曜日と火曜日の二日間')">🚩 同盟争覇戦 (月・火)</button>
-                    <button class="preset-btn" onclick="addKyokokuHeikiPreset()">⛰️ 峡谷と兵器エントリー (水9時〜金9時)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('⛰️ 峡谷合戦 エントリー', 2, '水曜日 9:00 〜 金曜日 9:00')">⛰️ 峡谷エントリー (水〜金)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🏭 兵器工場 エントリー', 2, '水曜日 9:00 〜 金曜日 9:00')">🏭 兵器エントリー (水〜金)</button>
                 </div>
             </div>
 
