@@ -1,6 +1,6 @@
 /* ==========================================
-   Whiteout Checklist V4.7
-   script.js (雪原行商・兵器工場・峡谷合戦対応版)
+   Whiteout Checklist V4.8
+   script.js
 ========================================== */
 
 const STORAGE_INTERVALS = [
@@ -33,10 +33,12 @@ function checkDailyReset() {
 
     if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
         Object.keys(localStorage).forEach(key => {
+            // ステーションや親密度データの保護
             if (key === "wsStationManagerStateV4" || key.startsWith("ws_station") || key.startsWith("wh_expert_")) {
                 return;
             }
 
+            // メモ帳（幹部リスト）のチェック状態解除のみ
             if (key === "officer_list") {
                 try {
                     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
@@ -46,6 +48,7 @@ function checkDailyReset() {
                 return;
             }
 
+            // イベント、設定、時間保持キーの保護（全削除防止）
             if (
                 key.includes("_hide_") ||
                 key.startsWith("ws_") ||
@@ -594,6 +597,7 @@ function toggleHideEvent(eventId) {
     renderEvents();
 }
 
+// 単体削除（1件ずつ削除）
 function deleteEvent(eventId) {
     let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
     events = events.filter((e, index) => {
@@ -646,6 +650,7 @@ function renderOfficers() {
     initListSortable();
 }
 
+// メモ帳 単体削除
 function deleteOfficer(id) {
     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
     officers = officers.filter(o => String(o.id) !== String(id));
@@ -694,8 +699,7 @@ function closePresetModal() {
     if (modal) modal.classList.add("hidden");
 }
 
-// モーダルの日付入力値を使って定例イベントを追加
-function addPresetEvent(title, days) {
+function addPresetEvent(title, days, memoOverride = null) {
     let startDate = document.getElementById("presetStartDate")?.value;
     let endDate = document.getElementById("presetEndDate")?.value;
 
@@ -703,7 +707,6 @@ function addPresetEvent(title, days) {
         startDate = new Date().toISOString().slice(0, 10);
     }
     
-    // 手動で日付変更していない（または1日イベント指定）場合は自動で終了日を合わせる
     if (!endDate || days === 1) {
         const endDateObj = new Date(startDate);
         endDateObj.setDate(endDateObj.getDate() + (days - 1));
@@ -714,7 +717,7 @@ function addPresetEvent(title, days) {
     events.push({
         id: Date.now(),
         title: title,
-        memo: days === 1 ? "1日開催イベント" : `${days}日間イベント`,
+        memo: memoOverride ? memoOverride : (days === 1 ? "1日開催イベント" : `${days}日間イベント`),
         startDate: startDate,
         endDate: endDate
     });
@@ -724,7 +727,27 @@ function addPresetEvent(title, days) {
     renderEvents();
 }
 
-// 🐫 雪原行商（護送3回＋支援＋略奪セットを一括追加）
+function addKyokokuHeikiPreset() {
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const now = new Date();
+    const startDate = now.toISOString().slice(0, 10);
+    const endDateObj = new Date();
+    endDateObj.setDate(now.getDate() + 2);
+    const endDate = endDateObj.toISOString().slice(0, 10);
+
+    events.push({
+        id: Date.now(),
+        title: "⛰️ 峡谷と兵器エントリー",
+        memo: "水曜日 9:00 〜 金曜日 9:00",
+        startDate: startDate,
+        endDate: endDate
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
 function addGyoshoSet() {
     let startDate = document.getElementById("presetStartDate")?.value;
     let endDate = document.getElementById("presetEndDate")?.value;
