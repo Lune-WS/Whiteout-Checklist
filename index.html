@@ -158,12 +158,12 @@
 
         <div id="dailyContainer" class="task-container"></div>
 
-        <h3 class="extra-title">⭐ おまけ</h3>
+        <h3 class="extra-title" style="font-size: 14px; margin-top: 14px;">⭐ おまけ</h3>
 
         <div id="dailyExtraContainer" class="task-container"></div>
 
-        <section class="card repeat-card">
-            <h2>🔄 繰り返し</h2>
+        <section class="card repeat-card" style="margin-top: 14px; padding: 12px; background: #fafafa;">
+            <h2 style="font-size: 15px;">🔄 繰り返し</h2>
             <div id="repeatContainer"></div>
         </section>
 
@@ -238,9 +238,9 @@
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; margin-bottom: 15px;" class="two-column-layout">
 
     <section class="card underground-card" style="margin: 0; height: 100%; box-sizing: border-box;">
-        <button id="toggleMemo" class="memo-button" style="width: 100%;">🌋 地底メモ ▼</button>
+        <button id="toggleMemo" class="memo-button" style="width: 100%; border:none; background:#e2e8f0; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;">🌋 地底メモ ▼</button>
         <div id="memoBody" class="memo-body hidden">
-<pre>
+<pre style="font-size: 11px; background: #f8fafc; padding: 10px; border-radius: 8px;">
 【🌋 地底探検】
 
 勇者 50:10:40 → 55/10/35
@@ -286,7 +286,7 @@
 </div>
 
 <!-- ツール・保存ボタン群 -->
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
     <a href="clejoy_simple.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #42a5f5, #1e88e5);">
         🛡 クレジョイ盾兵計算機を開く
     </a>
@@ -329,10 +329,13 @@
                 </div>
             </div>
 
-            <!-- 1. 4週間サイクル -->
+            <!-- 1. サイクル・大型イベント -->
             <div class="preset-group">
-                <h4>🔄 4週間サイクル (同盟大作戦・雪原行商など)</h4>
+                <h4>🔄 サイクル・大型イベント</h4>
                 <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('🏛️ 英雄殿堂', 3, '1週間に1回 (3日間)')">🏛️ 英雄殿堂 (3日間)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('💎 氷結の秘宝', 7, '1か月に1回 (7日間)')">💎 氷結の秘宝 (7日間)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🗡️ 傭兵の名誉', 3, '6週間に1回 (3日間)')">🗡️ 傭兵の名誉 (3日間)</button>
                     <button class="preset-btn" onclick="addPresetEvent('❄️ 氷原の支配者', 7)">❄️ 氷原の支配者</button>
                     <button class="preset-btn" onclick="addPresetEvent('🤝 同盟総動員', 7)">🤝 同盟総動員</button>
                     <button class="preset-btn" onclick="addPresetEvent('🏆 SvS 決戦', 7)">🏆 SvS 決戦</button>
@@ -341,7 +344,16 @@
                 </div>
             </div>
 
-            <!-- 2. 燃霜鉱区 -->
+            <!-- 2. エントリー・定期申請 -->
+            <div class="preset-group">
+                <h4>📌 エントリー・定期申請</h4>
+                <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('🚩 同盟争覇戦 エントリー', 2, '月曜日と火曜日の二日間')">🚩 同盟争覇戦 (月・火)</button>
+                    <button class="preset-btn" onclick="addKyokokuHeikiPreset()">⛰️ 峡谷と兵器エントリー (水9時〜金9時)</button>
+                </div>
+            </div>
+
+            <!-- 3. 燃霜鉱区 -->
             <div class="preset-group">
                 <h4>🌋 燃霜鉱区（エントリー時間選択）</h4>
                 <p style="font-size:12px; color:#666; margin-bottom:6px;">選択中のキャラ: <strong id="modalCharName">Lune</strong></p>
@@ -355,10 +367,14 @@
                 </div>
             </div>
 
-            <!-- 3. 2日開催・定期イベント -->
+            <!-- 4. 隔週・定期イベント -->
             <div class="preset-group">
-                <h4>🛡️ 2日開催 / 隔週系</h4>
+                <h4>🛡️ 隔週・2〜3日開催イベント</h4>
                 <div class="preset-btn-grid">
+                    <button class="preset-btn" onclick="addPresetEvent('🎖️ 英雄の役目', 3, '2週間に1回 (3日間)')">🎖️ 英雄の役目 (3日間)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🔮 ミアの占い屋', 2, '2週間に1回 (2日間)')">🔮 ミアの占い屋 (2日間)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🎰 ラッキールーレット', 3, '2週間に1回 (3日間)')">🎰 ラッキールーレット (3日間)</button>
+                    <button class="preset-btn" onclick="addPresetEvent('🔥 烈火と牙', 3, '2週間に1回 (3日間) ※日曜日仕込み')">🔥 烈火と牙 (3日間・日曜仕込み)</button>
                     <button class="preset-btn" onclick="addPresetEvent('🛡️ クレジョイ', 2)">🛡️ クレジョイ</button>
                     <button class="preset-btn" onclick="addPresetEvent('⚔️ 全軍参戦', 2)">⚔️ 全軍参戦</button>
                     <button class="preset-btn" onclick="addPresetEvent('🐾 野獣駆逐', 2)">🐾 野獣駆逐</button>
@@ -367,7 +383,7 @@
                 </div>
             </div>
 
-            <!-- 4. 3日開催 / 月1イベント -->
+            <!-- 5. 3日開催 / 月1イベント -->
             <div class="preset-group">
                 <h4>🌙 3日開催 / 月1イベント</h4>
                 <div class="preset-btn-grid">
@@ -377,7 +393,7 @@
                 </div>
             </div>
 
-<!-- 5. 週末イベント -->
+            <!-- 6. 週末イベント -->
             <div class="preset-group">
                 <h4>👑 週末イベント</h4>
                 <div class="preset-btn-grid">
