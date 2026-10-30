@@ -1,111 +1,185 @@
-<!DOCTYPE html>
+
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ホワサバ時計 ＆ 差し込み司令室</title>
+    <title>ホワサバ 差し込み司令室 Dual</title>
     <style>
-        body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            padding: 16px;
+            padding: 0;
+        }
+        body {
+            background-color: #0b0f19;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         .container {
             width: 100%;
-            max-width: 420px;
+            max-width: 860px;
         }
-        /* 時計カード */
+        
+        /* 共通時計カード */
         .clock-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1px solid #334155;
+            background: #111827;
+            border: 2px solid #38bdf8;
             border-radius: 12px;
-            padding: 14px 16px;
+            padding: 10px 16px;
             text-align: center;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            margin-bottom: 12px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.25);
         }
-        /* 日付と曜日（小さく上部へ） */
         .date-display {
             font-size: 13px;
             color: #94a3b8;
-            margin-bottom: 2px;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 0.5px;
         }
-        /* 時計本体（さらに大きく！） */
         .time-display {
-            font-size: 54px;
-            font-weight: bold;
-            font-family: monospace;
-            color: #38bdf8;
-            letter-spacing: 1px;
+            font-size: 46px;
+            font-weight: 800;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ffffff;
             line-height: 1.1;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
         .ms-display {
             font-size: 24px;
-            color: #f59e0b;
-            font-family: monospace;
+            color: #fbbf24;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
         }
 
-        /* 計算機カード */
-        .calc-card {
+        /* モード切替・連動コントロール */
+        .top-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
             background: #1e293b;
+            padding: 8px;
+            border-radius: 10px;
             border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            margin-bottom: 16px;
         }
         .tabs {
             display: flex;
-            gap: 4px;
-            margin-bottom: 14px;
-            background: #0f172a;
-            padding: 4px;
-            border-radius: 8px;
+            gap: 6px;
+            flex: 1;
+            min-width: 280px;
         }
         .tab-btn {
             flex: 1;
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            padding: 8px;
-            font-size: 12px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 8px 4px;
+            font-size: 13px;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: all 0.15s ease;
         }
         .tab-btn.active {
-            background: #38bdf8;
-            color: #0f172a;
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
         }
-        .calc-section {
-            display: none;
+        .sync-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #f1f5f9;
+            background: #0f172a;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            cursor: pointer;
+            user-select: none;
         }
-        .calc-section.active {
-            display: block;
+        .sync-toggle input {
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: #38bdf8;
         }
-        h3 {
-            font-size: 14px;
-            margin: 0 0 12px 0;
-            color: #38bdf8;
-            border-bottom: 1px solid #334155;
+
+        /* 2アカウント グリッド */
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .acc-card {
+            background: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .acc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
             padding-bottom: 6px;
+            border-bottom: 2px solid #334155;
         }
+        .acc-title-input {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: #38bdf8;
+            font-weight: bold;
+            font-size: 15px;
+            width: 140px;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+        .acc-title-input:focus {
+            border-color: #38bdf8;
+            outline: none;
+        }
+        .acc-badge {
+            background: #0284c7;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        /* 入力エリア共通 */
         .input-group {
             margin-bottom: 10px;
+            background: #0f172a;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+        .input-group.my-march {
+            border: 1px solid #0284c7;
+            background: #091e3a;
         }
         label {
-            display: block;
-            font-size: 11px;
-            color: #94a3b8;
-            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 4px;
         }
         .time-inputs {
             display: flex;
@@ -114,64 +188,133 @@
         }
         .time-inputs input {
             width: 100%;
-            padding: 8px;
-            background-color: #0f172a;
+            padding: 6px;
+            background-color: #1e293b;
             border: 1px solid #475569;
             border-radius: 6px;
-            color: #fff;
-            font-size: 14px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: bold;
             text-align: center;
+            font-family: monospace;
+        }
+        .time-inputs input:focus {
+            border-color: #38bdf8;
+            outline: none;
+            background-color: #0f172a;
         }
         .time-inputs span {
             font-size: 12px;
             color: #94a3b8;
+            font-weight: bold;
+            white-space: nowrap;
         }
+
+        /* ボタン群 */
+        .quick-btns {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        .q-btn {
+            flex: 1;
+            min-width: 44px;
+            background: #334155;
+            border: 1px solid #475569;
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 5px 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            transition: background 0.1s;
+        }
+        .q-btn:hover {
+            background: #475569;
+            border-color: #38bdf8;
+        }
+        .q-btn.reset-btn {
+            background: #475569;
+            color: #cbd5e1;
+            flex: 0.8;
+        }
+        .q-btn.reset-btn:hover {
+            background: #64748b;
+        }
+
+        /* 結果ボックス（統一レイアウト） */
         .result-box {
-            margin-top: 14px;
+            margin-top: 6px;
             background-color: #0f172a;
             border-radius: 8px;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
-            border: 1px solid #38bdf8;
+            border: 2px solid #38bdf8;
+            box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+        }
+        .result-box.danger {
+            border-color: #ef4444;
+            background-color: #2a1215;
         }
         .result-label {
             font-size: 11px;
-            color: #38bdf8;
-            margin-bottom: 2px;
-        }
-        .result-value {
-            font-size: 24px;
             font-weight: bold;
             color: #38bdf8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .result-box.danger .result-label {
+            color: #f87171;
+        }
+        .result-value {
+            font-size: 26px;
+            font-weight: 800;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ffffff;
+            margin: 2px 0;
+            letter-spacing: 1px;
+        }
+        .result-box.danger .result-value {
+            color: #fca5a5;
         }
         .sub-result {
             font-size: 13px;
-            color: #f59e0b;
+            color: #fbbf24;
             font-weight: bold;
-            margin-top: 4px;
+        }
+        .result-box.danger .sub-result {
+            color: #f87171;
         }
 
         /* メモカード */
         .memo-card {
             background: #1e293b;
-            border: 1px solid #334155;
+            border: 1px solid #475569;
             border-radius: 12px;
-            padding: 16px;
+            padding: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .memo-card h3 {
+            margin: 0 0 6px 0;
+            font-size: 13px;
+            color: #38bdf8;
         }
         textarea {
             width: 100%;
-            height: 70px;
+            height: 65px;
             background: #0f172a;
             border: 1px solid #475569;
             border-radius: 6px;
-            color: #fff;
+            color: #f8fafc;
             padding: 8px;
             font-size: 12px;
             resize: vertical;
             box-sizing: border-box;
+            font-family: inherit;
         }
-        textarea:focus, input:focus {
+        textarea:focus {
             border-color: #38bdf8;
             outline: none;
         }
@@ -180,107 +323,355 @@
 <body>
 
 <div class="container">
-    <!-- 時計エリア（日付・曜日を小さく上に、時計をさらに大きく） -->
-    <div class="clock-card">
-        <div class="date-display" id="dateMain">2026年9月5日(土)</div>
-        <div>
-            <span class="time-display" id="timeMain">00:00:00</span><span class="ms-display" id="timeMs">.000</span>
-        </div>
-    </div>
-
-    <!-- 差し込み計算カード -->
-    <div class="calc-card">
+    <!-- モード切替 & 敵情報連動スイッチ (時計を下に移動したため一番上に配置) -->
+    <div class="top-controls">
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(1)">① 敵行軍から計算</button>
-            <button class="tab-btn tab2" onclick="switchTab(2)">② 目標着弾時刻から計算</button>
+            <button class="tab-btn active" id="tab1Btn" onclick="switchMode(1)">① 敵行軍から計算</button>
+            <button class="tab-btn" id="tab2Btn" onclick="switchMode(2)">② 目標着弾時刻から計算</button>
         </div>
+        <label class="sync-toggle" title="アカウント1の敵情報/目標時刻をアカウント2に自動連動">
+            <input type="checkbox" id="syncEnemyCheck" onchange="onSyncToggle()">
+            🔗 Acc1の敵情報をAcc2へ同期
+        </label>
+    </div>
 
-        <!-- 自分の行軍時間（共通） -->
-        <div class="input-group" style="background: #111827; padding: 8px; border-radius: 8px; margin-bottom: 12px;">
-            <label>🛡️ 自分の行軍時間（自動保存されます）</label>
-            <div class="time-inputs">
-                <input type="number" id="myMin" placeholder="0" oninput="saveAndCalc()"><span>分</span>
-                <input type="number" id="mySec" placeholder="0" oninput="saveAndCalc()"><span>秒</span>
-            </div>
-        </div>
+    <!-- 2アカウント Grid -->
+    <div class="accounts-grid">
+        
+        <!-- アカウント 1 -->
+        <div class="acc-card">
+            <div>
+                <div class="acc-header">
+                    <input type="text" id="acc1Name" value="アカウント1" class="acc-title-input" oninput="saveUserData()">
+                    <span class="acc-badge">Acc 1</span>
+                </div>
 
-        <!-- モード1：敵の行軍から計算 -->
-        <div id="section1" class="calc-section active">
-            <h3>⚡ 敵行軍から算出</h3>
-            <div class="input-group">
-                <label>⏱️ 敵の集結残り時間（分・秒）</label>
-                <div class="time-inputs">
-                    <input type="number" id="gatherMin" placeholder="0" oninput="onGatherInput()"><span>分</span>
-                    <input type="number" id="gatherSec" placeholder="0" oninput="onGatherInput()"><span>秒</span>
+                <!-- 自部隊行軍時間 (ボタン順: +1分, +30秒, +10秒, +1秒, クリア) -->
+                <div class="input-group my-march">
+                    <label>🛡️ 自部隊の行軍時間</label>
+                    <div class="time-inputs">
+                        <input type="number" id="myMin1" placeholder="0" min="0" oninput="normalizeAndSave(1)"><span>分</span>
+                        <input type="number" id="mySec1" placeholder="0" min="0" oninput="normalizeAndSave(1)"><span>秒</span>
+                    </div>
+                    <div class="quick-btns">
+                        <button class="q-btn" onclick="addTime('myMin1','mySec1',1,0,1)">+1分</button>
+                        <button class="q-btn" onclick="addTime('myMin1','mySec1',1,30,0)">+30秒</button>
+                        <button class="q-btn" onclick="addTime('myMin1','mySec1',1,10,0)">+10秒</button>
+                        <button class="q-btn" onclick="addTime('myMin1','mySec1',1,1,0)">+1秒</button>
+                        <button class="q-btn reset-btn" onclick="clearTime('myMin1','mySec1',1)">クリア</button>
+                    </div>
+                </div>
+
+                <!-- モード1: 敵情報 (ボタン順: +5分, +2分, +1分, +30秒, +1秒, クリア) -->
+                <div id="acc1Mode1">
+                    <div class="input-group">
+                        <label>⏱️ 敵の集結残り時間</label>
+                        <div class="time-inputs">
+                            <input type="number" id="gatherMin1" placeholder="0" min="0" oninput="onGatherInputChanged(1)"><span>分</span>
+                            <input type="number" id="gatherSec1" placeholder="0" min="0" oninput="onGatherInputChanged(1)"><span>秒</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="q-btn" onclick="addGatherTime(1,0,5)">+5分</button>
+                            <button class="q-btn" onclick="addGatherTime(1,0,2)">+2分</button>
+                            <button class="q-btn" onclick="addGatherTime(1,0,1)">+1分</button>
+                            <button class="q-btn" onclick="addGatherTime(1,30,0)">+30秒</button>
+                            <button class="q-btn" onclick="addGatherTime(1,1,0)">+1秒</button>
+                            <button class="q-btn reset-btn" onclick="clearGatherTime(1)">クリア</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>⚔️ 敵の行軍時間</label>
+                        <div class="time-inputs">
+                            <input type="number" id="enemyMin1" placeholder="0" min="0" oninput="normalizeAndSave(1)"><span>分</span>
+                            <input type="number" id="enemySec1" placeholder="0" min="0" oninput="normalizeAndSave(1)"><span>秒</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="q-btn" onclick="addTime('enemyMin1','enemySec1',1,0,1)">+1分</button>
+                            <button class="q-btn" onclick="addTime('enemyMin1','enemySec1',1,30,0)">+30秒</button>
+                            <button class="q-btn" onclick="addTime('enemyMin1','enemySec1',1,10,0)">+10秒</button>
+                            <button class="q-btn" onclick="addTime('enemyMin1','enemySec1',1,1,0)">+1秒</button>
+                            <button class="q-btn reset-btn" onclick="clearTime('enemyMin1','enemySec1',1)">クリア</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- モード2: 目標時間 -->
+                <div id="acc1Mode2" style="display: none;">
+                    <div class="input-group">
+                        <label>🎯 目標の着弾時刻（時・分・秒）</label>
+                        <div class="time-inputs">
+                            <input type="number" id="targetHour1" placeholder="時" min="0" max="23" oninput="normalizeAndSave(1)"><span>時</span>
+                            <input type="number" id="targetMin1" placeholder="分" min="0" max="59" oninput="normalizeAndSave(1)"><span>分</span>
+                            <input type="number" id="targetSec1" placeholder="秒" min="0" max="59" oninput="normalizeAndSave(1)"><span>秒</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="input-group">
-                <label>⚔️ 敵の行軍時間（分・秒）</label>
-                <div class="time-inputs">
-                    <input type="number" id="enemyMin" placeholder="0" oninput="onGatherInput()"><span>分</span>
-                    <input type="number" id="enemySec" placeholder="0" oninput="onGatherInput()"><span>秒</span>
-                </div>
-            </div>
-            <div class="result-box">
-                <div class="result-label">発射すべき時刻 ＆ 残り時間</div>
-                <div class="result-value" id="result1">-</div>
-                <div class="sub-result" id="subResult1"></div>
+
+            <!-- 結果表示（下部揃え統一） -->
+            <div class="result-box" id="resBox1">
+                <div class="result-label">発射推奨時刻</div>
+                <div class="result-value" id="result1">--:--:--</div>
+                <div class="sub-result" id="subResult1">-</div>
             </div>
         </div>
 
-        <!-- モード2：目標着弾時刻から計算 -->
-        <div id="section2" class="calc-section">
-            <h3>🎯 目標着弾時刻から算出</h3>
-            <div class="input-group">
-                <label>🎯 目標の着弾時刻（時・分・秒）</label>
-                <div class="time-inputs">
-                    <input type="number" id="targetHour" placeholder="時" oninput="calculate2()"><span>時</span>
-                    <input type="number" id="targetMin" placeholder="分" oninput="calculate2()"><span>分</span>
-                    <input type="number" id="targetSec" placeholder="秒" oninput="calculate2()"><span>秒</span>
+        <!-- アカウント 2 -->
+        <div class="acc-card">
+            <div>
+                <div class="acc-header">
+                    <input type="text" id="acc2Name" value="アカウント2" class="acc-title-input" oninput="saveUserData()">
+                    <span class="acc-badge">Acc 2</span>
+                </div>
+
+                <!-- 自部隊行軍時間 -->
+                <div class="input-group my-march">
+                    <label>🛡️ 自部隊の行軍時間</label>
+                    <div class="time-inputs">
+                        <input type="number" id="myMin2" placeholder="0" min="0" oninput="normalizeAndSave(2)"><span>分</span>
+                        <input type="number" id="mySec2" placeholder="0" min="0" oninput="normalizeAndSave(2)"><span>秒</span>
+                    </div>
+                    <div class="quick-btns">
+                        <button class="q-btn" onclick="addTime('myMin2','mySec2',2,0,1)">+1分</button>
+                        <button class="q-btn" onclick="addTime('myMin2','mySec2',2,30,0)">+30秒</button>
+                        <button class="q-btn" onclick="addTime('myMin2','mySec2',2,10,0)">+10秒</button>
+                        <button class="q-btn" onclick="addTime('myMin2','mySec2',2,1,0)">+1秒</button>
+                        <button class="q-btn reset-btn" onclick="clearTime('myMin2','mySec2',2)">クリア</button>
+                    </div>
+                </div>
+
+                <!-- モード1: 敵情報 -->
+                <div id="acc2Mode1">
+                    <div class="input-group">
+                        <label>⏱️ 敵の集結残り時間</label>
+                        <div class="time-inputs">
+                            <input type="number" id="gatherMin2" placeholder="0" min="0" oninput="onGatherInputChanged(2)"><span>分</span>
+                            <input type="number" id="gatherSec2" placeholder="0" min="0" oninput="onGatherInputChanged(2)"><span>秒</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="q-btn" onclick="addGatherTime(2,0,5)">+5分</button>
+                            <button class="q-btn" onclick="addGatherTime(2,0,2)">+2分</button>
+                            <button class="q-btn" onclick="addGatherTime(2,0,1)">+1分</button>
+                            <button class="q-btn" onclick="addGatherTime(2,30,0)">+30秒</button>
+                            <button class="q-btn" onclick="addGatherTime(2,1,0)">+1秒</button>
+                            <button class="q-btn reset-btn" onclick="clearGatherTime(2)">クリア</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>⚔️ 敵の行軍時間</label>
+                        <div class="time-inputs">
+                            <input type="number" id="enemyMin2" placeholder="0" min="0" oninput="normalizeAndSave(2)"><span>分</span>
+                            <input type="number" id="enemySec2" placeholder="0" min="0" oninput="normalizeAndSave(2)"><span>秒</span>
+                        </div>
+                        <div class="quick-btns">
+                            <button class="q-btn" onclick="addTime('enemyMin2','enemySec2',2,0,1)">+1分</button>
+                            <button class="q-btn" onclick="addTime('enemyMin2','enemySec2',2,30,0)">+30秒</button>
+                            <button class="q-btn" onclick="addTime('enemyMin2','enemySec2',2,10,0)">+10秒</button>
+                            <button class="q-btn" onclick="addTime('enemyMin2','enemySec2',2,1,0)">+1秒</button>
+                            <button class="q-btn reset-btn" onclick="clearTime('enemyMin2','enemySec2',2)">クリア</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- モード2: 目標時間 -->
+                <div id="acc2Mode2" style="display: none;">
+                    <div class="input-group">
+                        <label>🎯 目標の着弾時刻（時・分・秒）</label>
+                        <div class="time-inputs">
+                            <input type="number" id="targetHour2" placeholder="時" min="0" max="23" oninput="normalizeAndSave(2)"><span>時</span>
+                            <input type="number" id="targetMin2" placeholder="分" min="0" max="59" oninput="normalizeAndSave(2)"><span>分</span>
+                            <input type="number" id="targetSec2" placeholder="秒" min="0" max="59" oninput="normalizeAndSave(2)"><span>秒</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="result-box">
-                <div class="result-label">発射すべき時刻 ＆ 残り時間</div>
-                <div class="result-value" id="result2">-</div>
-                <div class="sub-result" id="subResult2"></div>
+
+            <!-- 結果表示（下部揃え統一） -->
+            <div class="result-box" id="resBox2">
+                <div class="result-label">発射推奨時刻</div>
+                <div class="result-value" id="result2">--:--:--</div>
+                <div class="sub-result" id="subResult2">-</div>
             </div>
+        </div>
+
+    </div>
+
+    <!-- 1. 共通時計（計算結果の直下に移動） -->
+    <div class="clock-card">
+        <div class="date-display" id="dateMain">----年--月--日(-)</div>
+        <div>
+            <span class="time-display" id="timeMain">00:00:00</span><span class="ms-display" id="timeMs">.00</span>
         </div>
     </div>
 
-    <!-- 味方の行軍メモエリア -->
+    <!-- メモ欄 -->
     <div class="memo-card">
-        <h3>📝 味方・部隊行軍メモ（自動保存）</h3>
+        <h3>📝 作戦メモ（自動保存）</h3>
         <textarea id="partyMemo" placeholder="例：
-Aさん：2分15秒
-Bさん：1分50秒
-主力部隊：2分30秒" oninput="saveMemo()"></textarea>
+メイン：2分15秒
+サブ：1分40秒" oninput="saveUserData()"></textarea>
     </div>
 </div>
 
 <script>
-    let baseGatherTotalSec = 0;
-    let baseTimestamp = 0;
+    let currentMode = 1;
+    let baseGatherTotalSec = { 1: 0, 2: 0 };
+    let baseTimestamp = { 1: 0, 2: 0 };
 
-    function onGatherInput() {
-        const m = parseFloat(document.getElementById('gatherMin').value) || 0;
-        const s = parseFloat(document.getElementById('gatherSec').value) || 0;
-        baseGatherTotalSec = (m * 60) + s;
-        baseTimestamp = Date.now();
-        calculate1();
+    // モード切り替え (1: 敵行軍から, 2: 目標時刻から)
+    function switchMode(mode) {
+        currentMode = mode;
+        if (mode === 1) {
+            document.getElementById('tab1Btn').classList.add('active');
+            document.getElementById('tab2Btn').classList.remove('active');
+            document.getElementById('acc1Mode1').style.display = 'block';
+            document.getElementById('acc1Mode2').style.display = 'none';
+            document.getElementById('acc2Mode1').style.display = 'block';
+            document.getElementById('acc2Mode2').style.display = 'none';
+        } else {
+            document.getElementById('tab2Btn').classList.add('active');
+            document.getElementById('tab1Btn').classList.remove('active');
+            document.getElementById('acc1Mode1').style.display = 'none';
+            document.getElementById('acc1Mode2').style.display = 'block';
+            document.getElementById('acc2Mode2').style.display = 'block';
+            document.getElementById('acc2Mode1').style.display = 'none';
+        }
     }
 
+    // 60秒以上の入力を分・秒に正規化する関数（例：75秒 -> 1分15秒）
+    function normalizeTimeInput(minId, secId) {
+        const minEl = document.getElementById(minId);
+        const secEl = document.getElementById(secId);
+        let m = parseInt(minEl.value) || 0;
+        let s = parseInt(secEl.value) || 0;
+
+        if (s >= 60) {
+            m += Math.floor(s / 60);
+            s = s % 60;
+            minEl.value = m;
+            secEl.value = s;
+        } else if (s < 0) {
+            secEl.value = 0;
+        }
+        if (m < 0) minEl.value = 0;
+    }
+
+    // 各入力欄の変更・保存
+    function normalizeAndSave(accNum) {
+        normalizeTimeInput(`myMin${accNum}`, `mySec${accNum}`);
+        normalizeTimeInput(`enemyMin${accNum}`, `enemySec${accNum}`);
+
+        // 同期が有効な場合のみAcc1からAcc2にコピー
+        if (accNum === 1 && isSyncEnabled()) {
+            document.getElementById('enemyMin2').value = document.getElementById('enemyMin1').value;
+            document.getElementById('enemySec2').value = document.getElementById('enemySec1').value;
+            document.getElementById('targetHour2').value = document.getElementById('targetHour1').value;
+            document.getElementById('targetMin2').value = document.getElementById('targetMin1').value;
+            document.getElementById('targetSec2').value = document.getElementById('targetSec1').value;
+        }
+        saveUserData();
+    }
+
+    // 集結時間の変更（タイマーベース更新）
+    function onGatherInputChanged(accNum) {
+        normalizeTimeInput(`gatherMin${accNum}`, `gatherSec${accNum}`);
+
+        const m = parseFloat(document.getElementById(`gatherMin${accNum}`).value) || 0;
+        const s = parseFloat(document.getElementById(`gatherSec${accNum}`).value) || 0;
+        baseGatherTotalSec[accNum] = (m * 60) + s;
+        baseTimestamp[accNum] = Date.now();
+
+        // 同期が有効な場合のみAcc1からAcc2にコピー
+        if (accNum === 1 && isSyncEnabled()) {
+            document.getElementById('gatherMin2').value = document.getElementById('gatherMin1').value;
+            document.getElementById('gatherSec2').value = document.getElementById('gatherSec1').value;
+            baseGatherTotalSec[2] = baseGatherTotalSec[1];
+            baseTimestamp[2] = baseTimestamp[1];
+        }
+        saveUserData();
+    }
+
+    // 加算ボタン操作 (一般項目)
+    function addTime(minId, secId, accNum, addS, addM) {
+        const minEl = document.getElementById(minId);
+        const secEl = document.getElementById(secId);
+        let m = parseInt(minEl.value) || 0;
+        let s = parseInt(secEl.value) || 0;
+
+        s += addS;
+        m += addM;
+
+        if (s >= 60) {
+            m += Math.floor(s / 60);
+            s = s % 60;
+        }
+
+        minEl.value = m;
+        secEl.value = s;
+        normalizeAndSave(accNum);
+    }
+
+    function clearTime(minId, secId, accNum) {
+        document.getElementById(minId).value = "";
+        document.getElementById(secId).value = "";
+        normalizeAndSave(accNum);
+    }
+
+    // 集結時間専用の加算ボタン
+    function addGatherTime(accNum, addS, addM) {
+        const minEl = document.getElementById(`gatherMin${accNum}`);
+        const secEl = document.getElementById(`gatherSec${accNum}`);
+        let m = parseInt(minEl.value) || 0;
+        let s = parseInt(secEl.value) || 0;
+
+        s += addS;
+        m += addM;
+
+        if (s >= 60) {
+            m += Math.floor(s / 60);
+            s = s % 60;
+        }
+
+        minEl.value = m;
+        secEl.value = s;
+        onGatherInputChanged(accNum);
+    }
+
+    function clearGatherTime(accNum) {
+        document.getElementById(`gatherMin${accNum}`).value = "";
+        document.getElementById(`gatherSec${accNum}`).value = "";
+        onGatherInputChanged(accNum);
+    }
+
+    function isSyncEnabled() {
+        return document.getElementById('syncEnemyCheck').checked;
+    }
+
+    function onSyncToggle() {
+        if (isSyncEnabled()) {
+            onGatherInputChanged(1);
+            normalizeAndSave(1);
+        }
+    }
+
+    function getSecFromInputs(minId, secId) {
+        const m = parseFloat(document.getElementById(minId).value) || 0;
+        const s = parseFloat(document.getElementById(secId).value) || 0;
+        return (m * 60) + s;
+    }
+
+    // メインループ (100ms周期)
     function mainLoop() {
         const now = new Date();
-        
-        // 日付と曜日の表示更新
+
+        // 共通時計
         const year = now.getFullYear();
-        const month = now.getMonth() + 1;
-        const date = now.getDate();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const date = String(now.getDate()).padStart(2, '0');
         const days = ['日', '月', '火', '水', '木', '金', '土'];
         const dayOfWeek = days[now.getDay()];
         document.getElementById('dateMain').innerText = `${year}年${month}月${date}日(${dayOfWeek})`;
 
-        // 時計の更新
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -289,101 +680,91 @@ Bさん：1分50秒
         document.getElementById('timeMain').innerText = `${hours}:${minutes}:${seconds}`;
         document.getElementById('timeMs').innerText = `.${ms}`;
 
-        if (document.getElementById('section1').classList.contains('active')) {
-            if (baseGatherTotalSec > 0) {
-                const elapsedSec = (Date.now() - baseTimestamp) / 1000;
-                let currentGather = baseGatherTotalSec - elapsedSec;
-                if (currentGather < 0) currentGather = 0;
+        // アカウント計算実行
+        calculateForAccount(1);
+        calculateForAccount(2);
+    }
 
-                calculate1WithCurrent(currentGather);
+    function calculateForAccount(accNum) {
+        const resEl = document.getElementById(`result${accNum}`);
+        const subResEl = document.getElementById(`subResult${accNum}`);
+        const boxEl = document.getElementById(`resBox${accNum}`);
+
+        const myMarch = getSecFromInputs(`myMin${accNum}`, `mySec${accNum}`);
+
+        if (currentMode === 1) {
+            // モード1: 敵行軍から
+            const enemyMarch = getSecFromInputs(`enemyMin${accNum}`, `enemySec${accNum}`);
+            const baseGather = baseGatherTotalSec[accNum];
+
+            const gatherHasVal = document.getElementById(`gatherMin${accNum}`).value !== "" || document.getElementById(`gatherSec${accNum}`).value !== "";
+            const enemyHasVal = document.getElementById(`enemyMin${accNum}`).value !== "" || document.getElementById(`enemySec${accNum}`).value !== "";
+
+            if (!gatherHasVal && !enemyHasVal) {
+                resEl.innerText = "--:--:--";
+                subResEl.innerText = "-";
+                boxEl.classList.remove('danger');
+                return;
             }
+
+            const elapsedSec = (Date.now() - baseTimestamp[accNum]) / 1000;
+            let currentGather = baseGather - elapsedSec;
+            if (currentGather < 0) currentGather = 0;
+
+            const diffToLaunch = currentGather + (enemyMarch - myMarch);
+
+            if (diffToLaunch < 0) {
+                resEl.innerText = "発射不可能";
+                subResEl.innerText = "⚠️ 時間超過 (間に合いません)";
+                boxEl.classList.add('danger');
+                return;
+            }
+
+            boxEl.classList.remove('danger');
+            renderLaunchTime(diffToLaunch, resEl, subResEl);
+
         } else {
-            calculate2();
+            // モード2: 目標時刻から
+            const hInput = document.getElementById(`targetHour${accNum}`).value;
+            const mInput = document.getElementById(`targetMin${accNum}`).value;
+            const sInput = document.getElementById(`targetSec${accNum}`).value;
+
+            if (hInput === "" || (mInput === "" && sInput === "")) {
+                resEl.innerText = "--:--:--";
+                subResEl.innerText = "-";
+                boxEl.classList.remove('danger');
+                return;
+            }
+
+            const targetH = parseInt(hInput) || 0;
+            const targetM = parseInt(mInput) || 0;
+            const targetS = parseInt(sInput) || 0;
+
+            const now = new Date();
+            const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + (now.getMilliseconds() / 1000);
+            let targetSecTotal = targetH * 3600 + targetM * 60 + targetS;
+
+            // 翌日を跨ぐ調整
+            if (targetSecTotal < nowSec - 3600) {
+                targetSecTotal += 24 * 3600;
+            }
+
+            const launchSecTotal = targetSecTotal - myMarch;
+            const diffToLaunch = launchSecTotal - nowSec;
+
+            if (diffToLaunch < 0) {
+                resEl.innerText = "発射不可能";
+                subResEl.innerText = "⚠️ 目標時刻を過ぎています";
+                boxEl.classList.add('danger');
+                return;
+            }
+
+            boxEl.classList.remove('danger');
+            renderLaunchTime(diffToLaunch, resEl, subResEl);
         }
     }
 
-    setInterval(mainLoop, 100);
-    mainLoop();
-
-    function switchTab(num) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.calc-section').forEach(s => s.classList.remove('active'));
-        
-        if(num === 1) {
-            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-            document.getElementById('section1').classList.add('active');
-            onGatherInput();
-        } else {
-            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-            document.getElementById('section2').classList.add('active');
-            calculate2();
-        }
-    }
-
-    function saveAndCalc() {
-        const myMin = document.getElementById('myMin').value;
-        const mySec = document.getElementById('mySec').value;
-        localStorage.setItem('wh_my_min', myMin);
-        localStorage.setItem('wh_my_sec', mySec);
-
-        onGatherInput();
-        calculate2();
-    }
-
-    function saveMemo() {
-        const memo = document.getElementById('partyMemo').value;
-        localStorage.setItem('wh_party_memo', memo);
-    }
-
-    window.onload = function() {
-        if(localStorage.getItem('wh_my_min') !== null) {
-            document.getElementById('myMin').value = localStorage.getItem('wh_my_min');
-        }
-        if(localStorage.getItem('wh_my_sec') !== null) {
-            document.getElementById('mySec').value = localStorage.getItem('wh_my_sec');
-        }
-        if(localStorage.getItem('wh_party_memo') !== null) {
-            document.getElementById('partyMemo').value = localStorage.getItem('wh_party_memo');
-        }
-        onGatherInput();
-        calculate2();
-    };
-
-    function getTimeInSec(minId, secId) {
-        const m = parseFloat(document.getElementById(minId).value) || 0;
-        const s = parseFloat(document.getElementById(secId).value) || 0;
-        return (m * 60) + s;
-    }
-
-    function calculate1() {
-        const m = parseFloat(document.getElementById('gatherMin').value) || 0;
-        const s = parseFloat(document.getElementById('gatherSec').value) || 0;
-        baseGatherTotalSec = (m * 60) + s;
-        baseTimestamp = Date.now();
-    }
-
-    function calculate1WithCurrent(currentGather) {
-        const enemyMarch = getTimeInSec('enemyMin', 'enemySec');
-        const myMarch = getTimeInSec('myMin', 'mySec');
-        const resEl = document.getElementById('result1');
-        const subResEl = document.getElementById('subResult1');
-
-        if (!document.getElementById('gatherMin').value && !document.getElementById('gatherSec').value &&
-            !document.getElementById('enemyMin').value && !document.getElementById('enemySec').value) {
-            resEl.innerText = "-";
-            subResEl.innerText = "";
-            return;
-        }
-
-        const diffToLaunch = currentGather + (enemyMarch - myMarch);
-
-        if (diffToLaunch < 0) {
-            resEl.style.fontSize = "14px";
-            resEl.innerText = "⚠️ 間に合いません";
-            subResEl.innerText = "";
-            return;
-        }
-
+    function renderLaunchTime(diffToLaunch, resEl, subResEl) {
         const now = new Date();
         const nowSecTotal = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + (now.getMilliseconds() / 1000);
         const launchSecTotal = nowSecTotal + diffToLaunch;
@@ -397,70 +778,48 @@ Bさん：1分50秒
         const remM = Math.floor(exactRemSec / 60);
         const remS = (exactRemSec % 60).toFixed(1);
         
-        let remStr = "";
-        if (remM > 0) {
-            remStr = `(あと ${remM}分 ${remS}秒後に発射)`;
-        } else {
-            remStr = `(あと ${remS}秒後に発射)`;
-        }
+        let remStr = remM > 0 ? `あと ${remM}分 ${remS}秒 後に発射` : `あと ${remS}秒 後に発射`;
 
-        resEl.style.fontSize = "24px";
         resEl.innerText = timeStr;
         subResEl.innerText = remStr;
     }
 
-    function calculate2() {
-        const hInput = document.getElementById('targetHour').value;
-        const mInput = document.getElementById('targetMin').value;
-        const sInput = document.getElementById('targetSec').value;
-        const resEl = document.getElementById('result2');
-        const subResEl = document.getElementById('subResult2');
-
-        if (hInput === "" || (mInput === "" && sInput === "")) {
-            resEl.innerText = "-";
-            subResEl.innerText = "";
-            return;
-        }
-
-        const targetH = parseInt(hInput) || 0;
-        const targetM = parseInt(mInput) || 0;
-        const targetS = parseInt(sInput) || 0;
-        const myMarchSec = getTimeInSec('myMin', 'mySec');
-
-        const now = new Date();
-        const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds() + (now.getMilliseconds() / 1000);
-        const targetSecTotal = targetH * 3600 + targetM * 60 + targetS;
-
-        const launchSecTotal = targetSecTotal - myMarchSec;
-        const diffToLaunch = launchSecTotal - nowSec;
-
-        if (diffToLaunch < 0) {
-            resEl.style.fontSize = "14px";
-            resEl.innerText = "⚠️ 発射時刻を過ぎています";
-            subResEl.innerText = "";
-            return;
-        }
-
-        let lH = Math.floor(launchSecTotal / 3600) % 24;
-        let lM = Math.floor((launchSecTotal % 3600) / 60);
-        let lS = Math.floor(launchSecTotal % 60);
-        const timeStr = `${String(lH).padStart(2, '0')}:${String(lM).padStart(2, '0')}:${String(lS).padStart(2, '0')}`;
-
-        const exactRemSec = Math.max(0, diffToLaunch);
-        const remM = Math.floor(exactRemSec / 60);
-        const remS = (exactRemSec % 60).toFixed(1);
-
-        let remStr = "";
-        if (remM > 0) {
-            remStr = `(あと ${remM}分 ${remS}秒後に発射)`;
-        } else {
-            remStr = `(あと ${remS}秒後に発射)`;
-        }
-
-        resEl.style.fontSize = "24px";
-        resEl.innerText = timeStr;
-        subResEl.innerText = remStr;
+    // LocalStorage 保存＆復元
+    function saveUserData() {
+        const data = {
+            acc1Name: document.getElementById('acc1Name').value,
+            acc2Name: document.getElementById('acc2Name').value,
+            myMin1: document.getElementById('myMin1').value,
+            mySec1: document.getElementById('mySec1').value,
+            myMin2: document.getElementById('myMin2').value,
+            mySec2: document.getElementById('mySec2').value,
+            memo: document.getElementById('partyMemo').value,
+            sync: isSyncEnabled()
+        };
+        localStorage.setItem('wh_dual_clock_v2', JSON.stringify(data));
     }
+
+    function loadUserData() {
+        const raw = localStorage.getItem('wh_dual_clock_v2');
+        if (!raw) return;
+        try {
+            const data = JSON.parse(raw);
+            if (data.acc1Name) document.getElementById('acc1Name').value = data.acc1Name;
+            if (data.acc2Name) document.getElementById('acc2Name').value = data.acc2Name;
+            if (data.myMin1 !== undefined) document.getElementById('myMin1').value = data.myMin1;
+            if (data.mySec1 !== undefined) document.getElementById('mySec1').value = data.mySec1;
+            if (data.myMin2 !== undefined) document.getElementById('myMin2').value = data.myMin2;
+            if (data.mySec2 !== undefined) document.getElementById('mySec2').value = data.mySec2;
+            if (data.memo !== undefined) document.getElementById('partyMemo').value = data.memo;
+            if (data.sync !== undefined) document.getElementById('syncEnemyCheck').checked = data.sync;
+        } catch(e) {}
+    }
+
+    window.onload = function() {
+        loadUserData();
+        setInterval(mainLoop, 100);
+        mainLoop();
+    };
 </script>
 
 </body>
