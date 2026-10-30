@@ -597,7 +597,6 @@ function toggleHideEvent(eventId) {
     renderEvents();
 }
 
-// 単体削除（1件ずつ削除）
 function deleteEvent(eventId) {
     let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
     events = events.filter((e, index) => {
@@ -650,7 +649,6 @@ function renderOfficers() {
     initListSortable();
 }
 
-// メモ帳 単体削除
 function deleteOfficer(id) {
     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
     officers = officers.filter(o => String(o.id) !== String(id));
@@ -718,27 +716,6 @@ function addPresetEvent(title, days, memoOverride = null) {
         id: Date.now(),
         title: title,
         memo: memoOverride ? memoOverride : (days === 1 ? "1日開催イベント" : `${days}日間イベント`),
-        startDate: startDate,
-        endDate: endDate
-    });
-
-    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
-    closePresetModal();
-    renderEvents();
-}
-
-function addKyokokuHeikiPreset() {
-    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
-    const now = new Date();
-    const startDate = now.toISOString().slice(0, 10);
-    const endDateObj = new Date();
-    endDateObj.setDate(now.getDate() + 2);
-    const endDate = endDateObj.toISOString().slice(0, 10);
-
-    events.push({
-        id: Date.now(),
-        title: "⛰️ 峡谷と兵器エントリー",
-        memo: "水曜日 9:00 〜 金曜日 9:00",
         startDate: startDate,
         endDate: endDate
     });
