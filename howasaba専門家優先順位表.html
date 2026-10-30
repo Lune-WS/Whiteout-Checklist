@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ホワサバ 専門家＆スキル優先度診断ツール</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --border: #cbd5e1;
+      --accent: #d97706;
+      --success: #16a34a;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 12px;
+      line-height: 1.4;
+    }
+    .container {
+      max-width: 768px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.1rem;
+      text-align: center;
+      color: #1e3a8a;
+      margin: 6px 0 12px;
+    }
+    
+    /* データ同期・保存管理バー */
+    .data-sync-bar {
+      background: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+    }
+    .sync-btn-group {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-sync {
+      background: #475569;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .btn-sync:hover {
+      background: #334155;
+    }
+
+    /* タブ */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      overflow-x: auto;
+    }
+    .tab {
+      flex: 1;
+      padding: 8px 4px;
+      text-align: center;
+      background: #e2e8f0;
+      border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: #64748b;
+      white-space: nowrap;
+    }
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* 診断パネル */
+    .diag-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .diag-title {
+      font-weight: bold;
+      font-size: 0.85rem;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+    .diag-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      font-size: 0.75rem;
+    }
+    .diag-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .acc-settings {
+      background: var(--card-bg);
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .acc-settings input[type="text"] {
+      font-size: 0.85rem;
+      font-weight: bold;
+      padding: 6px 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      flex: 1;
+    }
+
+    /* 更新ボタン */
+    .update-btn-container {
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+      margin-bottom: 12px;
+    }
+    .btn-update {
+      width: 100%;
+      background: #16a34a;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: bold;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .btn-update:active {
+      background: #15803d;
+    }
+
+    /* キャラカード */
+    .hero-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .hero-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .hero-title-area {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rank-badge {
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .hero-name {
+      font-weight: bold;
+      font-size: 1rem;
+      color: #1e293b;
+    }
+    .score-badge {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: bold;
+    }
+
+    .hero-use-tag {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #2563eb;
+      margin-bottom: 2px;
+    }
+
+    .hero-talent-tag {
+      font-size: 0.7rem;
+      color: #d97706;
+      background: #fffbebfb;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #fef3c7;
+      margin-bottom: 6px;
+      display: inline-block;
+    }
+
+    .next-target {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #16a34a;
+      background: #f0fdf4;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #bbf7d0;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .skills-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 4px;
+      margin: 6px 0;
+      background: #f8fafc;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .skill-item {
+      font-size: 0.7rem;
+      color: #334155;
+    }
+    .skill-item span.s-label {
+      font-weight: bold;
+      color: #1e40af;
+    }
+    .skill-item span.max-tag {
+      font-size: 0.65rem;
+      color: #dc2626;
+      font-weight: bold;
+      margin-left: 2px;
+    }
+
+    .inputs-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .input-group {
+      flex: 1;
+      text-align: center;
+    }
+    .input-group.hero-lv-group {
+      flex: 1.2;
+      background: #eff6ff;
+      padding: 4px;
+      border-radius: 6px;
+      border: 1px solid #bfdbfe;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.65rem;
+      color: #64748b;
+      font-weight: bold;
+      margin-bottom: 2px;
+    }
+    .input-group.hero-lv-group label {
+      color: #1e40af;
+    }
+    
+    .input-group input {
+      width: 100%;
+      text-align: center;
+      padding: 8px 0;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+
+    /* 優先項目の発光強調 */
+    .input-group.highlight input {
+      border: 2px solid #d97706 !important;
+      background-color: #fef3c7 !important;
+      color: #92400e !important;
+      box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);
+      animation: pulse-glow 1.5s infinite alternate;
+    }
+    .input-group.highlight label {
+      color: #b45309 !important;
+      font-weight: bolder;
+    }
+
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 4px rgba(217, 119, 6, 0.4); }
+      100% { box-shadow: 0 0 10px rgba(217, 119, 6, 0.9); }
+    }
+
+    .note-input {
+      width: 100%;
+      font-size: 0.75rem;
+      padding: 6px 8px;
+      border: 1px dashed var(--accent);
+      border-radius: 4px;
+      background: #fff8f1;
+      color: #78350f;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🛡️ 専門家キャラ＆スキル自動優先度診断</h1>
+
+  <!-- データ管理・同期バー -->
+  <div class="data-sync-bar">
+    <span>💾 データ端末共有・バックアップ</span>
+    <div class="sync-btn-group">
+      <button class="btn-sync" onclick="exportData()">設定を出力 (JSON)</button>
+      <button class="btn-sync" onclick="document.getElementById('importFile').click()">設定を読み込み</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchAcc(0)" id="tab0">3288メイン</div>
+    <div class="tab" onclick="switchAcc(1)" id="tab1">3288サブ</div>
+    <div class="tab" onclick="switchAcc(2)" id="tab2">3718メイン</div>
+    <div class="tab" onclick="switchAcc(3)" id="tab3">3718サブ</div>
+  </div>
+
+  <!-- アカウント設定 -->
+  <div class="acc-settings">
+    <label style="font-size: 0.8rem; font-weight: bold;">アカウント名:</label>
+    <input type="text" id="accNameInput" onchange="updateAccName()">
+  </div>
+
+  <!-- プレイスタイル診断パネル -->
+  <div class="diag-panel">
+    <div class="diag-title">⚙️ プレイスタイル診断（このアカウントの育成方針）</div>
+    <div class="diag-options">
+      <label class="diag-item"><input type="checkbox" id="p_resource" onchange="saveStyleFromUI()"> 🌾 資源・都市育成・短縮重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_event" onchange="saveStyleFromUI()"> 🏆 イベントPt・報酬獲得重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_bear" onchange="saveStyleFromUI()"> 🐻 熊狩り重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_arena" onchange="saveStyleFromUI()"> 🥊 闘技場重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_war" onchange="saveStyleFromUI()"> ⚔️ 兵器工場重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_svs" onchange="saveStyleFromUI()"> 🌐 SVS（段階・戦争）重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_trader" onchange="saveStyleFromUI()"> 🚚 雪原行商重視</label>
+      <label class="diag-item"><input type="checkbox" id="p_miner" onchange="saveStyleFromUI()"> ⛏️ 燃霜鉱区重視</label>
+      <label class="diag-item" style="grid-column: span 2;"><input type="checkbox" id="p_rally" onchange="saveStyleFromUI()"> 🚩 集結主になる（※集結容量が必要）</label>
+    </div>
+  </div>
+
+  <!-- 手動更新ボタン -->
+  <div class="update-btn-container">
+    <button class="btn-update" onclick="applySortAndUpdate()">🔄 優先順位・ランキングを更新する</button>
+  </div>
+
+  <!-- 専門家リスト -->
+  <div id="heroList"></div>
+</div>
+
+<script>
+// 印の必要数テーブル
+const COST_TABLE = {
+  agnes:   [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+  cyril:   [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+  holger:  [8, 16, 24, 32, 40, 48, 56, 64, 72, 80],
+  bard:    [6, 12, 18, 24, 30, 36, 42, 48, 54, 60],
+  casey:   [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+  fabian:  [12, 24, 36, 48, 60, 72, 84, 96, 108, 120],
+  ronnie:  [8, 16, 24, 32, 40, 48, 56, 64, 72, 80],
+  valeria: [20, 40, 60, 80, 100, 120, 140, 160, 180, 200],
+  gareth:  [120, 160, 200, 240, 280, 320, 360, 400, 440, 480],
+  romulus: [20, 40, 80, 120, 160, 200, 240, 280, 320, 360]
+};
+
+// 正しい Max レベルを設定
+const MASTER_HEROS = {
+  agnes: { 
+    name: 'アグネス', use: '【内政・都市育成】建築・研究加速・火晶・体力', 
+    talent: '天賦: 最新ドリラー（採集時 探求者の宝箱獲得）', costFactor: 1.4,
+    tags: ['resource', 'event'],
+    s1: '高効率偵察(灯台情報+8件)', s2: '生産革命(領主体力+40)', s3: '工程管理(建築8h短縮/研究+5%)', s4: '神秘の知識(神秘紋章120枚/更新+4)',
+    maxLvs: [5, 5, 5, 10], // アグネス: 5, 5, 5, 10
+    baseScore: 100, weights: [90, 85, 100, 70], isRally: [false, false, false, false], order: [2, 0, 1, 3]
+  },
+  cyril: { 
+    name: 'シリル', use: '【熊狩り】熊ダメージ＆パーツ・源石素材', 
+    talent: '天賦: 狩人の心得（熊狩りダメージPt+30%）', costFactor: 1.3,
+    tags: ['bear', 'resource'],
+    s1: '包囲狩猟(熊集結容量+30,000)', s2: 'リサイクル(経験パーツ100Pt×5)', s3: '武装特化(精錬エナジー源石×5)', s4: '巨熊キラー(熊出征部隊容量+30,000)',
+    maxLvs: [10, 5, 5, 10], // シリル: 10, 5, 5, 10
+    baseScore: 90, weights: [15, 80, 85, 95], isRally: [true, false, false, false], order: [3, 2, 1, 0]
+  },
+  bard: { 
+    name: 'バルド', use: '【同盟イベント】総動員・争覇戦・クレイジージョイ', 
+    talent: '天賦: 交渉の達人（同盟ショップ15%引/激励宝箱+100%）', costFactor: 1.2,
+    tags: ['event', 'svs'],
+    s1: '曙光の名誉(総動員Pt+20%/スロット+3)', s2: '戦火と栄誉(争覇戦バッジ+50%/商品+3)', s3: '大金懸賞(ジョイPt+50%/宝箱獲得)', s4: '曙光戦歌(同盟大作戦Pt+50%/スロット+3)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 85, weights: [95, 75, 85, 70], isRally: [false, false, false, false], order: [0, 2, 1, 3]
+  },
+  holger: { 
+    name: 'ホルガー', use: '【闘技場】コイン獲得・ショップ割引・部隊バフ', 
+    talent: '天賦: 戦刃の舞（闘技場勝利時 剣闘士の星宝箱×3）', costFactor: 1.15,
+    tags: ['arena'],
+    s1: 'エリート剣闘士(闘技場 攻撃&HP+20%)', s2: '煌めくリング(競技コイン+50%)', s3: '競技場の星(ショップ+3枠/50%引)', s4: '勇猛果敢(部隊攻撃&HP+20%)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 75, weights: [60, 85, 90, 75], isRally: [false, false, false, false], order: [2, 1, 3, 0]
+  },
+  casey: { 
+    name: 'ケイシー', use: '【燃霜鉱区】経験値・オリハルコン・宝石図面', 
+    talent: '天賦: 燃霜の子（燃霜鉱区での殺傷力&HP+30%）', costFactor: 1.0,
+    tags: ['miner'],
+    s1: '氷火游猟(巡回兵経験値+50%)', s2: '霜風烈火(部隊容量+50,000/回復60%短縮)', s3: '霜炎珍宝(宝石図面60枚)', s4: '効率採掘(オリハルコン+5000/分&ハンドブック10枚)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 65, weights: [75, 70, 80, 85], isRally: [false, false, false, false], order: [3, 2, 0, 1]
+  },
+  fabian: { 
+    name: 'ファビアン', use: '【兵器工場】兵器戦特化バフ＆無料治療', 
+    talent: '天賦: 戦場職人（兵器工場/雪原戦火で攻撃&防御+30%）', costFactor: 0.95,
+    tags: ['war'],
+    s1: '溶解回収(軍事施設コイン+100%)', s2: '絶境救援(兵士100万名 即座無料治療)', s3: '烈火武装(兵器戦 部隊殺傷&HP+30%)', s4: '軍需産業の巨頭(兵器戦 集結量+150,000)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 60, weights: [50, 95, 90, 20], isRally: [false, false, false, true], order: [1, 2, 0, 3]
+  },
+  ronnie: { 
+    name: 'ロニー', use: '【雪原行商】トラック到達時間短縮・略奪・保護', 
+    talent: '天賦: 交易路の支配者（行商時 攻撃&防御+30%）', costFactor: 0.9,
+    tags: ['trader'],
+    s1: '路線計画(トラック時間20%短縮/更新+3)', s2: '鋭い洞察(略奪成功時 貨物+1件)', s3: '迅猛反撃(50%で貨物回収/エリート宝箱)', s4: '最強護衛(神話トラック/追加+1台)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 55, weights: [80, 75, 65, 85], isRally: [false, false, false, false], order: [3, 0, 1, 2]
+  },
+  valeria: { 
+    name: 'ヴァレリア', use: '【SVS】最強王国 準備フェーズPt＆戦争バフ', 
+    talent: '天賦: 征服者の心（SVS戦争フェーズで攻撃&防御+30%）', costFactor: 0.85,
+    tags: ['svs', 'event'],
+    s1: '出撃準備(SVS準備Pt+20%/個人Pt宝箱+1)', s2: '烈日勲章(太陽コイン+50/商品+3)', s3: '戦場の協奏曲(SVS戦争 殺傷&HP+30%)', s4: '圧倒する力(SVS戦争 集結兵力上限+150,000)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 50, weights: [85, 60, 90, 20], isRally: [false, false, false, true], order: [2, 0, 1, 3]
+  },
+  gareth: { 
+    name: 'ガレス', use: '【訓練・防衛】訓練宝箱＆強力部隊バフ（※超高コスト）', 
+    talent: '天賦: 風雲再起（軍医所収容上限+200,000/治療速度+50%）', costFactor: 0.45,
+    tags: ['resource', 'event', 'war', 'svs'],
+    s1: '鉄林の贈物(訓練100名ごとに鉄枝宝箱)', s2: '鉄棘戦陣(部隊防御力+50%)', s3: '不敗の鉄軍(部隊HP+50%)', s4: '威風震天(出征時 敵殺傷力5%低下)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 45, weights: [95, 90, 90, 85], isRally: [false, false, false, false], order: [0, 1, 2, 3]
+  },
+  romulus: { 
+    name: 'ロムルス', use: '【遠征・兵士】無料最高兵士＆大規模戦争バフ', 
+    talent: '天賦: 鋼鉄の雄姿（出撃部隊上限+10,000）', costFactor: 0.5,
+    tags: ['war', 'svs'],
+    s1: '戦火の咆哮(毎日最高兵士600名無料/忠誠タグ)', s2: '最終防衛線(部隊攻撃&防御+10%)', s3: 'アイエーテースの威光(部隊殺傷&HP+10%)', s4: '一致団結(集結容量+100,000)',
+    maxLvs: [10, 10, 10, 10],
+    baseScore: 40, weights: [80, 50, 50, 10], isRally: [false, false, false, true], order: [0, 1, 2, 3]
+  }
+};
+
+let appData = [
+  { name: '3288メイン', style: { resource: true, event: true, bear: false, arena: false, war: false, svs: false, trader: false, miner: false, rally: false }, heroLvs: {}, skills: {}, notes: {} },
+  { name: '3288サブ', style: { resource: true, event: false, bear: false, arena: false, war: false, svs: false, trader: false, miner: false, rally: false }, heroLvs: {}, skills: {}, notes: {} },
+  { name: '3718メイン', style: { resource: true, event: true, bear: false, arena: false, war: false, svs: false, trader: false, miner: false, rally: false }, heroLvs: {}, skills: {}, notes: {} },
+  { name: '3718サブ', style: { resource: true, event: false, bear: false, arena: false, war: false, svs: false, trader: false, miner: false, rally: false }, heroLvs: {}, skills: {}, notes: {} }
+];
+
+try {
+  const saved = localStorage.getItem('hosasaba_app_v12');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed) && parsed.length === 4) {
+      appData = parsed;
+    }
+  }
+} catch (e) {}
+
+let currentAccIdx = 0;
+
+function saveData() {
+  try {
+    localStorage.setItem('hosasaba_app_v12', JSON.stringify(appData));
+  } catch(e){}
+}
+
+function exportData() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `howasaba_data_${new Date().toISOString().slice(0,10)}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (Array.isArray(imported)) {
+        appData = imported;
+        saveData();
+        init();
+        alert('設定データの読み込みが完了しました！');
+      } else {
+        alert('データ形式が正しくありません。');
+      }
+    } catch (err) {
+      alert('ファイルの読み込みに失敗しました。');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function init() {
+  renderTabs();
+  loadAccData();
+}
+
+function renderTabs() {
+  for (let i = 0; i < 4; i++) {
+    const tab = document.getElementById(`tab${i}`);
+    if (tab) {
+      tab.innerText = appData[i].name || `アカウント${i+1}`;
+      tab.className = `tab ${i === currentAccIdx ? 'active' : ''}`;
+    }
+  }
+}
+
+function switchAcc(idx) {
+  currentAccIdx = idx;
+  renderTabs();
+  loadAccData();
+}
+
+function updateAccName() {
+  const val = document.getElementById('accNameInput').value;
+  appData[currentAccIdx].name = val || `アカウント${currentAccIdx+1}`;
+  saveData();
+  renderTabs();
+}
+
+function saveStyleFromUI() {
+  if (!appData[currentAccIdx].style) appData[currentAccIdx].style = {};
+  const st = appData[currentAccIdx].style;
+  st.resource = document.getElementById('p_resource').checked;
+  st.event = document.getElementById('p_event').checked;
+  st.bear = document.getElementById('p_bear').checked;
+  st.arena = document.getElementById('p_arena').checked;
+  st.war = document.getElementById('p_war').checked;
+  st.svs = document.getElementById('p_svs').checked;
+  st.trader = document.getElementById('p_trader').checked;
+  st.miner = document.getElementById('p_miner').checked;
+  st.rally = document.getElementById('p_rally').checked;
+  saveData();
+}
+
+function loadAccData() {
+  const acc = appData[currentAccIdx];
+  document.getElementById('accNameInput').value = acc.name || '';
+  
+  const st = acc.style || {};
+  document.getElementById('p_resource').checked = !!st.resource;
+  document.getElementById('p_event').checked = !!st.event;
+  document.getElementById('p_bear').checked = !!st.bear;
+  document.getElementById('p_arena').checked = !!st.arena;
+  document.getElementById('p_war').checked = !!st.war;
+  document.getElementById('p_svs').checked = !!st.svs;
+  document.getElementById('p_trader').checked = !!st.trader;
+  document.getElementById('p_miner').checked = !!st.miner;
+  document.getElementById('p_rally').checked = !!st.rally;
+
+  renderHeroList();
+}
+
+function getHeroLv(heroId) {
+  const acc = appData[currentAccIdx];
+  if (!acc.heroLvs) acc.heroLvs = {};
+  return acc.heroLvs[heroId] !== undefined ? acc.heroLvs[heroId] : 1;
+}
+
+function handleHeroLvChange(heroId, val) {
+  if (!appData[currentAccIdx].heroLvs) acc.heroLvs = {};
+  appData[currentAccIdx].heroLvs[heroId] = parseInt(val) || 1;
+  saveData();
+}
+
+function getHeroSkills(heroId) {
+  const acc = appData[currentAccIdx];
+  if (!acc.skills) acc.skills = {};
+  if (!acc.skills[heroId]) acc.skills[heroId] = [0, 0, 0, 0];
+  return acc.skills[heroId];
+}
+
+function handleSkillChange(heroId, idx, val) {
+  const sk = getHeroSkills(heroId);
+  sk[idx] = parseInt(val) || 0;
+  saveData();
+}
+
+function handleNoteChange(heroId, val) {
+  if (!appData[currentAccIdx].notes) appData[currentAccIdx].notes = {};
+  appData[currentAccIdx].notes[heroId] = val;
+  saveData();
+}
+
+function applySortAndUpdate() {
+  saveStyleFromUI();
+  renderHeroList();
+}
+
+function calculateHeroPriority(heroId) {
+  const h = MASTER_HEROS[heroId];
+  const acc = appData[currentAccIdx];
+  const heroLv = getHeroLv(heroId);
+  const sk = getHeroSkills(heroId);
+  const st = acc.style || {};
+  const costs = COST_TABLE[heroId] || [10,20,30,40,50,60,70,80,90,100];
+
+  let heroBaseMultiplier = 1.0;
+  if (st.resource && h.tags.includes('resource')) heroBaseMultiplier += 0.35;
+  if (st.event && h.tags.includes('event')) heroBaseMultiplier += 0.35;
+  if (st.bear && h.tags.includes('bear')) heroBaseMultiplier += 0.4;
+  if (st.arena && h.tags.includes('arena')) heroBaseMultiplier += 0.4;
+  if (st.war && h.tags.includes('war')) heroBaseMultiplier += 0.4;
+  if (st.svs && h.tags.includes('svs')) heroBaseMultiplier += 0.4;
+  if (st.trader && h.tags.includes('trader')) heroBaseMultiplier += 0.4;
+  if (st.miner && h.tags.includes('miner')) heroBaseMultiplier += 0.4;
+
+  let sWeights = [...h.weights];
+
+  for (let i = 0; i < 4; i++) {
+    if (h.isRally[i]) {
+      sWeights[i] = st.rally ? 90 : 5;
+    }
+  }
+
+  const heroLvNeed = Math.max(0, 50 - heroLv);
+
+  let remainingNeed = 0;
+  let nextSkillIdx = -1;
+  let maxEfficiency = -1;
+
+  h.order.forEach(sIdx => {
+    const curLv = sk[sIdx] !== undefined ? sk[sIdx] : 0;
+    const maxLv = h.maxLvs[sIdx];
+    const w = sWeights[sIdx];
+    
+    if (curLv < maxLv) {
+      const need = (maxLv - curLv) * w;
+      remainingNeed += need;
+
+      const costIndex = Math.min(curLv, costs.length - 1);
+      const nextCost = costs[costIndex] || 10;
+      
+      const efficiency = need / (nextCost * 1.5);
+
+      if (efficiency > maxEfficiency) {
+        maxEfficiency = efficiency;
+        nextSkillIdx = sIdx;
+      }
+    }
+  });
+
+  const totalHeroScore = ((h.baseScore * heroBaseMultiplier) + (remainingNeed * 0.05) + (heroLvNeed * 0.1)) * h.costFactor;
+
+  let nextAdvice = '✨ 育成完了（レベル・スキル極まり）';
+  let targetType = 'none';
+
+  if (heroLv < 20 && (heroLvNeed * 0.4 > maxEfficiency * 10)) {
+    nextAdvice = `👉 おすすめNEXT：【専門家レベル】を Lv${heroLv + 5} 目標で強化！`;
+    targetType = 'lv';
+  } else if (nextSkillIdx !== -1) {
+    const curLv = sk[nextSkillIdx] || 0;
+    const maxLv = h.maxLvs[nextSkillIdx];
+    const targetLv = Math.min(curLv + 1, maxLv);
+    nextAdvice = `👉 おすすめNEXT：【S${nextSkillIdx + 1}】を Lv${targetLv} へ！（コスパ優先）`;
+    targetType = 'skill';
+  }
+
+  return { totalHeroScore, nextAdvice, nextSkillIdx, targetType };
+}
+
+function renderHeroList() {
+  const container = document.getElementById('heroList');
+  const acc = appData[currentAccIdx];
+
+  const heroKeys = Object.keys(MASTER_HEROS);
+  const calculatedList = heroKeys.map(heroId => {
+    const res = calculateHeroPriority(heroId);
+    return { 
+      heroId, 
+      score: res.totalHeroScore, 
+      advice: res.nextAdvice, 
+      nextSkillIdx: res.nextSkillIdx, 
+      targetType: res.targetType 
+    };
+  });
+
+  calculatedList.sort((a, b) => b.score - a.score);
+
+  let html = '';
+
+  calculatedList.forEach((item, rankIdx) => {
+    const heroId = item.heroId;
+    const h = MASTER_HEROS[heroId];
+    const heroLv = getHeroLv(heroId);
+    const sk = getHeroSkills(heroId);
+    const noteVal = (acc.notes && acc.notes[heroId] !== undefined) ? acc.notes[heroId] : '';
+
+    const isLvHighlight = item.targetType === 'lv' ? 'highlight' : '';
+    const isS1Highlight = (item.targetType === 'skill' && item.nextSkillIdx === 0) ? 'highlight' : '';
+    const isS2Highlight = (item.targetType === 'skill' && item.nextSkillIdx === 1) ? 'highlight' : '';
+    const isS3Highlight = (item.targetType === 'skill' && item.nextSkillIdx === 2) ? 'highlight' : '';
+    const isS4Highlight = (item.targetType === 'skill' && item.nextSkillIdx === 3) ? 'highlight' : '';
+
+    html += `
+      <div class="hero-card">
+        <div class="hero-header">
+          <div class="hero-title-area">
+            <span class="rank-badge">キャラ優先 ${rankIdx + 1}位</span>
+            <span class="hero-name">${h.name}</span>
+          </div>
+          <span class="score-badge">育成優先度: ${Math.round(item.score)}pt</span>
+        </div>
+        
+        <div class="hero-use-tag">${h.use}</div>
+        <div class="hero-talent-tag">${h.talent}</div>
+        <div class="next-target">${item.advice}</div>
+
+        <div class="skills-detail-grid">
+          <div class="skill-item"><span class="s-label">S1:</span> ${h.s1} <span class="max-tag">(Max Lv${h.maxLvs[0]})</span></div>
+          <div class="skill-item"><span class="s-label">S2:</span> ${h.s2} <span class="max-tag">(Max Lv${h.maxLvs[1]})</span></div>
+          <div class="skill-item"><span class="s-label">S3:</span> ${h.s3} <span class="max-tag">(Max Lv${h.maxLvs[2]})</span></div>
+          <div class="skill-item"><span class="s-label">S4:</span> ${h.s4} <span class="max-tag">(Max Lv${h.maxLvs[3]})</span></div>
+        </div>
+
+        <div class="inputs-row">
+          <div class="input-group hero-lv-group ${isLvHighlight}">
+            <label>専門家 Lv</label>
+            <input type="number" min="1" max="50" value="${heroLv}" onchange="handleHeroLvChange('${heroId}', this.value)">
+          </div>
+          <div class="input-group ${isS1Highlight}">
+            <label>S1 LV</label>
+            <input type="number" min="0" max="${h.maxLvs[0]}" value="${sk[0]!==undefined?sk[0]:0}" onchange="handleSkillChange('${heroId}', 0, this.value)">
+          </div>
+          <div class="input-group ${isS2Highlight}">
+            <label>S2 LV</label>
+            <input type="number" min="0" max="${h.maxLvs[1]}" value="${sk[1]!==undefined?sk[1]:0}" onchange="handleSkillChange('${heroId}', 1, this.value)">
+          </div>
+          <div class="input-group ${isS3Highlight}">
+            <label>S3 LV</label>
+            <input type="number" min="0" max="${h.maxLvs[2]}" value="${sk[2]!==undefined?sk[2]:0}" onchange="handleSkillChange('${heroId}', 2, this.value)">
+          </div>
+          <div class="input-group ${isS4Highlight}">
+            <label>S4 LV</label>
+            <input type="number" min="0" max="${h.maxLvs[3]}" value="${sk[3]!==undefined?sk[3]:0}" onchange="handleSkillChange('${heroId}', 3, this.value)">
+          </div>
+        </div>
+
+        <input type="text" class="note-input" value="${noteVal}" placeholder="育成メモ・目標..." onchange="handleNoteChange('${heroId}', this.value)">
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+init();
+</script>
+
+</body>
+</html>
