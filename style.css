@@ -1,6 +1,6 @@
 /* ==========================================
-   Whiteout Checklist V4.8
-   style.css (デザイン復元＆定例セットモーダル対応版)
+   Whiteout Checklist V4.9
+   style.css (ピン留め固定＆ソート安定化対応)
 ========================================== */
 
 :root{
@@ -109,13 +109,17 @@ body{
 .input-form input{ flex:1; min-width:140px; padding:8px; border:1px solid var(--border); border-radius:8px; }
 
 .event-container{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-.event-item{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; margin-bottom:10px; border:1px solid #d7e4ff; border-radius:10px; background:#fff; }
+.event-item{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; margin-bottom:10px; border:1px solid #d7e4ff; border-radius:10px; background:#fff; transition: background 0.2s, border-color 0.2s; }
+.event-item.is-pinned { background: #fffdf0; border-color: #fbd38d; }
 .event-item.checked{ opacity:.55; }
 .event-left{ flex:1; }
 .event-title{ font-size:16px; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.pinned-tag { font-size: 11px; background: #feebc8; color: #c05621; border-radius: 6px; padding: 1px 6px; font-weight: bold; }
 .event-memo{ color:#666; font-size:13px; margin-top:2px; }
-.event-right{ display:flex; gap:8px; align-items:center; }
-.event-right button{ width:34px; height:34px; cursor:pointer; }
+.event-right{ display:flex; gap:6px; align-items:center; }
+.event-right button{ width:34px; height:34px; cursor:pointer; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc; }
+.event-right button:hover { background: #edf2f7; }
+.event-right button.pin-btn.active { background: #feebc8; border-color: #fbd38d; }
 .event-hidden{ opacity:0.4; filter:grayscale(100%); }
 .event-item.event-hidden .event-title { text-decoration: line-through; color: #94a3b8; }
 
