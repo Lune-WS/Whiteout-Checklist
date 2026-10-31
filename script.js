@@ -1,5 +1,5 @@
 /* ==========================================
-   Whiteout Checklist V4.8
+   Whiteout Checklist V4.9
    script.js
 ========================================== */
 
@@ -496,12 +496,35 @@ function renderEvents() {
         events = typeof DEFAULT_EVENTS !== "undefined" ? DEFAULT_EVENTS : [];
     }
 
+    // ----------------------------------------------------
+    // 安定ソート（チェック状態で並び順を変えない）
+    // 判定基準: 1. ピン留め優先 2. 終了期限が近い順 3. 元のインデックス順
+    // ----------------------------------------------------
+    events.sort((a, b) => {
+        const aPinned = !!a.isPinned;
+        const bPinned = !!b.isPinned;
+        
+        if (aPinned !== bPinned) {
+            return aPinned ? -1 : 1;
+        }
+
+        const aDate = a.endDate ? new Date(a.endDate + "T23:59:59").getTime() : Infinity;
+        const bDate = b.endDate ? new Date(b.endDate + "T23:59:59").getTime() : Infinity;
+
+        if (aDate !== bDate) {
+            return aDate - bDate;
+        }
+
+        return 0;
+    });
+
     container.innerHTML = events.map((e, index) => {
         const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
         const hideKey = `${currentCharacter}_hide_event_${eventId}`;
         const isHidden = localStorage.getItem(hideKey) === "1";
         const checkKey = `${currentCharacter}_check_event_${eventId}`;
         const isChecked = localStorage.getItem(checkKey) === "1";
+        const isPinned = !!e.isPinned;
 
         let dateBadge = "";
         if (e.startDate && e.endDate) {
@@ -531,15 +554,19 @@ function renderEvents() {
         }
 
         return `
-            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""}">
+            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}">
                 <div class="event-left" style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
                     <div>
-                        <div class="event-title">${escapeHtml(e.title)} ${dateBadge}</div>
+                        <div class="event-title">
+                            ${isPinned ? '<span class="pinned-tag">📌 固定</span>' : ''}
+                            ${escapeHtml(e.title)} ${dateBadge}
+                        </div>
                         ${e.memo ? `<div class="event-memo">⏰ ${escapeHtml(e.memo)}</div>` : ""}
                     </div>
                 </div>
                 <div class="event-right">
+                    <button type="button" class="pin-btn ${isPinned ? "active" : ""}" onclick="togglePinEvent('${eventId}')" title="${isPinned ? "固定解除" : "一番上に固定"}">📌</button>
                     <button type="button" onclick="editEvent('${eventId}')" title="編集">✏️</button>
                     <button type="button" onclick="toggleHideEvent('${eventId}')" title="目隠し">${isHidden ? "👁" : "🙈"}</button>
                     <button type="button" onclick="deleteEvent('${eventId}')" title="削除">❌</button>
@@ -548,6 +575,20 @@ function renderEvents() {
         `;
     }).join("");
     initListSortable();
+}
+
+function togglePinEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const eventObj = events.find((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id === String(eventId);
+    });
+
+    if (eventObj) {
+        eventObj.isPinned = !eventObj.isPinned;
+        localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+        renderEvents();
+    }
 }
 
 function editEvent(eventId) {
@@ -717,7 +758,8 @@ function addPresetEvent(title, days, memoOverride = null) {
         title: title,
         memo: memoOverride ? memoOverride : (days === 1 ? "1日開催イベント" : `${days}日間イベント`),
         startDate: startDate,
-        endDate: endDate
+        endDate: endDate,
+        isPinned: false
     });
 
     localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
@@ -753,7 +795,8 @@ function addGyoshoSet() {
             title: item.title,
             memo: item.memo,
             startDate: startDate,
-            endDate: endDate
+            endDate: endDate,
+            isPinned: false
         });
     });
 
@@ -774,7 +817,8 @@ function addNensoEvent(selectedTime) {
         title: "🌋 燃霜鉱区",
         memo: `エントリー: ${selectedTime} (${currentCharacter})`,
         startDate: startDate,
-        endDate: startDate
+        endDate: startDate,
+        isPinned: false
     });
 
     localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
@@ -846,7 +890,7 @@ function setupEvents() {
             if (!title) return;
 
             const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
-            events.push({ id: Date.now(), title, memo, startDate, endDate });
+            events.push({ id: Date.now(), title, memo, startDate, endDate, isPinned: false });
             localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
 
             titleInput.value = "";
@@ -975,9 +1019,17 @@ function saveItemOrder(containerId, storageKey) {
         const events = JSON.parse(localStorage.getItem(storageKey) || "[]");
         const newEvents = [];
         container.querySelectorAll('.event-item').forEach(el => {
-            const title = el.querySelector('.event-title')?.textContent.trim();
-            const found = events.find(e => e.title === title);
-            if (found) newEvents.push(found);
+            const titleEl = el.querySelector('.event-title');
+            if (!titleEl) return;
+            
+            // タグなどの要素を除外して純粋なテキストを取り出す
+            let titleText = titleEl.childNodes[titleEl.childNodes.length - 1]?.textContent?.trim() || "";
+            if (!titleText) {
+                titleText = titleEl.textContent.replace('📌 固定', '').trim().split(' ')[0];
+            }
+
+            const found = events.find(e => e.title === titleText);
+            if (found && !newEvents.includes(found)) newEvents.push(found);
         });
         if (newEvents.length > 0) {
             localStorage.setItem(storageKey, JSON.stringify(newEvents));
