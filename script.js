@@ -1,5 +1,5 @@
 /* ==========================================
-   Whiteout Checklist V4.9
+   Whiteout Checklist V4.9 (Fix: Event Pin & Sort)
    script.js
 ========================================== */
 
@@ -33,12 +33,10 @@ function checkDailyReset() {
 
     if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
         Object.keys(localStorage).forEach(key => {
-            // ステーションや親密度データの保護
             if (key === "wsStationManagerStateV4" || key.startsWith("ws_station") || key.startsWith("wh_expert_")) {
                 return;
             }
 
-            // メモ帳（幹部リスト）のチェック状態解除のみ
             if (key === "officer_list") {
                 try {
                     let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
@@ -48,7 +46,6 @@ function checkDailyReset() {
                 return;
             }
 
-            // イベント、設定、時間保持キーの保護（全削除防止）
             if (
                 key.includes("_hide_") ||
                 key.startsWith("ws_") ||
@@ -496,11 +493,8 @@ function renderEvents() {
         events = typeof DEFAULT_EVENTS !== "undefined" ? DEFAULT_EVENTS : [];
     }
 
-    // ----------------------------------------------------
-    // 安定ソート（チェック状態で並び順を変えない）
-    // 判定基準: 1. ピン留め優先 2. 終了期限が近い順 3. 元のインデックス順
-    // ----------------------------------------------------
-    events.sort((a, b) => {
+    // 元の配列を破壊しないように非破壊的ソートを実行
+    const sortedEvents = [...events].sort((a, b) => {
         const aPinned = !!a.isPinned;
         const bPinned = !!b.isPinned;
         
@@ -518,7 +512,7 @@ function renderEvents() {
         return 0;
     });
 
-    container.innerHTML = events.map((e, index) => {
+    container.innerHTML = sortedEvents.map((e, index) => {
         const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
         const hideKey = `${currentCharacter}_hide_event_${eventId}`;
         const isHidden = localStorage.getItem(hideKey) === "1";
@@ -554,7 +548,7 @@ function renderEvents() {
         }
 
         return `
-            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}">
+            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}" data-id="${eventId}">
                 <div class="event-left" style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
                     <div>
@@ -709,9 +703,6 @@ function toggleOfficer(id, checked) {
     renderOfficers();
 }
 
-// ------------------------------------------
-// ⚡ 定例プリセット モーダル処理
-// ------------------------------------------
 function openPresetModal() {
     const modal = document.getElementById("presetModal");
     const charNameEl = document.getElementById("modalCharName");
@@ -1019,18 +1010,18 @@ function saveItemOrder(containerId, storageKey) {
         const events = JSON.parse(localStorage.getItem(storageKey) || "[]");
         const newEvents = [];
         container.querySelectorAll('.event-item').forEach(el => {
-            const titleEl = el.querySelector('.event-title');
-            if (!titleEl) return;
-            
-            // タグなどの要素を除外して純粋なテキストを取り出す
-            let titleText = titleEl.childNodes[titleEl.childNodes.length - 1]?.textContent?.trim() || "";
-            if (!titleText) {
-                titleText = titleEl.textContent.replace('📌 固定', '').trim().split(' ')[0];
-            }
-
-            const found = events.find(e => e.title === titleText);
+            const eventId = el.getAttribute('data-id');
+            const found = events.find((e, idx) => {
+                const id = e.id ? String(e.id) : `evt_${idx}_${e.title}`;
+                return id === eventId;
+            });
             if (found && !newEvents.includes(found)) newEvents.push(found);
         });
+
+        events.forEach(e => {
+            if (!newEvents.includes(e)) newEvents.push(e);
+        });
+
         if (newEvents.length > 0) {
             localStorage.setItem(storageKey, JSON.stringify(newEvents));
         }
@@ -1040,7 +1031,7 @@ function saveItemOrder(containerId, storageKey) {
         container.querySelectorAll('.officer-item').forEach(el => {
             const text = el.querySelector('span')?.textContent.trim();
             const found = officers.find(o => o.text === text);
-            if (found) newOfficers.push(found);
+            if (found && !newOfficers.includes(found)) newOfficers.push(found);
         });
         if (newOfficers.length > 0) {
             localStorage.setItem(storageKey, JSON.stringify(newOfficers));
