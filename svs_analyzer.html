@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ホワサバ SVS対戦相手データアナライザー</title>
+  <style>
+    :root {
+      --bg-main: #0B132B;
+      --bg-card: #1C2541;
+      --bg-input: #0F172A;
+      --accent-blue: #38BDF8;
+      --accent-cyan: #06B6D4;
+      --text-main: #F8FAFC;
+      --text-sub: #94A3B8;
+      --border-color: #334155;
+      --win-color: #22C55E;
+      --lose-color: #EF4444;
+      --draw-color: #EAB308;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding: 20px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    header h1 {
+      color: var(--accent-blue);
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .stat-card .value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--accent-cyan);
+    }
+
+    .stat-card .label {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .panel h2 {
+      font-size: 1.2rem;
+      color: var(--accent-blue);
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      margin-bottom: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent-blue);
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: auto;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input, .search-bar select {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .record-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .record-card {
+      background: var(--bg-input);
+      border-radius: 8px;
+      padding: 12px 15px;
+      border-left: 5px solid var(--border-color);
+      position: relative;
+    }
+
+    .record-card.win { border-left-color: var(--win-color); }
+    .record-card.lose { border-left-color: var(--lose-color); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .server-no {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .account-badge {
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--accent-blue);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      border: 1px solid var(--accent-blue);
+    }
+
+    .result-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.8rem;
+    }
+
+    .win .result-badge { background: var(--win-color); color: #000; }
+    .lose .result-badge { background: var(--lose-color); color: #fff; }
+
+    .card-body {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-memo {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border-color);
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .card-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-small {
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      width: auto;
+      background: var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--lose-color);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>ホワサバ SVS対戦相手記録・分析</h1>
+  </header>
+
+  <div class="dashboard">
+    <div class="stat-card">
+      <div class="value" id="stat-total">0</div>
+      <div class="label">対戦数</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-winrate">0%</div>
+      <div class="label">全体勝率</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-acc1">0 / 0%</div>
+      <div class="label">3288 Lune</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="stat-acc2">0 / 0%</div>
+      <div class="label">3781 Chocolat</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <!-- 登録フォーム -->
+    <div class="panel">
+      <h2 id="form-title">SVS戦績を登録</h2>
+      <div id="svs-form">
+        <input type="hidden" id="edit-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="server-num">相手サーバー番号</label>
+            <input type="number" id="server-num" placeholder="例: 123">
+          </div>
+          <div class="form-group">
+            <label for="svs-date">開催年月</label>
+            <input type="month" id="svs-date">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="account-select">参戦アカウント</label>
+            <select id="account-select" onchange="toggleCustomAccountInput()">
+              <option value="3288 Lune">3288 Lune</option>
+              <option value="3781 Chocolat">3781 Chocolat</option>
+              <option value="両方">両方</option>
+              <option value="custom">手入力（その他）</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="result">勝敗結果</label>
+            <select id="result">
+              <option value="win">勝利</option>
+              <option value="lose">敗北</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" id="custom-account-group" style="display: none;">
+          <label for="account-custom">アカウント名を手入力</label>
+          <input type="text" id="account-custom" placeholder="例: メイン / 〇〇鯖サブ">
+        </div>
+
+        <div class="form-group">
+          <label for="timezone">相手の主要タイムゾーン・特徴</label>
+          <input type="text" id="timezone" placeholder="例: 欧米メイン / 決戦19時アクティブ">
+        </div>
+
+        <div class="form-group">
+          <label for="whales">高戦力プレイヤー・注目の同盟</label>
+          <input type="text" id="whales" placeholder="例: FC8×3名 / Top1同盟が強力">
+        </div>
+
+        <div class="form-group">
+          <label for="tactics">相手の立ち回り・戦術</label>
+          <textarea id="tactics" rows="2" placeholder="例: 終盤一括ラッシュ型、バブル管理が徹底されていた"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="memo">次回への対策・メモ</label>
+          <textarea id="memo" rows="3" placeholder="例: 14時以降の人数確保が鍵。砲台防衛の横付け禁止。"></textarea>
+        </div>
+
+        <button type="button" id="submit-btn" onclick="saveRecord()">対戦記録を保存</button>
+        <button type="button" id="cancel-btn" class="btn-secondary" onclick="resetForm()" style="display:none; margin-top:8px; width:100%;">キャンセル</button>
+      </div>
+    </div>
+
+    <!-- 検索・履歴表示 -->
+    <div class="panel">
+      <h2>
+        対戦履歴
+        <div>
+          <button class="btn-secondary" onclick="exportData()">保存</button>
+          <button class="btn-secondary" onclick="importData()">復元</button>
+        </div>
+      </h2>
+
+      <div class="search-bar">
+        <input type="text" id="search-keyword" placeholder="鯖番号、メモなど..." oninput="renderRecords()">
+        <select id="filter-account" onchange="renderRecords()">
+          <option value="all">全アカウント</option>
+          <option value="3288 Lune">3288 Lune</option>
+          <option value="3781 Chocolat">3781 Chocolat</option>
+          <option value="両方">両方</option>
+        </select>
+        <select id="filter-result" onchange="renderRecords()">
+          <option value="all">すべての勝敗</option>
+          <option value="win">勝利のみ</option>
+          <option value="lose">敗北のみ</option>
+        </select>
+      </div>
+
+      <div class="record-list" id="record-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem('svs_records') || '[]');
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    document.getElementById('svs-date').value = today.toISOString().slice(0, 7);
+    updateDashboard();
+    renderRecords();
+  });
+
+  function toggleCustomAccountInput() {
+    const select = document.getElementById('account-select').value;
+    const customGroup = document.getElementById('custom-account-group');
+    customGroup.style.display = (select === 'custom') ? 'block' : 'none';
+  }
+
+  function getSelectedAccountName() {
+    const select = document.getElementById('account-select').value;
+    if (select === 'custom') {
+      return document.getElementById('account-custom').value.trim() || 'その他';
+    }
+    return select;
+  }
+
+  function saveRecord() {
+    const serverNum = document.getElementById('server-num').value.trim();
+    if (!serverNum) {
+      alert('相手サーバー番号を入力してください');
+      return;
+    }
+
+    const editId = document.getElementById('edit-id').value;
+    
+    const record = {
+      id: editId ? Number(editId) : Date.now(),
+      server: serverNum,
+      date: document.getElementById('svs-date').value,
+      account: getSelectedAccountName(),
+      result: document.getElementById('result').value,
+      timezone: document.getElementById('timezone').value.trim(),
+      whales: document.getElementById('whales').value.trim(),
+      tactics: document.getElementById('tactics').value.trim(),
+      memo: document.getElementById('memo').value.trim()
+    };
+
+    if (editId) {
+      records = records.map(r => r.id === record.id ? record : r);
+    } else {
+      records.unshift(record);
+    }
+
+    saveAndRefresh();
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById('server-num').value = '';
+    document.getElementById('edit-id').value = '';
+    document.getElementById('timezone').value = '';
+    document.getElementById('whales').value = '';
+    document.getElementById('tactics').value = '';
+    document.getElementById('memo').value = '';
+    document.getElementById('account-custom').value = '';
+    document.getElementById('account-select').value = '3288 Lune';
+    document.getElementById('result').value = 'win';
+    
+    document.getElementById('form-title').innerText = 'SVS戦績を登録';
+    document.getElementById('submit-btn').innerText = '対戦記録を保存';
+    document.getElementById('cancel-btn').style.display = 'none';
+    document.getElementById('custom-account-group').style.display = 'none';
+    
+    const today = new Date();
+    document.getElementById('svs-date').value = today.toISOString().slice(0, 7);
+  }
+
+  function saveAndRefresh() {
+    localStorage.setItem('svs_records', JSON.stringify(records));
+    updateDashboard();
+    renderRecords();
+  }
+
+  function updateDashboard() {
+    const total = records.length;
+    const wins = records.filter(r => r.result === 'win').length;
+    const winRate = total ? Math.round((wins / total) * 100) : 0;
+
+    document.getElementById('stat-total').innerText = total;
+    document.getElementById('stat-winrate').innerText = `${winRate}%`;
+
+    const calcAccount = (accName) => {
+      const accRecords = records.filter(r => r.account === accName || r.account === '両方');
+      const accTotal = accRecords.length;
+      const accWins = accRecords.filter(r => r.result === 'win').length;
+      const rate = accTotal ? Math.round((accWins / accTotal) * 100) : 0;
+      return `${accTotal}戦 (${rate}%)`;
+    };
+
+    document.getElementById('stat-acc1').innerText = calcAccount('3288 Lune');
+    document.getElementById('stat-acc2').innerText = calcAccount('3781 Chocolat');
+  }
+
+  function renderRecords() {
+    const keyword = document.getElementById('search-keyword').value.toLowerCase();
+    const filterAcc = document.getElementById('filter-account').value;
+    const filterRes = document.getElementById('filter-result').value;
+    const listEl = document.getElementById('record-list');
+
+    const filtered = records.filter(r => {
+      const matchKw = `#${r.server}`.includes(keyword) || 
+                      r.account.toLowerCase().includes(keyword) ||
+                      r.timezone.toLowerCase().includes(keyword) || 
+                      r.whales.toLowerCase().includes(keyword) || 
+                      r.tactics.toLowerCase().includes(keyword) || 
+                      r.memo.toLowerCase().includes(keyword);
+      const matchAcc = filterAcc === 'all' || r.account === filterAcc;
+      const matchRes = filterRes === 'all' || r.result === filterRes;
+      return matchKw && matchAcc && matchRes;
+    });
+
+    if (filtered.length === 0) {
+      listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px;">該当する対戦記録はありません</div>';
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(r => `
+      <div class="record-card ${r.result}">
+        <div class="card-header">
+          <div>
+            <span class="server-no">#${r.server}</span>
+            <span class="account-badge">${r.account}</span>
+          </div>
+          <div>
+            <span style="font-size:0.8rem; color:var(--text-sub); margin-right:8px;">${r.date}</span>
+            <span class="result-badge">${r.result === 'win' ? '勝利' : '敗北'}</span>
+          </div>
+        </div>
+        <div class="card-body">
+          ${r.timezone ? `<div><strong>時間帯:</strong> ${r.timezone}</div>` : ''}
+          ${r.whales ? `<div><strong>戦力・同盟:</strong> ${r.whales}</div>` : ''}
+          ${r.tactics ? `<div><strong>立ち回り:</strong> ${r.tactics}</div>` : ''}
+          ${r.memo ? `<div class="card-memo"><strong>対策メモ:</strong>\n${r.memo}</div>` : ''}
+        </div>
+        <div class="card-actions">
+          <button class="btn-small" onclick="editRecord(${r.id})">編集</button>
+          <button class="btn-small btn-delete" onclick="deleteRecord(${r.id})">削除</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function editRecord(id) {
+    const r = records.find(item => item.id === id);
+    if (!r) return;
+
+    document.getElementById('edit-id').value = r.id;
+    document.getElementById('server-num').value = r.server;
+    document.getElementById('svs-date').value = r.date;
+    
+    const selectEl = document.getElementById('account-select');
+    if (['3288 Lune', '3781 Chocolat', '両方'].includes(r.account)) {
+      selectEl.value = r.account;
+      document.getElementById('custom-account-group').style.display = 'none';
+    } else {
+      selectEl.value = 'custom';
+      document.getElementById('custom-account-group').style.display = 'block';
+      document.getElementById('account-custom').value = r.account;
+    }
+
+    document.getElementById('result').value = r.result;
+    document.getElementById('timezone').value = r.timezone;
+    document.getElementById('whales').value = r.whales;
+    document.getElementById('tactics').value = r.tactics;
+    document.getElementById('memo').value = r.memo;
+
+    document.getElementById('form-title').innerText = '記録を編集';
+    document.getElementById('submit-btn').innerText = '変更を更新';
+    document.getElementById('cancel-btn').style.display = 'block';
+  }
+
+  function deleteRecord(id) {
+    if (confirm('この記録を削除してもよろしいですか？')) {
+      records = records.filter(r => r.id !== id);
+      saveAndRefresh();
+    }
+  }
+
+  function exportData() {
+    const blob = new Blob([JSON.stringify(records, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `svs_records_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  }
+
+  function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported)) {
+            records = imported;
+            saveAndRefresh();
+            alert('データを正常に読み込みました！');
+          }
+        } catch (err) {
+          alert('ファイルの読み込みに失敗しました。JSONの形式を確認してください。');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+</script>
+</body>
+</html>
