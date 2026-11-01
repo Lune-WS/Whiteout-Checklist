@@ -6,259 +6,311 @@
   <title>ホワサバ SVS対戦相手データアナライザー</title>
   <style>
     :root {
-      --bg-main: #0B132B;
-      --bg-card: #1C2541;
-      --bg-input: #0F172A;
-      --accent-blue: #38BDF8;
-      --accent-cyan: #06B6D4;
-      --text-main: #F8FAFC;
-      --text-sub: #94A3B8;
-      --border-color: #334155;
-      --win-color: #22C55E;
-      --lose-color: #EF4444;
-      --draw-color: #EAB308;
+      --bg-main: #edf4f8;
+      --bg-card: rgba(255,255,255,.92);
+      --bg-input: #f5f9fc;
+      --accent-blue: #527f9e;
+      --accent-cyan: #8eb9d0;
+      --accent-soft: #e5f0f6;
+      --text-main: #263b4b;
+      --text-sub: #718596;
+      --border-color: #d8e5ed;
+      --win-color: #4f9c83;
+      --lose-color: #c87983;
+      --silver: #b7cbd8;
+      --shadow: 0 14px 36px rgba(54, 86, 108, .09);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: var(--bg-main);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 8% 0%, rgba(255,255,255,.95), transparent 36%),
+        radial-gradient(ellipse at 100% 20%, rgba(190,218,234,.48), transparent 34%),
+        linear-gradient(145deg, #f4f8fb 0%, #e8f1f6 52%, #f4f7fa 100%);
       color: var(--text-main);
-      padding: 20px;
-      line-height: 1.5;
+      padding: 34px 20px 48px;
+      line-height: 1.65;
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
     }
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+    .container { max-width: 1180px; margin: 0 auto; }
 
     header {
+      position: relative;
+      overflow: hidden;
       text-align: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid var(--border-color);
+      margin-bottom: 28px;
+      padding: 32px 20px 28px;
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 24px;
+      background: linear-gradient(125deg, rgba(255,255,255,.88), rgba(225,239,247,.82));
+      box-shadow: var(--shadow);
     }
-
+    header::before, header::after {
+      content: "✧";
+      position: absolute;
+      color: rgba(103,151,179,.28);
+      font-size: 46px;
+    }
+    header::before { left: 8%; top: 10px; }
+    header::after { right: 9%; bottom: 0; font-size: 62px; }
     header h1 {
-      color: var(--accent-blue);
-      font-size: 1.8rem;
-      letter-spacing: 1px;
+      color: #466f8b;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800;
+      letter-spacing: .09em;
+    }
+    header h1::before {
+      content: "❄";
+      display: block;
+      color: #8eb6cc;
+      font-size: 1.3rem;
+      margin-bottom: 5px;
+    }
+    header p {
+      color: var(--text-sub);
+      font-size: .78rem;
+      letter-spacing: .2em;
+      margin-top: 5px;
     }
 
     .dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 25px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
     }
-
     .stat-card {
+      position: relative;
+      overflow: hidden;
       background: var(--bg-card);
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
+      padding: 19px 14px 17px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: 0 8px 22px rgba(54,86,108,.07);
       text-align: center;
+      transition: transform .2s, box-shadow .2s;
     }
-
+    .stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(180,211,228,.17);
+      right: -27px; top: -30px;
+    }
     .stat-card .value {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--accent-cyan);
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      font-weight: 800;
+      color: var(--accent-blue);
+      letter-spacing: .02em;
     }
-
     .stat-card .label {
-      font-size: 0.85rem;
+      font-size: .76rem;
       color: var(--text-sub);
+      font-weight: 700;
+      letter-spacing: .06em;
     }
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 2fr;
+      grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
       gap: 20px;
+      align-items: start;
     }
-
-    @media (max-width: 900px) {
-      .main-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
     .panel {
+      min-width: 0;
       background: var(--bg-card);
-      padding: 20px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+      padding: 23px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.95);
+      box-shadow: var(--shadow);
     }
-
     .panel h2 {
-      font-size: 1.2rem;
-      color: var(--accent-blue);
-      margin-bottom: 15px;
+      font-size: 1.08rem;
+      color: #3e617a;
+      margin-bottom: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    .form-row {
-      display: flex;
       gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 13px;
+      letter-spacing: .04em;
     }
-
-    .form-row .form-group {
-      flex: 1;
+    .panel h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      border-radius: 5px;
+      background: linear-gradient(#9fc6da, #527f9e);
+      margin-right: 9px;
     }
+    .panel h2 > div { display: flex; gap: 7px; margin-left: auto; }
 
+    .form-group { margin-bottom: 13px; min-width: 0; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; min-width: 0; }
     label {
       display: block;
-      font-size: 0.85rem;
-      color: var(--text-sub);
-      margin-bottom: 4px;
+      font-size: .77rem;
+      color: #61798a;
+      font-weight: 700;
+      margin-bottom: 5px;
+      letter-spacing: .02em;
     }
-
     input, select, textarea {
       width: 100%;
-      padding: 8px 12px;
+      min-width: 0;
+      padding: 10px 12px;
       background: var(--bg-input);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 10px;
       color: var(--text-main);
-      font-size: 0.95rem;
+      font-size: .88rem;
+      transition: border-color .2s, box-shadow .2s, background .2s;
     }
-
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: var(--accent-blue);
+      border-color: #8eb9d0;
+      box-shadow: 0 0 0 3px rgba(142,185,208,.2);
+      background: #fff;
     }
+    textarea { resize: vertical; }
+    input::placeholder, textarea::placeholder { color: #a8b8c3; }
 
     button {
       width: 100%;
-      padding: 10px;
-      background: var(--accent-blue);
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
+      padding: 11px 15px;
+      background: linear-gradient(135deg, #638da8, #86b1c8);
+      color: #fff;
+      font-weight: 700;
+      border: 1px solid rgba(255,255,255,.45);
+      border-radius: 11px;
       cursor: pointer;
-      transition: opacity 0.2s;
+      box-shadow: 0 5px 13px rgba(82,127,158,.2);
+      transition: transform .15s, filter .2s, box-shadow .2s;
+      letter-spacing: .04em;
     }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
+    button:hover { filter: brightness(1.04); box-shadow: 0 7px 17px rgba(82,127,158,.25); }
+    button:active { transform: translateY(1px) scale(.99); }
     .btn-secondary {
-      background: transparent;
+      background: #f2f7fa;
       border: 1px solid var(--border-color);
-      color: var(--text-main);
+      color: #58758a;
       width: auto;
-      padding: 5px 10px;
-      font-size: 0.8rem;
+      padding: 6px 12px;
+      font-size: .76rem;
+      box-shadow: none;
+      letter-spacing: 0;
     }
-
+    .btn-secondary:hover, .btn-small:hover { background: #e7f1f6; filter: none; }
     .search-bar {
       display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      gap: 9px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
+    .search-bar input { flex: 1 1 180px; }
+    .search-bar select { flex: 1 1 135px; }
 
-    .search-bar input, .search-bar select {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .record-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
+    .record-list { display: flex; flex-direction: column; gap: 12px; }
     .record-card {
-      background: var(--bg-input);
-      border-radius: 8px;
-      padding: 12px 15px;
-      border-left: 5px solid var(--border-color);
+      background: linear-gradient(135deg, #fff, #fbfdfe);
+      border-radius: 14px;
+      padding: 15px 16px;
+      border: 1px solid #e1ebf1;
+      border-left: 4px solid var(--silver);
+      box-shadow: 0 4px 13px rgba(54,86,108,.045);
       position: relative;
+      transition: transform .18s, box-shadow .18s;
     }
-
+    .record-card:hover { transform: translateY(-2px); box-shadow: 0 9px 20px rgba(54,86,108,.09); }
     .record-card.win { border-left-color: var(--win-color); }
     .record-card.lose { border-left-color: var(--lose-color); }
-
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
     }
-
-    .server-no {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-
+    .server-no { font-weight: 800; font-size: 1.17rem; color: #527f9e; }
     .account-badge {
-      background: rgba(56, 189, 248, 0.2);
-      color: var(--accent-blue);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      border: 1px solid var(--accent-blue);
+      background: #edf4f8;
+      color: #64859b;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: .7rem;
+      font-weight: 700;
+      margin-left: 5px;
     }
-
-    .result-badge {
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 0.8rem;
+    .badge-group { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+    .prep-badge, .result-badge {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: .69rem;
     }
-
-    .win .result-badge { background: var(--win-color); color: #000; }
-    .lose .result-badge { background: var(--lose-color); color: #fff; }
-
+    .badge-win { background: #e4f3ed; color: #397d67; }
+    .badge-lose { background: #f8e9eb; color: #a85e68; }
     .card-body {
-      font-size: 0.85rem;
-      color: var(--text-sub);
+      font-size: .83rem;
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 5px;
     }
-
+    .card-body strong { color: #71899a; }
     .card-memo {
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px dashed var(--border-color);
+      margin-top: 7px;
+      padding: 10px 12px;
+      background: #f1f6f9;
+      border: 1px solid #e6eef3;
+      border-radius: 9px;
       color: var(--text-main);
       white-space: pre-wrap;
+      font-size: .82rem;
     }
-
-    .card-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
+    .card-actions { display: flex; justify-content: flex-end; gap: 7px; margin-top: 11px; }
     .btn-small {
-      padding: 3px 8px;
-      font-size: 0.75rem;
+      padding: 5px 12px;
+      font-size: .73rem;
       width: auto;
-      background: var(--border-color);
-      color: var(--text-main);
+      background: #f1f6f9;
+      color: #58758a;
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+      letter-spacing: 0;
     }
-
     .btn-delete {
-      background: rgba(239, 68, 68, 0.2);
-      color: var(--lose-color);
+      background: #fbf0f1;
+      color: #b66d76;
+      border-color: #efdadd;
+    }
+    .btn-delete:hover { background: #f7e4e7; }
+
+    @media (max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 650px) {
+      body { padding: 16px 11px 30px; }
+      header { padding: 25px 12px 22px; border-radius: 18px; margin-bottom: 16px; }
+      header::before { left: 4%; }
+      header::after { right: 4%; }
+      .dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-bottom: 15px; }
+      .stat-card { padding: 14px 8px; border-radius: 14px; }
+      .panel { padding: 17px 14px; border-radius: 17px; }
+      .panel h2 { font-size: 1rem; }
+      .form-row { gap: 8px; }
+      .card-header { align-items: flex-start; }
+      .badge-group { justify-content: flex-start; }
+      .search-bar { flex-direction: column; }
+      .search-bar input, .search-bar select { flex: auto; width: 100%; }
     }
   </style>
 </head>
@@ -266,7 +318,8 @@
 
 <div class="container">
   <header>
-    <h1>ホワサバ SVS対戦相手記録・分析</h1>
+    <h1>SVS BATTLE ARCHIVE</h1>
+    <p>WHITEOUT SURVIVAL　・　対戦記録データベース</p>
   </header>
 
   <div class="dashboard">
@@ -276,7 +329,7 @@
     </div>
     <div class="stat-card">
       <div class="value" id="stat-winrate">0%</div>
-      <div class="label">全体勝率</div>
+      <div class="label">本戦勝率</div>
     </div>
     <div class="stat-card">
       <div class="value" id="stat-acc1">0 / 0%</div>
@@ -305,28 +358,36 @@
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label for="account-select">参戦アカウント</label>
-            <select id="account-select" onchange="toggleCustomAccountInput()">
-              <option value="3288 Lune">3288 Lune</option>
-              <option value="3781 Chocolat">3781 Chocolat</option>
-              <option value="両方">両方</option>
-              <option value="custom">手入力（その他）</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="result">勝敗結果</label>
-            <select id="result">
-              <option value="win">勝利</option>
-              <option value="lose">敗北</option>
-            </select>
-          </div>
+        <div class="form-group">
+          <label for="account-select">参戦アカウント</label>
+          <select id="account-select" onchange="toggleCustomAccountInput()">
+            <option value="3288 Lune">3288 Lune</option>
+            <option value="3781 Chocolat">3781 Chocolat</option>
+            <option value="両方">両方</option>
+            <option value="custom">手入力（その他）</option>
+          </select>
         </div>
 
         <div class="form-group" id="custom-account-group" style="display: none;">
           <label for="account-custom">アカウント名を手入力</label>
           <input type="text" id="account-custom" placeholder="例: メイン / 〇〇鯖サブ">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prep-result">準備フェーズ（前哨戦）</label>
+            <select id="prep-result">
+              <option value="win">勝利</option>
+              <option value="lose">敗北</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="result">本戦結果</label>
+            <select id="result">
+              <option value="win">勝利</option>
+              <option value="lose">敗北</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group">
@@ -335,8 +396,13 @@
         </div>
 
         <div class="form-group">
-          <label for="whales">高戦力プレイヤー・注目の同盟</label>
-          <input type="text" id="whales" placeholder="例: FC8×3名 / Top1同盟が強力">
+          <label for="alliances">高火力・主要同盟</label>
+          <input type="text" id="alliances" placeholder="例: Top1同盟が強力、〇〇同盟がゲリラ特化">
+        </div>
+
+        <div class="form-group">
+          <label for="whales">高戦力プレイヤー（鯨）</label>
+          <input type="text" id="whales" placeholder="例: FC8×3名、〇〇さん（専武Lv10）">
         </div>
 
         <div class="form-group">
@@ -365,7 +431,7 @@
       </h2>
 
       <div class="search-bar">
-        <input type="text" id="search-keyword" placeholder="鯖番号、メモなど..." oninput="renderRecords()">
+        <input type="text" id="search-keyword" placeholder="鯖番号、同盟、メモなど..." oninput="renderRecords()">
         <select id="filter-account" onchange="renderRecords()">
           <option value="all">全アカウント</option>
           <option value="3288 Lune">3288 Lune</option>
@@ -373,9 +439,9 @@
           <option value="両方">両方</option>
         </select>
         <select id="filter-result" onchange="renderRecords()">
-          <option value="all">すべての勝敗</option>
-          <option value="win">勝利のみ</option>
-          <option value="lose">敗北のみ</option>
+          <option value="all">すべての本戦勝敗</option>
+          <option value="win">本戦勝利のみ</option>
+          <option value="lose">本戦敗北のみ</option>
         </select>
       </div>
 
@@ -422,15 +488,17 @@
       server: serverNum,
       date: document.getElementById('svs-date').value,
       account: getSelectedAccountName(),
+      prepResult: document.getElementById('prep-result').value,
       result: document.getElementById('result').value,
       timezone: document.getElementById('timezone').value.trim(),
+      alliances: document.getElementById('alliances').value.trim(),
       whales: document.getElementById('whales').value.trim(),
       tactics: document.getElementById('tactics').value.trim(),
       memo: document.getElementById('memo').value.trim()
     };
 
     if (editId) {
-      records = records.map(r => r.id === record.id ? record : r);
+      records = records.map(r => String(r.id) === String(record.id) ? record : r);
     } else {
       records.unshift(record);
     }
@@ -443,11 +511,13 @@
     document.getElementById('server-num').value = '';
     document.getElementById('edit-id').value = '';
     document.getElementById('timezone').value = '';
+    document.getElementById('alliances').value = '';
     document.getElementById('whales').value = '';
     document.getElementById('tactics').value = '';
     document.getElementById('memo').value = '';
     document.getElementById('account-custom').value = '';
     document.getElementById('account-select').value = '3288 Lune';
+    document.getElementById('prep-result').value = 'win';
     document.getElementById('result').value = 'win';
     
     document.getElementById('form-title').innerText = 'SVS戦績を登録';
@@ -495,7 +565,8 @@
       const matchKw = `#${r.server}`.includes(keyword) || 
                       r.account.toLowerCase().includes(keyword) ||
                       r.timezone.toLowerCase().includes(keyword) || 
-                      r.whales.toLowerCase().includes(keyword) || 
+                      (r.alliances && r.alliances.toLowerCase().includes(keyword)) ||
+                      (r.whales && r.whales.toLowerCase().includes(keyword)) || 
                       r.tactics.toLowerCase().includes(keyword) || 
                       r.memo.toLowerCase().includes(keyword);
       const matchAcc = filterAcc === 'all' || r.account === filterAcc;
@@ -504,38 +575,47 @@
     });
 
     if (filtered.length === 0) {
-      listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:20px;">該当する対戦記録はありません</div>';
+      listEl.innerHTML = '<div style="text-align:center; color:var(--text-sub); padding:30px;">対戦記録がまだありません</div>';
       return;
     }
 
-    listEl.innerHTML = filtered.map(r => `
-      <div class="record-card ${r.result}">
-        <div class="card-header">
-          <div>
-            <span class="server-no">#${r.server}</span>
-            <span class="account-badge">${r.account}</span>
+    listEl.innerHTML = filtered.map(r => {
+      const prepText = r.prepResult === 'win' ? '準備 勝' : '準備 敗';
+      const prepClass = r.prepResult === 'win' ? 'badge-win' : 'badge-lose';
+      const mainText = r.result === 'win' ? '本戦 勝' : '本戦 敗';
+      const mainClass = r.result === 'win' ? 'badge-win' : 'badge-lose';
+
+      return `
+        <div class="record-card ${r.result}">
+          <div class="card-header">
+            <div>
+              <span class="server-no">#${r.server}</span>
+              <span class="account-badge">${r.account}</span>
+            </div>
+            <div class="badge-group">
+              <span style="font-size:0.75rem; color:var(--text-sub); margin-right:4px;">${r.date}</span>
+              <span class="prep-badge ${prepClass}">${prepText}</span>
+              <span class="result-badge ${mainClass}">${mainText}</span>
+            </div>
           </div>
-          <div>
-            <span style="font-size:0.8rem; color:var(--text-sub); margin-right:8px;">${r.date}</span>
-            <span class="result-badge">${r.result === 'win' ? '勝利' : '敗北'}</span>
+          <div class="card-body">
+            ${r.timezone ? `<div><strong>時間帯:</strong> ${r.timezone}</div>` : ''}
+            ${r.alliances ? `<div><strong>主要同盟:</strong> ${r.alliances}</div>` : ''}
+            ${r.whales ? `<div><strong>高戦力(鯨):</strong> ${r.whales}</div>` : ''}
+            ${r.tactics ? `<div><strong>立ち回り:</strong> ${r.tactics}</div>` : ''}
+            ${r.memo ? `<div class="card-memo"><strong>対策メモ:</strong>\n${r.memo}</div>` : ''}
+          </div>
+          <div class="card-actions">
+            <button class="btn-small" onclick="editRecord(${r.id})">編集</button>
+            <button class="btn-small btn-delete" onclick="deleteRecord(${r.id})">削除</button>
           </div>
         </div>
-        <div class="card-body">
-          ${r.timezone ? `<div><strong>時間帯:</strong> ${r.timezone}</div>` : ''}
-          ${r.whales ? `<div><strong>戦力・同盟:</strong> ${r.whales}</div>` : ''}
-          ${r.tactics ? `<div><strong>立ち回り:</strong> ${r.tactics}</div>` : ''}
-          ${r.memo ? `<div class="card-memo"><strong>対策メモ:</strong>\n${r.memo}</div>` : ''}
-        </div>
-        <div class="card-actions">
-          <button class="btn-small" onclick="editRecord(${r.id})">編集</button>
-          <button class="btn-small btn-delete" onclick="deleteRecord(${r.id})">削除</button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
   function editRecord(id) {
-    const r = records.find(item => item.id === id);
+    const r = records.find(item => String(item.id) === String(id));
     if (!r) return;
 
     document.getElementById('edit-id').value = r.id;
@@ -552,11 +632,13 @@
       document.getElementById('account-custom').value = r.account;
     }
 
+    document.getElementById('prep-result').value = r.prepResult || 'win';
     document.getElementById('result').value = r.result;
-    document.getElementById('timezone').value = r.timezone;
-    document.getElementById('whales').value = r.whales;
-    document.getElementById('tactics').value = r.tactics;
-    document.getElementById('memo').value = r.memo;
+    document.getElementById('timezone').value = r.timezone || '';
+    document.getElementById('alliances').value = r.alliances || '';
+    document.getElementById('whales').value = r.whales || '';
+    document.getElementById('tactics').value = r.tactics || '';
+    document.getElementById('memo').value = r.memo || '';
 
     document.getElementById('form-title').innerText = '記録を編集';
     document.getElementById('submit-btn').innerText = '変更を更新';
@@ -565,7 +647,7 @@
 
   function deleteRecord(id) {
     if (confirm('この記録を削除してもよろしいですか？')) {
-      records = records.filter(r => r.id !== id);
+      records = records.filter(r => String(r.id) !== String(id));
       saveAndRefresh();
     }
   }
