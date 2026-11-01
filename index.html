@@ -287,6 +287,9 @@
 
 <!-- index.html の下部ツールボタン群 -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; width: 100%; margin-top: 15px; margin-bottom: 30px;">
+    <a href="svs_analyzer.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0284c7, #0ea5e9);">
+        🏆 SvS対戦分析を開く
+    </a>
     <a href="clejoy_simple.html" target="_blank" class="primary-btn" style="text-decoration: none; width: 100%; text-align: center; box-sizing: border-box; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #42a5f5, #1e88e5);">
         🛡 クレジョイ盾兵計算機を開く
     </a>
@@ -416,3 +419,1650 @@
 </body>
 
 </html>
+/* ==========================================
+   Whiteout Checklist V4.9
+   style.css (ピン留め固定＆ソート安定化対応)
+========================================== */
+
+:root{
+    --bg:#eef4ff;
+    --card:#ffffff;
+    --blue:#4b82ff;
+    --blue2:#6fa0ff;
+    --border:#d8e5ff;
+    --text:#2d3748;
+    --success:#53c26d;
+    --shadow: 0 4px 15px rgba(0,0,0,.08);
+    --radius:16px;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:var(--bg);
+    font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
+    color:var(--text);
+    padding:18px;
+}
+
+.container{
+    max-width:1800px;
+    margin:auto;
+}
+
+/* HEADER */
+.top-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:14px 18px;
+    margin-bottom:18px;
+    box-shadow:var(--shadow);
+}
+
+.character-bar{ display:flex; gap:10px; flex-wrap:wrap; }
+.character-btn{ width:120px; border:none; cursor:pointer; border-radius:12px; background:#edf4ff; padding:10px; transition:.2s; }
+.character-btn:hover{ transform:translateY(-2px); }
+.character-btn.active{ background:var(--blue); color:white; }
+.character-name{ font-size:15px; font-weight:bold; }
+.character-progress{ margin-top:4px; font-size:13px; opacity:.85; }
+
+.header-right{ display:flex; gap:18px; }
+.bear-card{ width:200px; border:1px solid var(--border); border-radius:14px; background:#f8fbff; padding:12px; }
+.bear-title{ font-size:13px; color:#666; }
+.bear-date-row{ margin-top:5px; display:flex; justify-content:space-between; align-items:center; }
+#bearDate{ font-size:24px; font-weight:bold; }
+#bearTime{ margin-top:5px; font-size:16px; color:#666; }
+.icon-btn{ border:none; background:none; cursor:pointer; font-size:18px; }
+
+.progress-card{ width:340px; }
+.progress-header{ display:flex; justify-content:space-between; margin-bottom:8px; font-weight:bold; }
+.progress-bar{ width:100%; height:18px; background:#dbe7ff; border-radius:999px; overflow:hidden; }
+.progress-fill{ width:0%; height:100%; background: linear-gradient(90deg, #53c26d, #87e49f); transition:.3s; }
+.progress-count{ margin-top:6px; text-align:center; font-size:13px; color:#666; }
+
+.dashboard{ display:grid; grid-template-columns: 260px 340px 1fr; gap:18px; align-items:start; }
+.card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; }
+.card h2{ margin-bottom:15px; color:var(--blue); font-size:20px; }
+
+.task-container{ display:flex; flex-direction:column; gap:8px; }
+.task-item{ display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; transition:.2s; cursor:pointer; }
+.task-item:hover{ background:#f5f9ff; }
+.task-item.checked{ background:#edf4ff; color:#888; text-decoration:line-through; }
+
+.time-table{ width:100%; border-collapse:collapse; }
+.time-table th{ padding:10px; border:1px solid var(--border); font-size:15px; }
+.time-table td{ border:1px solid #e8eefb; padding:8px; text-align:center; }
+.time-table td:first-child{ text-align:left; white-space:nowrap; font-weight:600; }
+
+.time9{ background:#fff5b5; }
+.time17{ background:#ffd8a8; }
+.time1{ background:#dce8ff; }
+.small-note{ display:block; margin-top:3px; font-size:11px; color:#777; }
+
+.repeat-card { margin-top: 12px; }
+.repeat-row { padding: 12px; margin-bottom: 10px; background: #f8fbff; border: 1px solid #d8e5ff; border-radius: 12px; }
+.repeat-row:last-child { margin-bottom: 0; }
+.repeat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.repeat-title { font-weight: bold; font-size: 14px; color: #2d3748; }
+.repeat-count-badge { font-size: 12px; background: #e2edff; color: #3182ce; padding: 2px 8px; border-radius: 12px; font-weight: bold; }
+.repeat-stars-row { color: #ffcf4a; font-size: 14px; letter-spacing: 2px; margin-bottom: 8px; word-break: break-all; }
+.repeat-bottom { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.repeat-time { font-family: Consolas, Monaco, monospace; font-weight: bold; font-size: 14px; color: #e53e3e; background: #fff5f5; padding: 6px 12px; border-radius: 6px; border: 1px solid #fed7d7; }
+.repeat-time.ready { color: #276749; background: #f0fff4; border-color: #c6f6d5; }
+.repeat-add-btn { background: var(--blue); color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; transition: .2s; }
+.repeat-add-btn:hover { background: var(--blue2); }
+
+.bottom-area{ margin-top:18px; display:grid; grid-template-columns: 2fr 1fr; gap:18px; }
+.card-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.primary-btn{ border:none; cursor:pointer; border-radius:8px; padding:8px 14px; background:var(--blue); color:white; }
+.primary-btn:hover{ background:var(--blue2); }
+.success-btn{ border:none; cursor:pointer; border-radius:8px; padding:8px 14px; background:var(--success); color:white; }
+.input-form{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.input-form.hidden{ display:none !important; }
+.input-form input{ flex:1; min-width:140px; padding:8px; border:1px solid var(--border); border-radius:8px; }
+
+.event-container{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.event-item{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; margin-bottom:10px; border:1px solid #d7e4ff; border-radius:10px; background:#fff; transition: background 0.2s, border-color 0.2s; }
+.event-item.is-pinned { background: #fffdf0; border-color: #fbd38d; }
+.event-item.checked{ opacity:.55; }
+.event-left{ flex:1; }
+.event-title{ font-size:16px; font-weight:bold; margin-bottom:4px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.pinned-tag { font-size: 11px; background: #feebc8; color: #c05621; border-radius: 6px; padding: 1px 6px; font-weight: bold; }
+.event-memo{ color:#666; font-size:13px; margin-top:2px; }
+.event-right{ display:flex; gap:6px; align-items:center; }
+.event-right button{ width:34px; height:34px; cursor:pointer; border-radius: 6px; border: 1px solid #e2e8f0; background: #f8fafc; }
+.event-right button:hover { background: #edf2f7; }
+.event-right button.pin-btn.active { background: #feebc8; border-color: #fbd38d; }
+.event-hidden{ opacity:0.4; filter:grayscale(100%); }
+.event-item.event-hidden .event-title { text-decoration: line-through; color: #94a3b8; }
+
+.officer-card{ display:flex; flex-direction:column; height:780px; }
+#officerContainer{ flex:1; overflow-y:auto; padding-right:8px; }
+.officer-item{ display:grid; grid-template-columns: 28px 1fr auto; gap:10px; align-items:center; padding:8px 10px; background:#f8fbff; border:1px solid var(--border); border-radius:10px; }
+.officer-item.checked{ opacity:.55; text-decoration:line-through; }
+.officer-delete{ width:30px; height:30px; border:none; border-radius:8px; cursor:pointer; background:#edf4ff; }
+.officer-delete:hover{ background:#dce8ff; }
+
+.station-card { background: white; border: 1px solid #d6e4ff; border-radius: 18px; padding: 16px; min-width: 240px; display: flex; flex-direction: column; justify-content: space-between; }
+.station-title{ font-weight:bold; font-size:18px; }
+.station-count{ font-size:16px; font-weight:bold; }
+
+.underground-card{ margin-top:18px; }
+.memo-button{ width:100%; text-align:left; padding:12px 16px; border:none; border-radius:10px; cursor:pointer; background:#edf4ff; color:var(--blue); font-weight:bold; font-size:16px; }
+.memo-button:hover{ background:#dce8ff; }
+.memo-body{ margin-top:12px; padding:14px; background:#f8fbff; border-radius:10px; }
+.memo-body.hidden{ display:none !important; }
+.memo-body pre{ white-space:pre-wrap; line-height:1.8; font-family: Consolas, "Yu Gothic UI", monospace; }
+
+::-webkit-scrollbar{ width:9px; }
+::-webkit-scrollbar-thumb{ background:#c8d8ff; border-radius:999px; }
+::-webkit-scrollbar-track{ background:transparent; }
+
+/* 🌸 可愛い一括ボタン */
+.quick-action-bar.cute-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.quick-btn.cute-btn { border: none; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
+.quick-btn.cute-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 10px rgba(0,0,0,0.15); }
+.quick-btn.cute-btn:active { transform: translateY(1px); }
+.quick-btn.cute-btn.daily-all { background: linear-gradient(135deg, #abecd6 0%, #fbed96 100%); color: #2d5a44; }
+.quick-btn.cute-btn.day { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #5a2e38; }
+.quick-btn.cute-btn.night { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #1e3c72; }
+.quick-btn.cute-btn.reset { background: #e2e8f0; color: #64748b; }
+
+.time-quick-btn { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); border: none; border-radius: 12px; padding: 3px 8px; font-size: 11px; font-weight: bold; color: #4a2574; margin-top: 4px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.08); transition: 0.2s; }
+.time-quick-btn:hover { transform: scale(1.05); }
+
+/* ⚡ 時短モード */
+body.short-mode .city-card,
+body.short-mode .bottom-area,
+body.short-mode .two-column-layout { display: none !important; }
+
+/* 🏷 イベントバッジ */
+.event-badge { font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px; display: inline-block; }
+.event-badge.active { background: #ffe3e3; color: #e53e3e; }
+.event-badge.upcoming { background: #eef2ff; color: #4338ca; }
+.event-badge.ended { background: #f3f4f6; color: #9ca3af; }
+
+/* 🪟 定例セット モーダル ポップアップ (非表示クラスの確実化) */
+.hidden { display: none !important; }
+
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); display: flex; justify-content: center; align-items: center; z-index: 999; backdrop-filter: blur(2px); }
+.modal-overlay.hidden { display: none !important; }
+.modal-content { background: white; border-radius: 16px; padding: 20px; width: 90%; max-width: 540px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; }
+.modal-close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #a0aec0; }
+
+.preset-group { margin-bottom: 16px; }
+.preset-group h4 { font-size: 13px; color: #4a5568; margin-bottom: 8px; }
+.preset-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.preset-btn { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 12px; font-size: 13px; font-weight: bold; color: #2d3748; cursor: pointer; transition: 0.2s; text-align: left; }
+.preset-btn:hover { background: #edf2f7; border-color: #cbd5e0; }
+
+.time-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.time-select-btn { background: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; border-radius: 8px; padding: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 12px; text-align: center; }
+.time-select-btn:hover { background: #3182ce; color: white; }
+
+/* ==========================================
+   🏰 都市チェック用デザインバランス調整
+========================================== */
+
+.city-card {
+    align-self: start;
+}
+
+.city-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px !important;
+    margin-bottom: 4px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.city-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.city-label {
+    flex: 1;
+    font-size: 16px !important;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.city-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px !important;
+}
+
+/* ==========================================
+   ☑ 大きくて押しやすいチェックボックス設定
+========================================== */
+
+.task-item input[type="checkbox"],
+.event-item input[type="checkbox"],
+.officer-item input[type="checkbox"],
+.time-table input[type="checkbox"] {
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer;
+    accent-color: var(--blue);
+    border-radius: 6px;
+    transition: transform 0.1s ease;
+}
+
+.city-check input[type="checkbox"] {
+    width: 24px !important;
+    height: 24px !important;
+    cursor: pointer;
+    accent-color: var(--blue);
+    border-radius: 5px;
+}
+
+input[type="checkbox"]:active {
+    transform: scale(0.92);
+}
+
+.task-item, .event-item {
+    padding: 12px 14px !important;
+}
+
+@media (max-width:1200px){ .dashboard, .bottom-area { grid-template-columns:1fr; } }
+@media (max-width:700px){ body{ padding:10px; } .preset-btn-grid { grid-template-columns: 1fr; } }
+/* ==========================================
+   Whiteout Checklist 
+   data.js
+========================================== */
+
+
+// ==========================================
+// キャラクター設定 (SettingManager)
+// ==========================================
+
+const SettingManager = {
+    // 現在の設定を取得する
+    get: function() {
+        const saved = localStorage.getItem("ws_settings");
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error("設定の読み込みに失敗しました", e);
+            }
+        }
+        // 初回起動時や設定がない時のデフォルト値
+        return {
+            characters: ["Lune", "Melune", "Chocolat", "Vanille"],
+            alliances: {
+                Lune: "MEL",
+                Melune: "MEL",
+                Chocolat: "RxR",
+                Vanille: "RxR"
+            }
+        };
+    },
+    // 設定を保存して画面を更新する
+    save: function(data) {
+        localStorage.setItem("ws_settings", JSON.stringify(data));
+        location.reload(); 
+    }
+};
+
+// ==========================================
+// デイリー
+// ==========================================
+
+const DAILY_TASKS = [
+
+    {
+        id: "daily_chat",
+        label: "💬 チャット確認"
+    },
+
+    {
+        id: "daily_red",
+        label: "🔴 赤ぽち確認"
+    },
+
+    {
+        id: "daily_station",
+        label: "🏭 ステーションチェック"
+    },
+
+    {
+        id: "daily_event",
+        label: "🎪 イベントタイマー"
+    },
+
+    {
+        id: "daily_union",
+        label: "🛒 同盟ショップ確認"
+    },
+
+    {
+        id: "daily_shop",
+        label: "🛍 ショップ買い物"
+    }
+
+];
+
+
+// ==========================================
+// 都市チェック
+// ==========================================
+
+const CITY_TASKS = [
+
+    {
+        id: "city_route",
+        label: "🛣 旅路",
+        double: true
+    },
+
+    {
+        id: "city_build",
+        label: "🏗 建築",
+        double: true
+    },
+
+    {
+        id: "city_train",
+        label: "⚔ 兵士訓練",
+        double: true
+    },
+
+    {
+        id: "city_research",
+        label: "🔬 研究",
+        double: true
+    },
+
+    {
+        id: "city_school",
+        label: "🎓 戦争学園",
+        double: true
+    },
+
+    {
+        id: "city_specialist",
+        label: "👨‍🔧 専門家",
+        double: true
+    },
+
+    {
+        id: "city_puzzle",
+        label: "🧩 パズル",
+        double: true
+    },
+
+    {
+        id: "city_commander",
+        label: "🎖 領主司令",
+        double: true
+    },
+
+    {
+        id: "city_build_daily",
+        label: "🏗 建築デイリー報酬"
+    },
+
+    {
+        id: "city_lab",
+        label: "⚗ 錬成実験室"
+    },
+
+    {
+        id: "city_underground",
+        label: "🌋 地底探検"
+    },
+
+    {
+        id: "city_island",
+        label: "🏝 暁の島いいね"
+    },
+
+    {
+        id: "city_alliance_coin",
+        label: "🤝 同盟コイン集め"
+    },
+
+    {
+        id: "city_arena",
+        label: "🏟 競技場"
+    }
+
+];
+
+// ==========================================
+// 時間チェック
+// ==========================================
+
+const TIME_GROUPS = [
+
+    {
+        id: "9",
+        title: "🌅 9:00",
+        className: "time9"
+    },
+
+    {
+        id: "17",
+        title: "🌇 17:00",
+        className: "time17"
+    },
+
+    {
+        id: "1",
+        title: "🌙 1:00",
+        className: "time1"
+    }
+
+];
+
+const TIME_TASKS = [
+
+    {
+        id: "search",
+        label: "🔍 探検回収",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "island",
+        label: "🏝 暁の島",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "fire",
+        label: "🔥 灯台",
+        note: "日曜：烈火注意",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "mine",
+        label: "⛏ 採集",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "rally",
+        label: "🤝 自動集結",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "help",
+        label: "🔗 同盟支援",
+        times: ["9","17","1"]
+    },
+
+    {
+        id: "pet",
+        label: "🐾 ペット",
+        times: ["9","17"]
+    },
+
+    {
+        id: "supply",
+        label: "🎁 旅の補給",
+        times: ["9","17"]
+    }
+
+];
+
+// ==========================================
+// 初期幹部メニュー (メモ帳)
+// ==========================================
+
+const DEFAULT_OFFICERS = [
+
+    "熊予約",
+
+    "大型採集9:00",
+
+    "大型採集21:00",
+
+    "コイン"
+
+];
+
+// ==========================================
+// 熊罠
+// ==========================================
+
+// 基準日
+const BEAR_START = "2026-07-31";
+
+// 開催間隔（日）
+const BEAR_INTERVAL = 2;
+
+// デフォルト時間
+const DEFAULT_BEAR_TIME = "21:00";
+
+// ==========================================
+// LocalStorage
+// ==========================================
+
+const STORAGE = {
+
+    character: "ws_current_character",
+
+    events: "ws_events",
+
+    lastReset: "ws_last_reset",
+
+    backup: "ws_backup"
+
+};
+// data.js の最後に追加
+
+// 一括完了用のタスクIDリストを取得する関数
+function getQuickTaskIds(timeGroupId = null) {
+    if (timeGroupId) {
+        return TIME_TASKS
+            .filter(t => !t.times || t.times.includes(timeGroupId))
+            .map(t => `time_${timeGroupId}_${t.id}`);
+    }
+    return DAILY_TASKS.map(t => t.id);
+}
+/* ==========================================
+   Whiteout Checklist V4.9 (Fix: Event Pin & Sort)
+   script.js
+========================================== */
+
+const STORAGE_INTERVALS = [
+    0.5, 1, 1.5, 2.5, 5, 10, 10, 10, 10, 20, 
+    30, 45, 60, 60, 72, 108, 108, 108, 108, 120, 
+    120, 120, 120, 120, 120, 120, 120, 120, 120, 120
+];
+
+const NENSO_DEFAULT_TIMES = {
+    "Lune": "14:00",
+    "Melune": "11:00",
+    "Chocolat": "20:00",
+    "Vanille": "23:00"
+};
+
+let currentCharacter = localStorage.getItem("ws_current_character") || "Lune";
+
+function checkDailyReset() {
+    const lastResetStr = localStorage.getItem("ws_last_reset_date");
+    const now = new Date();
+
+    let resetTime = new Date();
+    resetTime.setHours(9, 0, 0, 0);
+
+    if (now < resetTime) {
+        resetTime.setDate(resetTime.getDate() - 1);
+    }
+
+    const resetTimeISO = resetTime.toISOString();
+
+    if (!lastResetStr || new Date(lastResetStr).getTime() < resetTime.getTime()) {
+        Object.keys(localStorage).forEach(key => {
+            if (key === "wsStationManagerStateV4" || key.startsWith("ws_station") || key.startsWith("wh_expert_")) {
+                return;
+            }
+
+            if (key === "officer_list") {
+                try {
+                    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+                    officers = officers.map(o => ({ ...o, checked: false }));
+                    localStorage.setItem("officer_list", JSON.stringify(officers));
+                } catch (e) {}
+                return;
+            }
+
+            if (
+                key.includes("_hide_") ||
+                key.startsWith("ws_") ||
+                key.includes("_list") ||
+                key.endsWith("_bear_time") ||
+                key.endsWith("_storage_time") ||
+                key.endsWith("_hero_time")
+            ) {
+                return;
+            }
+            localStorage.removeItem(key);
+        });
+
+        localStorage.setItem("ws_last_reset_date", resetTimeISO);
+    }
+}
+
+function init() {
+    checkDailyReset();
+    renderCharacters();
+    renderBear();
+    renderStationSummary();
+    renderDaily();
+    renderCity();
+    renderTime();
+    renderRepeat();
+    renderEvents();
+    renderOfficers();
+    updateProgress();
+    setupEvents();
+    applyModeState();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+
+function getItemLabel(item) {
+    if (typeof item === "string") return item;
+    return item ? (item.label || item.name || item.title || "") : "";
+}
+
+function getCharProgressPercent(charName) {
+    let total = 0, checked = 0;
+    const isChecked = (id) => localStorage.getItem(`${charName}_${id}`) === "1";
+
+    DAILY_TASKS.forEach(t => { 
+        total++; 
+        if (isChecked(t.id)) checked++; 
+    });
+
+    CITY_TASKS.forEach(t => {
+        if (t.double) {
+            total += 2;
+            if (isChecked(`${t.id}_am`)) checked++;
+            if (isChecked(`${t.id}_pm`)) checked++;
+        } else {
+            total++;
+            if (isChecked(t.id)) checked++;
+        }
+    });
+
+    TIME_TASKS.forEach(task => {
+        TIME_GROUPS.forEach(group => {
+            const supported = task.times ? task.times.includes(group.id) : true;
+            if (!supported) return;
+
+            total++;
+            if (isChecked(`time_${group.id}_${task.id}`)) {
+                checked++;
+            }
+        });
+    });
+
+    return total === 0 ? 0 : Math.round((checked / total) * 100);
+}
+
+function renderCharacters() {
+    const container = document.getElementById("characterBar");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const settings = SettingManager.get();
+    const characters = settings.characters;
+    const alliances = settings.alliances;
+    const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"];
+
+    characters.forEach((char, index) => {
+        const btn = document.createElement("button");
+        const isMain = (index === 0);
+        const isActive = (char === currentCharacter);
+        const color = colors[index % colors.length];
+
+        btn.className = `character-btn ${isActive ? "active" : ""}`;
+        btn.style.borderColor = isMain ? "#FFD700" : color;
+        btn.style.borderWidth = "2px";
+        btn.style.borderStyle = "solid";
+        btn.style.borderRadius = "12px";
+        btn.style.padding = "10px";
+        btn.style.minWidth = "100px";
+
+        const alliance = alliances[char] || "無所属";
+        const charPercent = getCharProgressPercent(char);
+
+        btn.innerHTML = `
+            <div style="font-size:11px; font-weight:bold; color:#666; margin-bottom:4px;">[${alliance}]</div>
+            <div style="font-size:18px; font-weight:900; color:#333; margin-bottom:2px;">${char}</div>
+            <div style="font-size:13px; font-weight:bold; color:${color};">${charPercent}%</div>
+        `;
+        
+        btn.onclick = () => {
+            currentCharacter = char;
+            localStorage.setItem(STORAGE?.character || "ws_current_character", char);
+            init();
+        };
+        
+        container.appendChild(btn);
+    });
+}
+
+function renderBear() {
+    const dateEl = document.getElementById("bearDate");
+    const timeEl = document.getElementById("bearTime");
+    if (!dateEl || !timeEl) return;
+
+    const savedTime = localStorage.getItem(`${currentCharacter}_bear_time`) || DEFAULT_BEAR_TIME;
+    timeEl.textContent = savedTime;
+
+    const start = new Date(BEAR_START);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let next = new Date(start);
+    while (next < today) {
+        next.setDate(next.getDate() + BEAR_INTERVAL);
+    }
+
+    dateEl.textContent = `${next.getMonth() + 1}/${next.getDate()}`;
+}
+
+function renderDaily() {
+    const container = document.getElementById("dailyContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "quick-action-bar cute-bar";
+    headerDiv.innerHTML = `
+        <button class="quick-btn cute-btn daily-all" onclick="completeAllDaily(true)">⚡ デイリー一括完了</button>
+        <button class="quick-btn cute-btn reset" onclick="completeAllDaily(false)">↺ 解除</button>
+    `;
+    container.appendChild(headerDiv);
+
+    DAILY_TASKS.forEach(task => {
+        const checked = localStorage.getItem(`${currentCharacter}_${task.id}`) === "1";
+        const label = document.createElement("label");
+        label.className = `task-item ${checked ? "checked" : ""}`;
+        label.innerHTML = `
+            <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)">
+            <span>${getItemLabel(task)}</span>
+        `;
+        container.appendChild(label);
+    });
+}
+
+function completeAllDaily(state) {
+    DAILY_TASKS.forEach(task => {
+        localStorage.setItem(`${currentCharacter}_${task.id}`, state ? "1" : "0");
+    });
+    renderDaily();
+    updateProgress();
+}
+
+function renderCity() {
+    const container = document.getElementById("cityContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "quick-action-bar cute-bar";
+    headerDiv.innerHTML = `
+        <button class="quick-btn cute-btn day" onclick="completeCityByTime('am', true)">🌅 昼一括</button>
+        <button class="quick-btn cute-btn night" onclick="completeCityByTime('pm', true)">🌙 夜一括</button>
+        <button class="quick-btn cute-btn reset" onclick="resetCityDouble()">↺ クリア</button>
+    `;
+    container.appendChild(headerDiv);
+
+    CITY_TASKS.forEach(task => {
+        const div = document.createElement("div");
+        div.className = "city-item";
+
+        if (task.double) {
+            const checkedAM = localStorage.getItem(`${currentCharacter}_${task.id}_am`) === "1";
+            const checkedPM = localStorage.getItem(`${currentCharacter}_${task.id}_pm`) === "1";
+            div.innerHTML = `
+                <span class="city-label">${getItemLabel(task)}</span>
+                <div style="display:flex; gap:10px;">
+                    <label class="city-check">🌅 <input type="checkbox" ${checkedAM ? "checked" : ""} onchange="toggleTask('${task.id}_am', this.checked)"></label>
+                    <label class="city-check">🌙 <input type="checkbox" ${checkedPM ? "checked" : ""} onchange="toggleTask('${task.id}_pm', this.checked)"></label>
+                </div>
+            `;
+        } else {
+            const checked = localStorage.getItem(`${currentCharacter}_${task.id}`) === "1";
+            div.innerHTML = `
+                <span class="city-label">${getItemLabel(task)}</span>
+                <label class="city-check"><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)"></label>
+            `;
+        }
+        container.appendChild(div);
+    });
+}
+
+function completeCityByTime(timeType, state) {
+    CITY_TASKS.forEach(task => {
+        if (task.double) {
+            localStorage.setItem(`${currentCharacter}_${task.id}_${timeType}`, state ? "1" : "0");
+        }
+    });
+    renderCity();
+    updateProgress();
+}
+
+function resetCityDouble() {
+    CITY_TASKS.forEach(task => {
+        if (task.double) {
+            localStorage.setItem(`${currentCharacter}_${task.id}_am`, "0");
+            localStorage.setItem(`${currentCharacter}_${task.id}_pm`, "0");
+        }
+    });
+    renderCity();
+    updateProgress();
+}
+
+function renderTime() {
+    const container = document.getElementById("timeContainer");
+    if (!container) return;
+
+    let html = `<table class="time-table"><thead><tr><th>タスク</th>`;
+    TIME_GROUPS.forEach(g => {
+        html += `<th class="${g.className || ""}">
+            <div>${g.title}</div>
+            <button class="time-quick-btn" onclick="completeTimeGroup('${g.id}', true)">一括</button>
+        </th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
+    TIME_TASKS.forEach(task => {
+        html += `<tr><td>${getItemLabel(task)}${task.note ? `<span class="small-note">${task.note}</span>` : ""}</td>`;
+        TIME_GROUPS.forEach(g => {
+            const isSupported = task.times ? task.times.includes(g.id) : true;
+            if (isSupported) {
+                const key = `time_${g.id}_${task.id}`;
+                const checked = localStorage.getItem(`${currentCharacter}_${key}`) === "1";
+                html += `<td><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${key}', this.checked)"></td>`;
+            } else {
+                html += `<td style="color:#ccc;">-</td>`;
+            }
+        });
+        html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+}
+
+function completeTimeGroup(groupId, state) {
+    TIME_TASKS.forEach(task => {
+        const isSupported = task.times ? task.times.includes(groupId) : true;
+        if (isSupported) {
+            const key = `time_${groupId}_${task.id}`;
+            localStorage.setItem(`${currentCharacter}_${key}`, state ? "1" : "0");
+        }
+    });
+    renderTime();
+    updateProgress();
+}
+
+function renderRepeat() {
+    const container = document.getElementById("repeatContainer");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const tasks = [
+        { id: "repeat_hero", icon: "🎖", label: "英雄募集", max: 5 },
+        { id: "repeat_storage", icon: "📦", label: "倉庫回収", max: 30 }
+    ];
+
+    tasks.forEach(task => {
+        const count = Number(localStorage.getItem(`${currentCharacter}_${task.id}`) || 0);
+        const nextTimeStr = localStorage.getItem(`${currentCharacter}_${task.id}_time`) || "--:--";
+
+        const div = document.createElement("div");
+        div.className = "repeat-row";
+        
+        const stars = "★".repeat(Math.min(count, 10)) + (count > 10 ? ` +${count - 10}` : "");
+
+        let timeDisplay = nextTimeStr;
+        let isReady = false;
+
+        if (nextTimeStr && nextTimeStr !== "--:--") {
+            const now = new Date();
+            let targetDate = new Date(nextTimeStr);
+            if (isNaN(targetDate.getTime())) {
+                const parts = nextTimeStr.split(":");
+                if (parts.length >= 2) {
+                    targetDate = new Date();
+                    targetDate.setHours(Number(parts[0]), Number(parts[1]), Number(parts[2] || 0), 0);
+                }
+            }
+
+            const diffMs = targetDate - now;
+            if (!isNaN(diffMs)) {
+                if (diffMs <= 0) {
+                    timeDisplay = "READY";
+                    isReady = true;
+                } else {
+                    const totalSec = Math.ceil(diffMs / 1000);
+                    const h = Math.floor(totalSec / 3600);
+                    const m = Math.floor((totalSec % 3600) / 60);
+                    const s = totalSec % 60;
+
+                    const pad = (n) => String(n).padStart(2, '0');
+                    timeDisplay = h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+                }
+            }
+        } else {
+            timeDisplay = "READY";
+            isReady = true;
+        }
+
+        div.innerHTML = `
+            <div class="repeat-header">
+                <div class="repeat-title">${task.icon} ${task.label}</div>
+                <div class="repeat-count-badge">${count} / ${task.max}</div>
+            </div>
+            <div class="repeat-stars-row">${stars || "☆"}</div>
+            <div class="repeat-bottom">
+                <div class="repeat-time ${isReady ? 'ready' : ''}">${timeDisplay}</div>
+                <button class="repeat-add-btn" onclick="addRepeat('${task.id}', ${task.max})">＋ 実行</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function addRepeat(id, maxCount) {
+    let count = Number(localStorage.getItem(`${currentCharacter}_${id}`) || 0);
+    if (count >= maxCount) return;
+
+    count++;
+    localStorage.setItem(`${currentCharacter}_${id}`, count);
+
+    let minutesToAdd = 5;
+    if (id === "repeat_storage") {
+        minutesToAdd = STORAGE_INTERVALS[count - 1] || 120;
+    }
+
+    const next = new Date();
+    next.setSeconds(next.getSeconds() + Math.round(minutesToAdd * 60));
+
+    localStorage.setItem(
+        `${currentCharacter}_${id}_time`,
+        next.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
+
+    renderRepeat();
+    updateProgress();
+}
+
+function toggleTask(id, checked) {
+    localStorage.setItem(`${currentCharacter}_${id}`, checked ? "1" : "0");
+    renderDaily();
+    renderCity();
+    renderTime();
+    updateProgress();
+}
+
+function updateProgress() {
+    let total = 0, checked = 0;
+    const isChecked = (id) => localStorage.getItem(`${currentCharacter}_${id}`) === "1";
+
+    DAILY_TASKS.forEach(t => { 
+        total++; 
+        if (isChecked(t.id)) checked++; 
+    });
+
+    CITY_TASKS.forEach(t => {
+        if (t.double) {
+            total += 2;
+            if (isChecked(`${t.id}_am`)) checked++;
+            if (isChecked(`${t.id}_pm`)) checked++;
+        } else {
+            total++;
+            if (isChecked(t.id)) checked++;
+        }
+    });
+
+    TIME_TASKS.forEach(task => {
+        TIME_GROUPS.forEach(group => {
+            const supported = task.times ? task.times.includes(group.id) : true;
+            if (!supported) return;
+
+            total++;
+            if (isChecked(`time_${group.id}_${task.id}`)) {
+                checked++;
+            }
+        });
+    });
+
+    const percent = total === 0 ? 0 : Math.round((checked / total) * 100);
+
+    const fill = document.getElementById("progressFill");
+    const percentEl = document.getElementById("progressPercent");
+    const countEl = document.getElementById("progressCount");
+
+    if (fill) fill.style.width = `${percent}%`;
+    if (percentEl) percentEl.textContent = `${percent}%`;
+    if (countEl) countEl.textContent = `${checked} / ${total}`;
+
+    const charProg = document.getElementById(`prog_${currentCharacter}`);
+    if (charProg) charProg.textContent = `${percent}%`;
+}
+
+function renderStationSummary() {
+    const el = document.getElementById("stationToday");
+    if (!el) return;
+
+    const settings = SettingManager.get();
+    const alliance = settings.alliances[currentCharacter] || "MEL";
+
+    const urgent = Number(localStorage.getItem(`ws_station_${alliance}_now`) || 0);
+    const today = Number(localStorage.getItem(`ws_station_${alliance}_today`) || 0);
+
+    if (urgent > 0) {
+        el.innerHTML = `🔴 今すぐ閉鎖：${urgent}件<br>🟡 24時間以内：${today}件`;
+    } else {
+        el.innerHTML = `🟢 24時間以内：${today}件`;
+    }
+}
+
+function renderEvents() {
+    const container = document.getElementById("eventContainer");
+    if (!container) return;
+    
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "null");
+    if (!events || events.length === 0) {
+        events = typeof DEFAULT_EVENTS !== "undefined" ? DEFAULT_EVENTS : [];
+    }
+
+    // 元の配列を破壊しないように非破壊的ソートを実行
+    const sortedEvents = [...events].sort((a, b) => {
+        const aPinned = !!a.isPinned;
+        const bPinned = !!b.isPinned;
+        
+        if (aPinned !== bPinned) {
+            return aPinned ? -1 : 1;
+        }
+
+        const aDate = a.endDate ? new Date(a.endDate + "T23:59:59").getTime() : Infinity;
+        const bDate = b.endDate ? new Date(b.endDate + "T23:59:59").getTime() : Infinity;
+
+        if (aDate !== bDate) {
+            return aDate - bDate;
+        }
+
+        return 0;
+    });
+
+    container.innerHTML = sortedEvents.map((e, index) => {
+        const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        const hideKey = `${currentCharacter}_hide_event_${eventId}`;
+        const isHidden = localStorage.getItem(hideKey) === "1";
+        const checkKey = `${currentCharacter}_check_event_${eventId}`;
+        const isChecked = localStorage.getItem(checkKey) === "1";
+        const isPinned = !!e.isPinned;
+
+        let dateBadge = "";
+        if (e.startDate && e.endDate) {
+            const start = new Date(e.startDate + "T00:00:00");
+            const end = new Date(e.endDate + "T23:59:59");
+            const now = new Date();
+
+            const startFormat = `${start.getMonth()+1}/${start.getDate()}`;
+            const endFormat = `${end.getMonth()+1}/${end.getDate()}`;
+
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const endDayStart = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+            const diffDays = Math.round((endDayStart - todayStart) / (1000 * 60 * 60 * 24));
+
+            if (now < start) {
+                dateBadge = `<span class="event-badge upcoming">📅 ${startFormat}〜${endFormat} (予告)</span>`;
+            } else if (now <= end) {
+                if (diffDays === 0) {
+                    dateBadge = `<span class="event-badge active" style="background:#ff4d4f; color:#fff;">🔥 本日最終日 (今日まで！)</span>`;
+                } else {
+                    dateBadge = `<span class="event-badge active">🔥 開催中 (あと${diffDays}日)</span>`;
+                }
+            } else {
+                dateBadge = `<span class="event-badge ended">⌛ 終了</span>`;
+            }
+        }
+
+        return `
+            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}" data-id="${eventId}">
+                <div class="event-left" style="display:flex; align-items:center; gap:8px;">
+                    <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
+                    <div>
+                        <div class="event-title">
+                            ${isPinned ? '<span class="pinned-tag">📌 固定</span>' : ''}
+                            ${escapeHtml(e.title)} ${dateBadge}
+                        </div>
+                        ${e.memo ? `<div class="event-memo">⏰ ${escapeHtml(e.memo)}</div>` : ""}
+                    </div>
+                </div>
+                <div class="event-right">
+                    <button type="button" class="pin-btn ${isPinned ? "active" : ""}" onclick="togglePinEvent('${eventId}')" title="${isPinned ? "固定解除" : "一番上に固定"}">📌</button>
+                    <button type="button" onclick="editEvent('${eventId}')" title="編集">✏️</button>
+                    <button type="button" onclick="toggleHideEvent('${eventId}')" title="目隠し">${isHidden ? "👁" : "🙈"}</button>
+                    <button type="button" onclick="deleteEvent('${eventId}')" title="削除">❌</button>
+                </div>
+            </div>
+        `;
+    }).join("");
+    initListSortable();
+}
+
+function togglePinEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const eventObj = events.find((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id === String(eventId);
+    });
+
+    if (eventObj) {
+        eventObj.isPinned = !eventObj.isPinned;
+        localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+        renderEvents();
+    }
+}
+
+function editEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const eventObj = events.find((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id === String(eventId);
+    });
+
+    if (!eventObj) return;
+
+    const newTitle = prompt("イベント名を修正:", eventObj.title);
+    if (newTitle === null) return;
+    
+    const trimmedTitle = newTitle.trim();
+    if (!trimmedTitle) {
+        alert("イベント名を入力してください。");
+        return;
+    }
+
+    const newMemo = prompt("備考・時間を修正 (任意):", eventObj.memo || "");
+    if (newMemo === null) return;
+
+    eventObj.title = trimmedTitle;
+    eventObj.memo = newMemo.trim();
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    renderEvents();
+}
+
+function toggleEventCheck(eventId, checked) {
+    const checkKey = `${currentCharacter}_check_event_${eventId}`;
+    localStorage.setItem(checkKey, checked ? "1" : "0");
+    renderEvents();
+}
+
+function toggleHideEvent(eventId) {
+    const hideKey = `${currentCharacter}_hide_event_${eventId}`;
+    const isHidden = localStorage.getItem(hideKey) === "1";
+    
+    if (isHidden) {
+        localStorage.removeItem(hideKey);
+    } else {
+        localStorage.setItem(hideKey, "1");
+    }
+    
+    renderEvents();
+}
+
+function deleteEvent(eventId) {
+    let events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events = events.filter((e, index) => {
+        const id = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        return id !== String(eventId);
+    });
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    renderEvents();
+}
+
+function escapeHtml(text) {
+    return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+function renderOfficers() {
+    const container = document.getElementById("officerContainer");
+    if (!container) return;
+
+    const officerCard = document.getElementById("officerCard");
+    if (officerCard) {
+        officerCard.style.display = ""; 
+    }
+
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "null");
+    if (!officers) {
+        officers = DEFAULT_OFFICERS.map((t, idx) => ({ id: idx + 1, text: t, checked: false, author: "" }));
+        localStorage.setItem("officer_list", JSON.stringify(officers));
+    }
+
+    container.innerHTML = officers.map(o => {
+        const authorTag = o.author ? `<span style="font-size: 10px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: bold; color: #555;">${escapeHtml(o.author)}</span>` : "";
+        
+        return `
+            <div class="officer-item ${o.checked ? "checked" : ""}" style="display:flex; align-items:center;">
+                <input type="checkbox" ${o.checked ? "checked" : ""} onchange="toggleOfficer('${o.id}', this.checked)">
+                <div style="flex-grow:1; display:flex; align-items:center; margin-left: 8px;">
+                    ${authorTag}
+                    <span>${escapeHtml(o.text)}</span>
+                </div>
+                <button type="button" class="officer-delete" onclick="deleteOfficer('${o.id}')">❌</button>
+            </div>
+        `;
+    }).join("");
+
+    initListSortable();
+}
+
+function deleteOfficer(id) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    officers = officers.filter(o => String(o.id) !== String(id));
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers();
+}
+
+function toggleOfficer(id, checked) {
+    let officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+    officers = officers.map(o => {
+        if (String(o.id) === String(id)) {
+            o.checked = checked;
+        }
+        return o;
+    });
+    localStorage.setItem("officer_list", JSON.stringify(officers));
+    renderOfficers();
+}
+
+function openPresetModal() {
+    const modal = document.getElementById("presetModal");
+    const charNameEl = document.getElementById("modalCharName");
+    if (charNameEl) {
+        charNameEl.textContent = currentCharacter;
+    }
+
+    const now = new Date();
+    const startDate = now.toISOString().slice(0, 10);
+    const endDateObj = new Date();
+    endDateObj.setDate(now.getDate() + 6);
+    const endDate = endDateObj.toISOString().slice(0, 10);
+
+    const startInput = document.getElementById("presetStartDate");
+    const endInput = document.getElementById("presetEndDate");
+    if (startInput) startInput.value = startDate;
+    if (endInput) endInput.value = endDate;
+
+    if (modal) modal.classList.remove("hidden");
+}
+
+function closePresetModal() {
+    const modal = document.getElementById("presetModal");
+    if (modal) modal.classList.add("hidden");
+}
+
+function addPresetEvent(title, days, memoOverride = null) {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    let endDate = document.getElementById("presetEndDate")?.value;
+
+    if (!startDate) {
+        startDate = new Date().toISOString().slice(0, 10);
+    }
+    
+    if (!endDate || days === 1) {
+        const endDateObj = new Date(startDate);
+        endDateObj.setDate(endDateObj.getDate() + (days - 1));
+        endDate = endDateObj.toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events.push({
+        id: Date.now(),
+        title: title,
+        memo: memoOverride ? memoOverride : (days === 1 ? "1日開催イベント" : `${days}日間イベント`),
+        startDate: startDate,
+        endDate: endDate,
+        isPinned: false
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+function addGyoshoSet() {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    let endDate = document.getElementById("presetEndDate")?.value;
+
+    if (!startDate) startDate = new Date().toISOString().slice(0, 10);
+    if (!endDate) {
+        const endDateObj = new Date(startDate);
+        endDateObj.setDate(endDateObj.getDate() + 6);
+        endDate = endDateObj.toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    const nowId = Date.now();
+
+    const gyoshoItems = [
+        { title: "🐫 雪原行商: 護送 1回目", memo: "17:00 スタート" },
+        { title: "🐫 雪原行商: 護送 2回目", memo: "21:00 スタート" },
+        { title: "🐫 雪原行商: 護送 3回目", memo: "1:00 スタート" },
+        { title: "🤝 雪原行商: 支援護送", memo: "同盟員の護送を支援" },
+        { title: "⚔️ 雪原行商: 略奪", memo: "4回完了でチェック" }
+    ];
+
+    gyoshoItems.forEach((item, idx) => {
+        events.push({
+            id: nowId + idx,
+            title: item.title,
+            memo: item.memo,
+            startDate: startDate,
+            endDate: endDate,
+            isPinned: false
+        });
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+function addNensoEvent(selectedTime) {
+    let startDate = document.getElementById("presetStartDate")?.value;
+    if (!startDate) {
+        startDate = new Date().toISOString().slice(0, 10);
+    }
+
+    const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+    events.push({
+        id: Date.now(),
+        title: "🌋 燃霜鉱区",
+        memo: `エントリー: ${selectedTime} (${currentCharacter})`,
+        startDate: startDate,
+        endDate: startDate,
+        isPinned: false
+    });
+
+    localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+    closePresetModal();
+    renderEvents();
+}
+
+function applyModeState() {
+    const isShortMode = localStorage.getItem("ws_mode_short") === "1";
+    const body = document.body;
+    
+    if (isShortMode) {
+        body.classList.add("short-mode");
+    } else {
+        body.classList.remove("short-mode");
+    }
+
+    const radioShort = document.getElementById("modeShort");
+    const radioFull = document.getElementById("modeFull");
+    if (radioShort && radioFull) {
+        radioShort.checked = isShortMode;
+        radioFull.checked = !isShortMode;
+    }
+}
+
+function toggleShortMode(enabled) {
+    localStorage.setItem("ws_mode_short", enabled ? "1" : "0");
+    applyModeState();
+}
+
+function setupEvents() {
+    const editBearBtn = document.getElementById("editBearTime");
+    if (editBearBtn) {
+        editBearBtn.onclick = () => {
+            const cur = document.getElementById("bearTime")?.textContent || "21:00";
+            const val = prompt(`【${currentCharacter}】の熊罠時間を入力してください`, cur);
+            if (val) {
+                localStorage.setItem(`${currentCharacter}_bear_time`, val);
+                renderBear();
+            }
+        };
+    }
+    
+    const toggleMemoBtn = document.getElementById("toggleMemo");
+    const memoBody = document.getElementById("memoBody");
+    if (toggleMemoBtn && memoBody) {
+        toggleMemoBtn.onclick = () => memoBody.classList.toggle("hidden");
+    }
+
+    const toggleEventBtn = document.getElementById("toggleEventForm");
+    const eventForm = document.getElementById("eventForm");
+    if (toggleEventBtn && eventForm) {
+        toggleEventBtn.onclick = () => eventForm.classList.toggle("hidden");
+    }
+
+    const addEventBtn = document.getElementById("addEventBtn");
+    if (addEventBtn) {
+        addEventBtn.onclick = () => {
+            const titleInput = document.getElementById("eventTitle");
+            const memoInput = document.getElementById("eventMemo");
+            const startInput = document.getElementById("eventStartDate");
+            const endInput = document.getElementById("eventEndDate");
+
+            const title = titleInput.value.trim();
+            const memo = memoInput.value.trim();
+            const startDate = startInput.value;
+            const endDate = endInput.value;
+
+            if (!title) return;
+
+            const events = JSON.parse(localStorage.getItem(STORAGE?.events || "ws_events") || "[]");
+            events.push({ id: Date.now(), title, memo, startDate, endDate, isPinned: false });
+            localStorage.setItem(STORAGE?.events || "ws_events", JSON.stringify(events));
+
+            titleInput.value = "";
+            memoInput.value = "";
+            startInput.value = "";
+            endInput.value = "";
+            eventForm.classList.add("hidden");
+            renderEvents();
+        };
+    }
+
+    const toggleOfficerBtn = document.getElementById("toggleOfficerForm");
+    const officerForm = document.getElementById("officerForm");
+    if (toggleOfficerBtn && officerForm) {
+        toggleOfficerBtn.onclick = () => officerForm.classList.toggle("hidden");
+    }
+
+    const addOfficerBtn = document.getElementById("addOfficerBtn");
+    if (addOfficerBtn) {
+        addOfficerBtn.onclick = () => {
+            const input = document.getElementById("officerInput");
+            const val = input.value.trim();
+            if (!val) return;
+
+            const officers = JSON.parse(localStorage.getItem("officer_list") || "[]");
+            officers.push({ id: Date.now(), text: val, checked: false, author: currentCharacter });
+            localStorage.setItem("officer_list", JSON.stringify(officers));
+
+            input.value = "";
+            officerForm.classList.add("hidden");
+            renderOfficers();
+        };
+    }
+    
+    const exportBtn = document.getElementById("exportJson");
+    if (exportBtn) {
+        exportBtn.onclick = () => {
+            const data = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                data[k] = localStorage.getItem(k);
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `whiteout_backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+        };
+    }
+
+    const importBtn = document.getElementById("importJson");
+    const importFile = document.getElementById("importJsonFile");
+    if (importBtn && importFile) {
+        importBtn.onclick = () => importFile.click();
+        importFile.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    Object.keys(data).forEach(k => localStorage.setItem(k, data[k]));
+                    alert("復元完了しました！");
+                    init();
+                } catch (err) {
+                    alert("ファイルの読み込みに失敗しました。");
+                }
+            };
+            reader.readAsText(file);
+        };
+    }
+
+    const openStationBtn = document.getElementById("openStation");
+    if (openStationBtn) {
+        openStationBtn.onclick = () => {
+            renderStationSummary();
+            window.location.href = "station.html";
+        };
+    }
+}
+
+function makeListSortable(containerId, storageKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    let draggedItem = null;
+
+    container.querySelectorAll('.event-item, .officer-item').forEach(item => {
+        item.setAttribute('draggable', 'true');
+        item.style.cursor = 'grab';
+
+        item.addEventListener('dragstart', (e) => {
+            if (['INPUT', 'BUTTON'].includes(e.target.tagName)) {
+                e.preventDefault();
+                return;
+            }
+            draggedItem = item;
+            item.classList.add('item-dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('item-dragging');
+            draggedItem = null;
+            saveItemOrder(containerId, storageKey);
+        });
+
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!draggedItem || draggedItem === item) return;
+
+            const rect = item.getBoundingClientRect();
+            const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+            container.insertBefore(draggedItem, next ? item.nextSibling : item);
+        });
+    });
+}
+
+function saveItemOrder(containerId, storageKey) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    if (containerId === 'eventContainer') {
+        const events = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const newEvents = [];
+        container.querySelectorAll('.event-item').forEach(el => {
+            const eventId = el.getAttribute('data-id');
+            const found = events.find((e, idx) => {
+                const id = e.id ? String(e.id) : `evt_${idx}_${e.title}`;
+                return id === eventId;
+            });
+            if (found && !newEvents.includes(found)) newEvents.push(found);
+        });
+
+        events.forEach(e => {
+            if (!newEvents.includes(e)) newEvents.push(e);
+        });
+
+        if (newEvents.length > 0) {
+            localStorage.setItem(storageKey, JSON.stringify(newEvents));
+        }
+    } else if (containerId === 'officerContainer') {
+        const officers = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        const newOfficers = [];
+        container.querySelectorAll('.officer-item').forEach(el => {
+            const text = el.querySelector('span')?.textContent.trim();
+            const found = officers.find(o => o.text === text);
+            if (found && !newOfficers.includes(found)) newOfficers.push(found);
+        });
+        if (newOfficers.length > 0) {
+            localStorage.setItem(storageKey, JSON.stringify(newOfficers));
+        }
+    }
+}
+
+function initListSortable() {
+    makeListSortable('eventContainer', STORAGE?.events || "ws_events");
+    makeListSortable('officerContainer', 'officer_list');
+}
+
+setInterval(() => {
+    renderRepeat();
+}, 1000);
+
+const openSettingsBtn = document.getElementById("openSettings");
+if (openSettingsBtn) {
+    openSettingsBtn.onclick = () => {
+        const form = document.getElementById("settingsForm");
+        form.classList.toggle("hidden");
+        
+        const settings = SettingManager.get();
+        document.getElementById("editChars").value = settings.characters.join(",");
+        
+        const allianceText = Object.entries(settings.alliances)
+            .map(([char, ally]) => `${char}:${ally}`)
+            .join(",");
+        document.getElementById("editAlliances").value = allianceText;
+    };
+}
+
+const saveSettingsBtn = document.getElementById("saveSettings");
+if (saveSettingsBtn) {
+    saveSettingsBtn.onclick = () => {
+        const charsInput = document.getElementById("editChars").value;
+        const chars = charsInput.split(",").map(s => s.trim()).filter(s => s !== "");
+
+        const alliances = {};
+        const alliancesInput = document.getElementById("editAlliances").value;
+        alliancesInput.split(",").forEach(item => {
+            const parts = item.split(":");
+            if (parts.length === 2) {
+                const char = parts[0].trim();
+                const ally = parts[1].trim();
+                if (char && ally) {
+                    alliances[char] = ally;
+                }
+            }
+        });
+
+        SettingManager.save({ characters: chars, alliances: alliances });
+    };
+}
