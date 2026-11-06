@@ -259,3 +259,15 @@ input[type="checkbox"]:active {
 
 @media (max-width:1200px){ .dashboard, .bottom-area { grid-template-columns:1fr; } }
 @media (max-width:700px){ body{ padding:10px; } .preset-btn-grid { grid-template-columns: 1fr; } }
+/* 非表示項目の設定用スタイル */
+.task-hidden {
+    opacity: 0.45;
+    background: #f1f5f9;
+    border-radius: 6px;
+}
+/* 非表示項目の設定用スタイル */
+.task-hidden {
+    opacity: 0.45;
+    background: #f1f5f9;
+    border-radius: 6px;
+}
