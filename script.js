@@ -1,5 +1,5 @@
 /* ==========================================
-   Whiteout Checklist V4.9 (Fix: Event Pin & Sort)
+   Whiteout Checklist V5.1 (キャラ別 項目非表示対応)
    script.js
 ========================================== */
 
@@ -9,14 +9,8 @@ const STORAGE_INTERVALS = [
     120, 120, 120, 120, 120, 120, 120, 120, 120, 120
 ];
 
-const NENSO_DEFAULT_TIMES = {
-    "Lune": "14:00",
-    "Melune": "11:00",
-    "Chocolat": "20:00",
-    "Vanille": "23:00"
-};
-
 let currentCharacter = localStorage.getItem("ws_current_character") || "Lune";
+let isEditMode = false; // 編集・非表示設定モード
 
 function checkDailyReset() {
     const lastResetStr = localStorage.getItem("ws_last_reset_date");
@@ -86,16 +80,39 @@ function getItemLabel(item) {
     return item ? (item.label || item.name || item.title || "") : "";
 }
 
+// 【キャラ別】項目が非表示にされているか判定
+function isTaskHidden(taskId) {
+    return localStorage.getItem(`${currentCharacter}_hide_task_${taskId}`) === "1";
+}
+
+// 【キャラ別】項目の非表示トグル
+function toggleHideTask(taskId) {
+    const key = `${currentCharacter}_hide_task_${taskId}`;
+    if (isTaskHidden(taskId)) {
+        localStorage.removeItem(key);
+    } else {
+        localStorage.setItem(key, "1");
+    }
+    renderDaily();
+    renderCity();
+    renderTime();
+    updateProgress();
+    renderCharacters(); // キャラバーのパーセント表示も更新
+}
+
 function getCharProgressPercent(charName) {
     let total = 0, checked = 0;
     const isChecked = (id) => localStorage.getItem(`${charName}_${id}`) === "1";
+    const isCharTaskHidden = (taskId) => localStorage.getItem(`${charName}_hide_task_${taskId}`) === "1";
 
     DAILY_TASKS.forEach(t => { 
+        if (isCharTaskHidden(t.id)) return;
         total++; 
         if (isChecked(t.id)) checked++; 
     });
 
     CITY_TASKS.forEach(t => {
+        if (isCharTaskHidden(t.id)) return;
         if (t.double) {
             total += 2;
             if (isChecked(`${t.id}_am`)) checked++;
@@ -107,6 +124,7 @@ function getCharProgressPercent(charName) {
     });
 
     TIME_TASKS.forEach(task => {
+        if (isCharTaskHidden(task.id)) return;
         TIME_GROUPS.forEach(group => {
             const supported = task.times ? task.times.includes(group.id) : true;
             if (!supported) return;
@@ -194,24 +212,48 @@ function renderDaily() {
     headerDiv.innerHTML = `
         <button class="quick-btn cute-btn daily-all" onclick="completeAllDaily(true)">⚡ デイリー一括完了</button>
         <button class="quick-btn cute-btn reset" onclick="completeAllDaily(false)">↺ 解除</button>
+        <button class="quick-btn cute-btn" style="background:${isEditMode ? '#fed7d7' : '#edf2f7'}; color:${isEditMode ? '#c53030' : '#4a5568'};" onclick="toggleEditMode()">
+            ${isEditMode ? "✖ 設定終了" : "⚙️ 非表示設定"}
+        </button>
     `;
     container.appendChild(headerDiv);
 
     DAILY_TASKS.forEach(task => {
+        const hidden = isTaskHidden(task.id);
+        if (hidden && !isEditMode) return;
+
         const checked = localStorage.getItem(`${currentCharacter}_${task.id}`) === "1";
-        const label = document.createElement("label");
-        label.className = `task-item ${checked ? "checked" : ""}`;
-        label.innerHTML = `
-            <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)">
-            <span>${getItemLabel(task)}</span>
+        const div = document.createElement("div");
+        div.className = `task-item-row ${hidden ? "task-hidden" : ""}`;
+        div.style.cssText = "display:flex; justify-content:space-between; align-items:center; width:100%;";
+
+        div.innerHTML = `
+            <label class="task-item ${checked ? "checked" : ""}" style="flex:1;">
+                <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)">
+                <span>${getItemLabel(task)}</span>
+            </label>
+            ${isEditMode ? `
+                <button class="icon-btn" onclick="toggleHideTask('${task.id}')" style="font-size:14px; padding:4px 8px;" title="${hidden ? '表示する' : '非表示にする'}">
+                    ${hidden ? "👁️ 表示" : "🙈 隠す"}
+                </button>
+            ` : ""}
         `;
-        container.appendChild(label);
+        container.appendChild(div);
     });
+}
+
+function toggleEditMode() {
+    isEditMode = !isEditMode;
+    renderDaily();
+    renderCity();
+    renderTime();
 }
 
 function completeAllDaily(state) {
     DAILY_TASKS.forEach(task => {
-        localStorage.setItem(`${currentCharacter}_${task.id}`, state ? "1" : "0");
+        if (!isTaskHidden(task.id)) {
+            localStorage.setItem(`${currentCharacter}_${task.id}`, state ? "1" : "0");
+        }
     });
     renderDaily();
     updateProgress();
@@ -232,24 +274,39 @@ function renderCity() {
     container.appendChild(headerDiv);
 
     CITY_TASKS.forEach(task => {
+        const hidden = isTaskHidden(task.id);
+        if (hidden && !isEditMode) return;
+
         const div = document.createElement("div");
-        div.className = "city-item";
+        div.className = `city-item ${hidden ? "task-hidden" : ""}`;
 
         if (task.double) {
             const checkedAM = localStorage.getItem(`${currentCharacter}_${task.id}_am`) === "1";
             const checkedPM = localStorage.getItem(`${currentCharacter}_${task.id}_pm`) === "1";
             div.innerHTML = `
                 <span class="city-label">${getItemLabel(task)}</span>
-                <div style="display:flex; gap:10px;">
+                <div style="display:flex; gap:10px; align-items:center;">
                     <label class="city-check">🌅 <input type="checkbox" ${checkedAM ? "checked" : ""} onchange="toggleTask('${task.id}_am', this.checked)"></label>
                     <label class="city-check">🌙 <input type="checkbox" ${checkedPM ? "checked" : ""} onchange="toggleTask('${task.id}_pm', this.checked)"></label>
+                    ${isEditMode ? `
+                        <button class="icon-btn" onclick="toggleHideTask('${task.id}')" style="font-size:14px; padding:2px 6px;">
+                            ${hidden ? "👁️" : "🙈"}
+                        </button>
+                    ` : ""}
                 </div>
             `;
         } else {
             const checked = localStorage.getItem(`${currentCharacter}_${task.id}`) === "1";
             div.innerHTML = `
                 <span class="city-label">${getItemLabel(task)}</span>
-                <label class="city-check"><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)"></label>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <label class="city-check"><input type="checkbox" ${checked ? "checked" : ""} onchange="toggleTask('${task.id}', this.checked)"></label>
+                    ${isEditMode ? `
+                        <button class="icon-btn" onclick="toggleHideTask('${task.id}')" style="font-size:14px; padding:2px 6px;">
+                            ${hidden ? "👁️" : "🙈"}
+                        </button>
+                    ` : ""}
+                </div>
             `;
         }
         container.appendChild(div);
@@ -258,7 +315,7 @@ function renderCity() {
 
 function completeCityByTime(timeType, state) {
     CITY_TASKS.forEach(task => {
-        if (task.double) {
+        if (task.double && !isTaskHidden(task.id)) {
             localStorage.setItem(`${currentCharacter}_${task.id}_${timeType}`, state ? "1" : "0");
         }
     });
@@ -268,7 +325,7 @@ function completeCityByTime(timeType, state) {
 
 function resetCityDouble() {
     CITY_TASKS.forEach(task => {
-        if (task.double) {
+        if (task.double && !isTaskHidden(task.id)) {
             localStorage.setItem(`${currentCharacter}_${task.id}_am`, "0");
             localStorage.setItem(`${currentCharacter}_${task.id}_pm`, "0");
         }
@@ -288,10 +345,14 @@ function renderTime() {
             <button class="time-quick-btn" onclick="completeTimeGroup('${g.id}', true)">一括</button>
         </th>`;
     });
+    if (isEditMode) html += `<th>設定</th>`;
     html += `</tr></thead><tbody>`;
 
     TIME_TASKS.forEach(task => {
-        html += `<tr><td>${getItemLabel(task)}${task.note ? `<span class="small-note">${task.note}</span>` : ""}</td>`;
+        const hidden = isTaskHidden(task.id);
+        if (hidden && !isEditMode) return;
+
+        html += `<tr class="${hidden ? 'task-hidden' : ''}"><td>${getItemLabel(task)}${task.note ? `<span class="small-note">${task.note}</span>` : ""}</td>`;
         TIME_GROUPS.forEach(g => {
             const isSupported = task.times ? task.times.includes(g.id) : true;
             if (isSupported) {
@@ -302,6 +363,13 @@ function renderTime() {
                 html += `<td style="color:#ccc;">-</td>`;
             }
         });
+        if (isEditMode) {
+            html += `<td>
+                <button class="icon-btn" onclick="toggleHideTask('${task.id}')" style="font-size:14px;">
+                    ${hidden ? "👁️" : "🙈"}
+                </button>
+            </td>`;
+        }
         html += `</tr>`;
     });
 
@@ -311,6 +379,7 @@ function renderTime() {
 
 function completeTimeGroup(groupId, state) {
     TIME_TASKS.forEach(task => {
+        if (isTaskHidden(task.id)) return;
         const isSupported = task.times ? task.times.includes(groupId) : true;
         if (isSupported) {
             const key = `time_${groupId}_${task.id}`;
@@ -426,11 +495,13 @@ function updateProgress() {
     const isChecked = (id) => localStorage.getItem(`${currentCharacter}_${id}`) === "1";
 
     DAILY_TASKS.forEach(t => { 
+        if (isTaskHidden(t.id)) return;
         total++; 
         if (isChecked(t.id)) checked++; 
     });
 
     CITY_TASKS.forEach(t => {
+        if (isTaskHidden(t.id)) return;
         if (t.double) {
             total += 2;
             if (isChecked(`${t.id}_am`)) checked++;
@@ -442,6 +513,7 @@ function updateProgress() {
     });
 
     TIME_TASKS.forEach(task => {
+        if (isTaskHidden(task.id)) return;
         TIME_GROUPS.forEach(group => {
             const supported = task.times ? task.times.includes(group.id) : true;
             if (!supported) return;
@@ -493,7 +565,6 @@ function renderEvents() {
         events = typeof DEFAULT_EVENTS !== "undefined" ? DEFAULT_EVENTS : [];
     }
 
-    // 元の配列を破壊しないように非破壊的ソートを実行
     const sortedEvents = [...events].sort((a, b) => {
         const aPinned = !!a.isPinned;
         const bPinned = !!b.isPinned;
