@@ -1,6 +1,6 @@
 /* ==========================================
-   Whiteout Checklist V5.1 (キャラ別 項目非表示対応)
-   script.js
+   Whiteout Checklist V5.2
+   script.js (イベントソート・チェック固定対応)
 ========================================== */
 
 const STORAGE_INTERVALS = [
@@ -556,6 +556,9 @@ function renderStationSummary() {
     }
 }
 
+// ----------------------------------------------------
+// イベント描画関数（ソート順・移動なし・予告表示対応）
+// ----------------------------------------------------
 function renderEvents() {
     const container = document.getElementById("eventContainer");
     if (!container) return;
@@ -565,29 +568,53 @@ function renderEvents() {
         events = typeof DEFAULT_EVENTS !== "undefined" ? DEFAULT_EVENTS : [];
     }
 
-    const sortedEvents = [...events].sort((a, b) => {
-        const aPinned = !!a.isPinned;
-        const bPinned = !!b.isPinned;
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const activeEvents = [];
+    const upcomingEvents = [];
+
+    events.forEach((e, index) => {
+        const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
+        const itemData = { ...e, eventId };
+
+        let start = e.startDate ? new Date(e.startDate + "T00:00:00") : null;
         
-        if (aPinned !== bPinned) {
-            return aPinned ? -1 : 1;
+        // 開始日が未来の場合は「今後の予定（予告）」へ分離
+        if (start && start > now && new Date(start.getFullYear(), start.getMonth(), start.getDate()) > todayStart) {
+            upcomingEvents.push(itemData);
+        } else {
+            activeEvents.push(itemData);
         }
-
-        const aDate = a.endDate ? new Date(a.endDate + "T23:59:59").getTime() : Infinity;
-        const bDate = b.endDate ? new Date(b.endDate + "T23:59:59").getTime() : Infinity;
-
-        if (aDate !== bDate) {
-            return aDate - bDate;
-        }
-
-        return 0;
     });
 
-    container.innerHTML = sortedEvents.map((e, index) => {
-        const eventId = e.id ? String(e.id) : `evt_${index}_${e.title}`;
-        const hideKey = `${currentCharacter}_hide_event_${eventId}`;
+    // 1. メインイベント（開催中＆終了済み）のソート：固定優先 → 終了日時が早い順（昇順）
+    activeEvents.sort((a, b) => {
+        const aPinned = !!a.isPinned;
+        const bPinned = !!b.isPinned;
+        if (aPinned !== bPinned) return aPinned ? -1 : 1;
+
+        const aEndDate = a.endDate ? new Date(a.endDate + "T23:59:59").getTime() : Infinity;
+        const bEndDate = b.endDate ? new Date(b.endDate + "T23:59:59").getTime() : Infinity;
+
+        if (aEndDate !== bEndDate) return aEndDate - bEndDate;
+
+        const aStartDate = a.startDate ? new Date(a.startDate + "T00:00:00").getTime() : Infinity;
+        const bStartDate = b.startDate ? new Date(b.startDate + "T00:00:00").getTime() : Infinity;
+        return aStartDate - bStartDate;
+    });
+
+    // 2. 今後の予定（予告）のソート：開始日時が早い順（昇順）
+    upcomingEvents.sort((a, b) => {
+        const aStartDate = a.startDate ? new Date(a.startDate + "T00:00:00").getTime() : Infinity;
+        const bStartDate = b.startDate ? new Date(b.startDate + "T00:00:00").getTime() : Infinity;
+        return aStartDate - bStartDate;
+    });
+
+    const createEventHtml = (e) => {
+        const hideKey = `${currentCharacter}_hide_event_${e.eventId}`;
         const isHidden = localStorage.getItem(hideKey) === "1";
-        const checkKey = `${currentCharacter}_check_event_${eventId}`;
+        const checkKey = `${currentCharacter}_check_event_${e.eventId}`;
         const isChecked = localStorage.getItem(checkKey) === "1";
         const isPinned = !!e.isPinned;
 
@@ -595,17 +622,14 @@ function renderEvents() {
         if (e.startDate && e.endDate) {
             const start = new Date(e.startDate + "T00:00:00");
             const end = new Date(e.endDate + "T23:59:59");
-            const now = new Date();
 
             const startFormat = `${start.getMonth()+1}/${start.getDate()}`;
             const endFormat = `${end.getMonth()+1}/${end.getDate()}`;
-
-            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const endDayStart = new Date(end.getFullYear(), end.getMonth(), end.getDate());
 
             const diffDays = Math.round((endDayStart - todayStart) / (1000 * 60 * 60 * 24));
 
-            if (now < start) {
+            if (now < start && new Date(start.getFullYear(), start.getMonth(), start.getDate()) > todayStart) {
                 dateBadge = `<span class="event-badge upcoming">📅 ${startFormat}〜${endFormat} (予告)</span>`;
             } else if (now <= end) {
                 if (diffDays === 0) {
@@ -619,9 +643,9 @@ function renderEvents() {
         }
 
         return `
-            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}" data-id="${eventId}">
+            <div class="event-item ${isHidden ? "event-hidden" : ""} ${isChecked ? "checked" : ""} ${isPinned ? "is-pinned" : ""}" data-id="${e.eventId}">
                 <div class="event-left" style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${eventId}', this.checked)">
+                    <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleEventCheck('${e.eventId}', this.checked, this)">
                     <div>
                         <div class="event-title">
                             ${isPinned ? '<span class="pinned-tag">📌 固定</span>' : ''}
@@ -631,14 +655,27 @@ function renderEvents() {
                     </div>
                 </div>
                 <div class="event-right">
-                    <button type="button" class="pin-btn ${isPinned ? "active" : ""}" onclick="togglePinEvent('${eventId}')" title="${isPinned ? "固定解除" : "一番上に固定"}">📌</button>
-                    <button type="button" onclick="editEvent('${eventId}')" title="編集">✏️</button>
-                    <button type="button" onclick="toggleHideEvent('${eventId}')" title="目隠し">${isHidden ? "👁" : "🙈"}</button>
-                    <button type="button" onclick="deleteEvent('${eventId}')" title="削除">❌</button>
+                    <button type="button" class="pin-btn ${isPinned ? "active" : ""}" onclick="togglePinEvent('${e.eventId}')" title="${isPinned ? "固定解除" : "一番上に固定"}">📌</button>
+                    <button type="button" onclick="editEvent('${e.eventId}')" title="編集">✏️</button>
+                    <button type="button" onclick="toggleHideEvent('${e.eventId}')" title="目隠し">${isHidden ? "👁" : "🙈"}</button>
+                    <button type="button" onclick="deleteEvent('${e.eventId}')" title="削除">❌</button>
                 </div>
             </div>
         `;
-    }).join("");
+    };
+
+    let html = activeEvents.map(createEventHtml).join("");
+
+    if (upcomingEvents.length > 0) {
+        html += `
+            <div class="upcoming-section-header">
+                📅 今後の予定（開始順）
+            </div>
+            ${upcomingEvents.map(createEventHtml).join("")}
+        `;
+    }
+
+    container.innerHTML = html;
     initListSortable();
 }
 
@@ -684,10 +721,21 @@ function editEvent(eventId) {
     renderEvents();
 }
 
-function toggleEventCheck(eventId, checked) {
+// チェックボックス操作時に位置が移動しないようにDOMを直接更新
+function toggleEventCheck(eventId, checked, inputEl) {
     const checkKey = `${currentCharacter}_check_event_${eventId}`;
     localStorage.setItem(checkKey, checked ? "1" : "0");
-    renderEvents();
+    
+    if (inputEl) {
+        const itemEl = inputEl.closest(".event-item");
+        if (itemEl) {
+            if (checked) {
+                itemEl.classList.add("checked");
+            } else {
+                itemEl.classList.remove("checked");
+            }
+        }
+    }
 }
 
 function toggleHideEvent(eventId) {
