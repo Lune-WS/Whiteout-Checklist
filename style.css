@@ -271,3 +271,16 @@ input[type="checkbox"]:active {
     background: #f1f5f9;
     border-radius: 6px;
 }
+/* 📅 今後の予定（予告）見出し用スタイル */
+.upcoming-section-header {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    font-weight: bold;
+    color: #4338ca;
+    background: #eef2ff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    border-left: 4px solid #6366f1;
+}
