@@ -32,6 +32,7 @@ const defaultState = {
 let state = loadState();
 let sortMode = "time";
 let searchKeyword = "";
+let enemyFilterMode = "all"; // "all" | "enemy" | "ally"
 
 const container = document.getElementById("stations");
 const closeNow = document.getElementById("closeNow");
@@ -49,12 +50,43 @@ const SHIELD_DURATION_MS = 3 * 24 * 60 * 60 * 1000; // 3日間 (72時間)
 const OCCUPY_WINDOW_MS = 1 * 60 * 60 * 1000;       // 占領時間 (1時間)
 const AUTO_RESET_CYCLE_MS = 4 * 24 * 60 * 60 * 1000; // 自動リセットサイクル (72H + 24H = 96時間)
 
+injectEnemyFilterUI();
 bindEvents();
 normalizeState();
 renderAllianceSelect();
 drawStations();
 
 setInterval(updateLiveContent, 1000);
+
+function injectEnemyFilterUI() {
+  const toolbar = document.querySelector(".toolbar");
+  if (!toolbar || document.getElementById("enemyFilterGroup")) return;
+
+  const group = document.createElement("div");
+  group.className = "toolbar-group enemy-filter-group";
+  group.id = "enemyFilterGroup";
+  group.innerHTML = `
+    <span class="field-label">占領状態:</span>
+    <button type="button" class="filter-pill active" data-filter="all">すべて</button>
+    <button type="button" class="filter-pill filter-pill--enemy" data-filter="enemy">⚔️ 敵占領中のみ (<span id="enemyCountBadge">0</span>)</button>
+    <button type="button" class="filter-pill" data-filter="ally">🛡️ 敵占領を除く</button>
+  `;
+
+  if (searchInput && searchInput.parentElement) {
+    toolbar.insertBefore(group, searchInput.parentElement);
+  } else {
+    toolbar.appendChild(group);
+  }
+
+  group.querySelectorAll(".filter-pill").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      enemyFilterMode = btn.dataset.filter;
+      group.querySelectorAll(".filter-pill").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      drawStations();
+    });
+  });
+}
 
 function loadState() {
   try {
@@ -287,8 +319,14 @@ function drawStations() {
   const keyword = searchKeyword.toLowerCase();
 
   let list = [...stations].filter((station) => {
+    const record = stationData[station.id];
+    const isEnemy = Boolean(record && record.enemyOccupied);
+
+    if (enemyFilterMode === "enemy" && !isEnemy) return false;
+    if (enemyFilterMode === "ally" && isEnemy) return false;
+
     if (!keyword) return true;
-    const text = `lv${station.level} ${station.name}`.toLowerCase();
+    const text = `lv${station.level} ${station.name} ${isEnemy ? "敵占領" : ""}`.toLowerCase();
     return text.includes(keyword);
   });
 
@@ -302,7 +340,7 @@ function drawStations() {
     container.innerHTML = `
       <div class="empty-state">
         <strong>${escapeHtml(alliance.name)}</strong> に一致するステーションがありません。<br />
-        検索語を変えてみてください。
+        フィルターや検索語を変えてみてください。
       </div>
     `;
     updateSummary();
@@ -329,8 +367,9 @@ function drawStations() {
 function buildStationCard(station, record) {
   const status = getStationStatus(record);
   const calc = getCalculatedShieldInfo(record);
+  const isEnemy = Boolean(record && record.enemyOccupied);
 
-  let dateText = "未登録";
+  let dateText = isEnemy ? "敵占領中（シールド時間未登録）" : "未登録";
   let remainText = "";
   let futureText = "";
 
@@ -346,7 +385,7 @@ function buildStationCard(station, record) {
       const seconds = String(totalSeconds % 60).padStart(2, '0');
       remainText = `（あと ${hours}:${minutes}:${seconds}）`;
     } else {
-      remainText = "（シールド切れ・要占領）";
+      remainText = isEnemy ? "（敵シールド切れ・奪還チャンス）" : "（シールド切れ・要占領）";
     }
 
     const nextStr = formatShortDate(calc.nextShieldEnd);
@@ -361,15 +400,21 @@ function buildStationCard(station, record) {
   }
 
   const stationTitle = `Lv${station.level} ${escapeHtml(station.name)}`;
+  const enemyBadge = isEnemy ? `<span class="enemy-badge">⚔️ 敵占領中</span>` : "";
 
   return `
-<div class="station-row" data-id="${station.id}">
+<div class="station-row ${isEnemy ? "is-enemy-occupied" : ""}" data-id="${station.id}">
     <div class="station-header">
         <div class="station-header-left">
             <div class="game-icon-badge ${station.bgClass}">${station.icon}</div>
-            <div class="station-name">${stationTitle}</div>
+            <div class="station-name">${stationTitle}${enemyBadge}</div>
         </div>
-        <button type="button" class="btn-action-now" onclick="confirmSaveNow(${station.id}, '${escapeHtml(station.name)}')">⚡ 今占領 (3日開始)</button>
+        <div class="station-header-actions">
+            <button type="button" class="btn-action-enemy ${isEnemy ? "active" : ""}" onclick="toggleEnemyOccupied(${station.id})">
+                ${isEnemy ? "⚔️ 敵占領中" : "⚔️ 敵占領"}
+            </button>
+            <button type="button" class="btn-action-now" onclick="confirmSaveNow(${station.id}, '${escapeHtml(station.name)}')">⚡ 今占領</button>
+        </div>
     </div>
 
     <div class="station-date" data-field="dateText">
@@ -381,9 +426,11 @@ function buildStationCard(station, record) {
     <div class="quick-time-presets">
         <button type="button" onclick="addTimeInput(${station.id}, 1, 0, 0)">+1日</button>
         <button type="button" onclick="addTimeInput(${station.id}, 0, 12, 0)">+12H</button>
+        <button type="button" onclick="addTimeInput(${station.id}, 0, 5, 0)">+5H</button>
         <button type="button" onclick="addTimeInput(${station.id}, 0, 1, 0)">+1H</button>
         <button type="button" onclick="addTimeInput(${station.id}, 0, 0, 30)">+30分</button>
-        <button type="button" onclick="addTimeInput(${station.id}, 0, 0, 15)">+15分</button>
+        <button type="button" onclick="addTimeInput(${station.id}, 0, 0, 10)">+10分</button>
+        <button type="button" onclick="addTimeInput(${station.id}, 0, 0, 5)">+5分</button>
         <button type="button" onclick="addTimeInput(${station.id}, 0, 0, 1)">+1分</button>
         <button type="button" onclick="clearTimeInput(${station.id})" class="btn-clear">✕</button>
     </div>
@@ -403,8 +450,12 @@ function buildStationCard(station, record) {
 }
 
 function getStationStatus(record) {
+  const isEnemy = Boolean(record && record.enemyOccupied);
+
   if (!record || !record.closeTime) {
-    return { icon: "⚪", badgeText: "未登録" };
+    return isEnemy
+      ? { icon: "⚔️", badgeText: "敵占領中" }
+      : { icon: "⚪", badgeText: "未登録" };
   }
 
   const calc = getCalculatedShieldInfo(record);
@@ -413,6 +464,9 @@ function getStationStatus(record) {
   const now = Date.now();
   const remain = calc.currentShieldEnd.getTime() - now;
 
+  if (isEnemy) {
+    return { icon: "⚔️", badgeText: "敵占領中" };
+  }
   if (remain <= 0) {
     return { icon: "🔴", badgeText: "今閉じる" };
   }
@@ -422,15 +476,36 @@ function getStationStatus(record) {
   return { icon: "🟢", badgeText: "シールド中" };
 }
 
+function toggleEnemyOccupied(id) {
+  const stationData = getCurrentStationData();
+  const current = stationData[id] || {};
+  const nextEnemyState = !current.enemyOccupied;
+
+  if (!nextEnemyState && !current.closeTime) {
+    delete stationData[id];
+  } else {
+    stationData[id] = {
+      ...current,
+      enemyOccupied: nextEnemyState
+    };
+  }
+
+  persistState();
+  drawStations();
+}
+
 function confirmSaveNow(id, name) {
-  if (confirm(`「${name}」を今占領（たった今から3日間のシールド開始）にしますか？`)) {
+  if (confirm(`「${name}」を今占領（たった今から3日間のシールド開始・敵占領解除）にしますか？`)) {
     saveNow(id);
   }
 }
 
 function saveNow(id) {
   const stationData = getCurrentStationData();
-  stationData[id] = { closeTime: new Date().toISOString() };
+  stationData[id] = {
+    closeTime: new Date().toISOString(),
+    enemyOccupied: false
+  };
   persistState();
   drawStations();
 }
@@ -498,7 +573,11 @@ function saveRemain(id) {
   const closeTime = new Date(shieldEnd.getTime() - SHIELD_DURATION_MS);
 
   const stationData = getCurrentStationData();
-  stationData[id] = { closeTime: closeTime.toISOString() };
+  const prevEnemy = Boolean(stationData[id] && stationData[id].enemyOccupied);
+  stationData[id] = {
+    closeTime: closeTime.toISOString(),
+    enemyOccupied: prevEnemy
+  };
 
   persistState();
   drawStations();
@@ -529,10 +608,26 @@ function updateSummary() {
   const warningMap = {};
 
   let registeredCount = 0;
+  let enemyCount = 0;
 
   stations.forEach((station) => {
     const record = stationData[station.id];
-    if (!record || !record.closeTime) return;
+    if (!record) return;
+
+    const isEnemy = Boolean(record.enemyOccupied);
+    if (isEnemy) enemyCount++;
+
+    if (!record.closeTime) {
+      if (isEnemy) {
+        urgent.push(`
+<div class="summary-item">
+<strong>Lv${station.level} ${escapeHtml(station.name)}</strong> <span class="enemy-badge">⚔️ 敵占領中</span><br>
+時間未登録
+</div>
+`);
+      }
+      return;
+    }
 
     registeredCount++;
 
@@ -545,8 +640,8 @@ function updateSummary() {
     if (remain <= 0) {
       urgent.push(`
 <div class="summary-item">
-<strong>Lv${station.level} ${escapeHtml(station.name)}</strong><br>
-シールド切れ（占領可能）
+<strong>Lv${station.level} ${escapeHtml(station.name)}</strong>${isEnemy ? ' <span class="enemy-badge">⚔️ 敵占領中</span>' : ''}<br>
+${isEnemy ? '敵シールド切れ（奪還可能）' : 'シールド切れ（占領可能）'}
 </div>
 `);
       return;
@@ -560,6 +655,8 @@ function updateSummary() {
       const hoursStr = String(shieldEnd.getHours()).padStart(2, '0');
       const minutesStr = String(shieldEnd.getMinutes()).padStart(2, '0');
       const timeOnlyStr = `${hoursStr}:${minutesStr}`;
+      const enemyLabelHtml = isEnemy ? ' <span class="enemy-badge">⚔️ 敵占領</span>' : '';
+      const enemyLabelText = isEnemy ? ' [⚔️敵占領]' : '';
 
       if (!warningMap[dateKey]) {
         warningMap[dateKey] = [];
@@ -569,10 +666,10 @@ function updateSummary() {
         remain,
         html: `
 <div class="summary-item">
-<strong>Lv${station.level} ${escapeHtml(station.name)}：${timeOnlyStr}</strong>
+<strong>Lv${station.level} ${escapeHtml(station.name)}：${timeOnlyStr}</strong>${enemyLabelHtml}
 </div>
 `,
-        text: `Lv${station.level} ${station.name}：${timeOnlyStr}`
+        text: `Lv${station.level} ${station.name}：${timeOnlyStr}${enemyLabelText}`
       });
     }
   });
@@ -594,7 +691,14 @@ function updateSummary() {
 
   if (closeNow) closeNow.innerHTML = urgent.length ? urgent.join("") : "ありません";
   if (todayStations) todayStations.innerHTML = warningHtmlList.length ? warningHtmlList.join("") : "ありません";
-  if (allianceStats) allianceStats.innerHTML = `${registeredCount} / ${stations.length} 登録`;
+  if (allianceStats) {
+    allianceStats.innerHTML = `${registeredCount} / ${stations.length} 登録` + (enemyCount > 0 ? `（⚔️ 敵占領: ${enemyCount}）` : "");
+  }
+
+  const enemyCountBadge = document.getElementById("enemyCountBadge");
+  if (enemyCountBadge) {
+    enemyCountBadge.textContent = enemyCount;
+  }
 
   window.todayCopyText = copyTextLines.join("\n").trim();
 
@@ -626,6 +730,7 @@ function updateLiveContent() {
     const calc = getCalculatedShieldInfo(record);
     if (!calc) return;
 
+    const isEnemy = Boolean(record.enemyOccupied);
     const shieldEnd = calc.currentShieldEnd;
     const status = getStationStatus(record);
     const dateTextEl = card.querySelector('[data-field="dateText"]');
@@ -640,7 +745,7 @@ function updateLiveContent() {
         const seconds = String(totalSeconds % 60).padStart(2, '0');
         remainText = `（あと ${hours}:${minutes}:${seconds}）`;
       } else {
-        remainText = "（シールド切れ・要占領）";
+        remainText = isEnemy ? "（敵シールド切れ・奪還チャンス）" : "（シールド切れ・要占領）";
       }
 
       dateTextEl.innerHTML = `${status.icon} ${formatShortDate(shieldEnd)} <span data-field="remainText" style="font-size: 0.85em; color: #666;">${remainText}</span>`;
