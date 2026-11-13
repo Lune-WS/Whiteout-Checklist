@@ -114,14 +114,14 @@
     </div>
   </header>
 
-  <!-- メインコンテンツ（PCでは左右2カラム、スマホでは上下レイアウト） -->
+  <!-- メインコンテンツ -->
   <main class="flex-1 max-w-[1600px] w-full mx-auto px-2 sm:px-4 py-3 flex flex-col gap-3">
 
     <!-- 操作ガイドバー -->
     <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-400 bg-[#161b26] border border-[#2a6ea6]/40 rounded-lg px-3 py-1.5">
       <div>
         <span class="text-sky-400 font-bold">💡 操作:</span>
-        <span>空き枠タップで英雄を選択。各キャラ右上の「✏️」から写真設定・名前変更・個別削除ができます。</span>
+        <span>どの枠にも好きな兵種を配置できます（左端は乗り手スキル枠）。1部隊に弓兵が2人以上になると警告が出ます。</span>
       </div>
       <div id="activeSlotIndicator" class="text-sky-300 font-bold hidden sm:block">選択中: なし</div>
     </div>
@@ -134,7 +134,7 @@
           <span class="text-[10px] text-slate-500">Whiteout Survival Squad Builder</span>
         </div>
 
-        <!-- 出征上限・ペット・ダイヤ・専門家シリルバフ設定バー -->
+        <!-- 出征上限・ペット・ダイヤ・巨熊キラー設定バー -->
         <div class="bg-[#161b26] border border-[#2a6ea6]/70 rounded-lg p-2 mb-2 flex flex-col gap-2 text-xs">
           <!-- 1段目：基礎出征上限 & 実出征バッジ -->
           <div class="flex flex-wrap items-center justify-between gap-2">
@@ -149,7 +149,7 @@
             </div>
           </div>
 
-          <!-- 2段目：バフ設定（ダイヤ・雪猿・専門家シリル） -->
+          <!-- 2段目：バフ設定（ダイヤ・雪猿・巨熊キラー） -->
           <div class="flex items-center gap-1.5 flex-wrap">
             <div class="flex items-center bg-[#12161f] border border-[#2a6ea6] rounded overflow-hidden">
               <span class="text-[11px] font-bold text-amber-300 pl-2 pr-1">💎 ダイヤ:</span>
@@ -192,24 +192,6 @@
                 <option value="8">Lv.8 (+24,000)</option>
                 <option value="9">Lv.9 (+27,000)</option>
                 <option value="10">Lv.10 (+30,000)</option>
-              </select>
-            </div>
-
-            <!-- 専門家シリル：包囲狩猟（熊狩発起集結の容量上限アップ） -->
-            <div class="flex items-center bg-[#12161f] border border-orange-500/70 rounded overflow-hidden" title="専門家シリル スキル1「包囲狩猟」: 熊狩行動で発起する集結の容量上限が上昇（参考表示）">
-              <span class="text-[11px] font-bold text-orange-300 pl-2 pr-1">🚩 包囲狩猟:</span>
-              <select id="cyrilSkill1Select" class="bg-[#12161f] text-white text-xs font-bold pr-2 py-1 focus:outline-none cursor-pointer">
-                <option value="0">なし (0)</option>
-                <option value="1">Lv.1 (+30,000)</option>
-                <option value="2">Lv.2 (+60,000)</option>
-                <option value="3">Lv.3 (+90,000)</option>
-                <option value="4">Lv.4 (+120,000)</option>
-                <option value="5">Lv.5 (+150,000)</option>
-                <option value="6">Lv.6 (+180,000)</option>
-                <option value="7">Lv.7 (+210,000)</option>
-                <option value="8">Lv.8 (+240,000)</option>
-                <option value="9">Lv.9 (+270,000)</option>
-                <option value="10">Lv.10 (+300,000)</option>
               </select>
             </div>
           </div>
@@ -518,9 +500,8 @@
       bow:    { label: '弓兵', icon: '🏹', color: 'text-amber-300' }
     };
 
-    const PET_MARCH_BONUS_PER_LEVEL = 1500;          // 雪猿「雪崩の如く」Lv.1〜10: レベル × 1,500人
-    const CYRIL_SKILL4_BONUS_PER_LEVEL = 3000;       // 専門家シリル スキル4「巨熊キラー」Lv.1〜10: レベル × 3,000人（熊狩出征上限）
-    const CYRIL_SKILL1_RALLY_BONUS_PER_LEVEL = 30000; // 専門家シリル スキル1「包囲狩猟」Lv.1〜10: レベル × 30,000人（熊狩発起集結上限）
+    const PET_MARCH_BONUS_PER_LEVEL = 1500;    // 雪猿「雪崩の如く」Lv.1〜10: レベル × 1,500人
+    const CYRIL_SKILL4_BONUS_PER_LEVEL = 3000; // 専門家シリル スキル4「巨熊キラー」Lv.1〜10: レベル × 3,000人（熊狩出征上限）
 
     const STORAGE_KEY = 'wos_squad_builder_v2';
 
@@ -561,7 +542,6 @@
         gemBuff: 0,          // 0, 10, 20 (%)
         petLevel: 0,        // 雪猿スキルレベル 0〜10 (1レベルにつき+1,500人)
         cyrilSkill4Level: 0, // 専門家シリル スキル4「巨熊キラー」0〜10 (1レベルにつき+3,000人)
-        cyrilSkill1Level: 0, // 専門家シリル スキル1「包囲狩猟」0〜10 (1レベルにつき+30,000人 集結容量)
         totalTroops: { shield: 0, spear: 0, bow: 0 }
       },
       filters: { type: 'ALL', gen: 'ALL', rarity: 'ALL', search: '' },
@@ -592,13 +572,11 @@
           if (parsed.marchSettings && typeof parsed.marchSettings === 'object') {
             const loadedPetLv = Number(parsed.marchSettings.petLevel);
             const loadedCyril4 = Number(parsed.marchSettings.cyrilSkill4Level);
-            const loadedCyril1 = Number(parsed.marchSettings.cyrilSkill1Level);
             state.marchSettings = {
               ...state.marchSettings,
               ...parsed.marchSettings,
               petLevel: (!isNaN(loadedPetLv) && loadedPetLv >= 0 && loadedPetLv <= 10) ? loadedPetLv : 0,
               cyrilSkill4Level: (!isNaN(loadedCyril4) && loadedCyril4 >= 0 && loadedCyril4 <= 10) ? loadedCyril4 : 0,
-              cyrilSkill1Level: (!isNaN(loadedCyril1) && loadedCyril1 >= 0 && loadedCyril1 <= 10) ? loadedCyril1 : 0,
               totalTroops: {
                 shield: 0,
                 spear: 0,
@@ -744,7 +722,7 @@
       const preset = getCurrentPreset();
       if (state.selectedSlot && preset.squads[state.selectedSlot.squadIndex]) {
         const sq = preset.squads[state.selectedSlot.squadIndex];
-        const slotNames = sq.mode === 'standard' ? ['盾兵枠', '槍兵枠', '弓兵枠'] : ['自由枠1', '自由枠2', '自由枠3'];
+        const slotNames = ['枠1(左・乗り手)', '枠2(中)', '枠3(右)'];
         indicator.textContent = `選択中: ${sq.name} - ${slotNames[state.selectedSlot.slotIndex]}`;
         indicator.classList.add('text-amber-300');
       } else {
@@ -763,11 +741,6 @@
       return lv * CYRIL_SKILL4_BONUS_PER_LEVEL;
     }
 
-    function getCyrilSkill1RallyBonusTroops() {
-      const lv = Math.max(0, Math.min(10, Number(state.marchSettings.cyrilSkill1Level) || 0));
-      return lv * CYRIL_SKILL1_RALLY_BONUS_PER_LEVEL;
-    }
-
     function getEffectiveCapacity() {
       const base = Number(state.marchSettings.baseCapacity) || 0;
       const gem = Number(state.marchSettings.gemBuff) || 0;
@@ -781,7 +754,6 @@
       document.getElementById('gemBuffSelect').value = String(state.marchSettings.gemBuff);
       document.getElementById('petLevelSelect').value = String(state.marchSettings.petLevel || 0);
       document.getElementById('cyrilSkill4Select').value = String(state.marchSettings.cyrilSkill4Level || 0);
-      document.getElementById('cyrilSkill1Select').value = String(state.marchSettings.cyrilSkill1Level || 0);
 
       const totals = state.marchSettings.totalTroops || { shield: 0, spear: 0, bow: 0 };
       document.getElementById('totalShieldInput').value = totals.shield || '';
@@ -792,17 +764,13 @@
       const gemBuff = Number(state.marchSettings.gemBuff) || 0;
       const petFlat = getPetBonusTroops();
       const cyril4Flat = getCyrilSkill4BonusTroops();
-      const cyril1RallyFlat = getCyrilSkill1RallyBonusTroops();
 
       const badgeDetails = [];
       if (gemBuff > 0) badgeDetails.push(`💎+${gemBuff}%`);
       if (petFlat > 0) badgeDetails.push(`🦍+${petFlat.toLocaleString()}`);
       if (cyril4Flat > 0) badgeDetails.push(`🐻+${cyril4Flat.toLocaleString()}`);
 
-      let badgeText = `実出征: ${eff.toLocaleString()}人${badgeDetails.length > 0 ? ` (${badgeDetails.join(' / ')})` : ''}`;
-      if (cyril1RallyFlat > 0) {
-        badgeText += ` ｜ 🚩集結+${cyril1RallyFlat.toLocaleString()}人`;
-      }
+      const badgeText = `実出征: ${eff.toLocaleString()}人${badgeDetails.length > 0 ? ` (${badgeDetails.join(' / ')})` : ''}`;
       document.getElementById('effectiveCapacityBadge').textContent = badgeText;
 
       renderTroopBalanceSummary();
@@ -853,17 +821,38 @@
       preset.squads.forEach((squad, sqIdx) => {
         if (!squad.ratio) squad.ratio = createDefaultRatio();
 
+        // 部隊内の弓兵人数をカウント
+        let bowHeroCount = 0;
+        squad.slots.forEach(hId => {
+          if (hId) {
+            const h = getHeroById(hId);
+            if (h && h.type === 'bow') bowHeroCount++;
+          }
+        });
+
         const row = document.createElement('div');
         row.className = 'squad-row-container rounded-lg overflow-hidden flex items-stretch shadow-sm';
 
         const labelCol = document.createElement('div');
         labelCol.className = 'squad-label-box w-24 sm:w-32 shrink-0 p-2 flex flex-col justify-between text-white border-r border-[#2a6ea6]';
 
+        const topLabelWrap = document.createElement('div');
+        topLabelWrap.className = 'flex flex-col gap-1';
+
         const nameBtn = document.createElement('button');
         nameBtn.type = 'button';
         nameBtn.className = 'text-left font-extrabold text-xs sm:text-sm hover:text-amber-200 transition truncate';
         nameBtn.textContent = `${squad.name} ✏️`;
         nameBtn.onclick = () => openRenameModal('squad', sqIdx);
+        topLabelWrap.appendChild(nameBtn);
+
+        // 弓兵が2人以上編成されている場合の警告バッジ
+        if (bowHeroCount >= 2) {
+          const bowWarn = document.createElement('div');
+          bowWarn.className = 'bg-amber-400 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 leading-tight';
+          bowWarn.textContent = `⚠️ 弓兵×${bowHeroCount} (注意)`;
+          topLabelWrap.appendChild(bowWarn);
+        }
 
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'flex items-center justify-between gap-1 mt-2 pt-1.5 border-t border-white/20';
@@ -873,7 +862,8 @@
         modeBtn.className = `text-[10px] font-bold px-1.5 py-0.5 rounded transition ${
           squad.mode === 'standard' ? 'bg-slate-900/50 text-sky-100' : 'bg-amber-500 text-slate-950'
         }`;
-        modeBtn.textContent = squad.mode === 'standard' ? '盾・槍・弓' : '自由枠';
+        modeBtn.textContent = squad.mode === 'standard' ? '目安表示' : '自由枠';
+        modeBtn.title = '空き枠のアイコン目安表示を切替（配置自体はどこでも自由です）';
         modeBtn.onclick = () => {
           squad.mode = squad.mode === 'standard' ? 'free' : 'standard';
           saveState();
@@ -897,7 +887,7 @@
 
         controlsDiv.appendChild(modeBtn);
         controlsDiv.appendChild(delRowBtn);
-        labelCol.appendChild(nameBtn);
+        labelCol.appendChild(topLabelWrap);
         labelCol.appendChild(controlsDiv);
 
         // 右側メインエリア（スロット行 ＋ 兵士割合・人数計算行）
@@ -907,15 +897,15 @@
         const slotsCol = document.createElement('div');
         slotsCol.className = 'p-1.5 sm:p-2 flex items-center gap-2 sm:gap-3 overflow-x-auto';
 
-        const requiredTypes = ['shield', 'spear', 'bow'];
+        const guideTypes = ['shield', 'spear', 'bow'];
 
         squad.slots.forEach((heroId, slotIdx) => {
           const isSelected = state.selectedSlot &&
             state.selectedSlot.squadIndex === sqIdx &&
             state.selectedSlot.slotIndex === slotIdx;
 
-          const reqType = squad.mode === 'standard' ? requiredTypes[slotIdx] : null;
-          const troopMeta = reqType ? TROOP_META[reqType] : null;
+          const guideType = squad.mode === 'standard' ? guideTypes[slotIdx] : null;
+          const troopMeta = guideType ? TROOP_META[guideType] : null;
 
           const slotEl = document.createElement('div');
           slotEl.className = `relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-lg border-2 border-dashed transition cursor-pointer flex items-center justify-center ${
@@ -938,12 +928,7 @@
             slotEl.classList.add('border-transparent');
             slotEl.innerHTML = renderHeroCardInner(assignedHero, false, false);
 
-            if (reqType && assignedHero.type !== reqType) {
-              const warnBadge = document.createElement('span');
-              warnBadge.className = 'absolute -top-1.5 -right-1.5 z-20 bg-rose-600 text-white text-[9px] font-black px-1 rounded shadow border border-white';
-              warnBadge.textContent = '兵種外';
-              slotEl.appendChild(warnBadge);
-            }
+            // ※どの位置にどの兵種を置いてもエラー（「兵種外」）は出さない
 
             slotEl.onclick = () => {
               squad.slots[slotIdx] = null;
@@ -955,11 +940,11 @@
             slotEl.innerHTML = troopMeta
               ? `<div class="flex flex-col items-center text-center pointer-events-none opacity-75">
                    <span class="text-base sm:text-lg leading-none mb-0.5">${troopMeta.icon}</span>
-                   <span class="text-[10px] font-bold ${troopMeta.color}">${troopMeta.label}</span>
+                   <span class="text-[10px] font-bold ${troopMeta.color}">${slotIdx === 0 ? '左/盾' : troopMeta.label}</span>
                  </div>`
               : `<div class="flex flex-col items-center text-center pointer-events-none opacity-60">
                    <span class="text-sm sm:text-base text-sky-300 font-bold">+</span>
-                   <span class="text-[10px] font-bold text-slate-400">自由枠</span>
+                   <span class="text-[10px] font-bold text-slate-400">${slotIdx === 0 ? '左枠' : '自由枠'}</span>
                  </div>`;
 
             slotEl.onclick = () => {
@@ -1076,6 +1061,15 @@
 
       targetSquad.slots[slotIdx] = heroId;
 
+      // 配置後、弓兵が2人以上になったらトーストでも通知
+      const bowCount = targetSquad.slots.reduce((acc, id) => {
+        const h = id ? getHeroById(id) : null;
+        return acc + (h && h.type === 'bow' ? 1 : 0);
+      }, 0);
+      if (bowCount >= 2) {
+        showToast(`⚠️ ${targetSquad.name}に弓兵が${bowCount}人編成されています`, 'error');
+      }
+
       let nextSlot = null;
       for (let i = slotIdx + 1; i < targetSquad.slots.length; i++) {
         if (!targetSquad.slots[i]) {
@@ -1153,23 +1147,14 @@
             return;
           }
 
-          const typeToSlotIdx = { shield: 0, spear: 1, bow: 2 };
-          const preferredIdx = typeToSlotIdx[hero.type];
-
+          // 場所を問わず左の空き枠から順番に自動配置
           for (let sIdx = 0; sIdx < preset.squads.length; sIdx++) {
             const sq = preset.squads[sIdx];
-            if (sq.mode === 'standard' && sq.slots[preferredIdx] === null) {
-              assignHeroToSlot(sIdx, preferredIdx, hero.id);
-              showToast(`${sq.name}の${TROOP_META[hero.type].label}枠に${hero.name}を配置しました`);
+            const emptyIdx = sq.slots.findIndex(x => x === null);
+            if (emptyIdx !== -1) {
+              assignHeroToSlot(sIdx, emptyIdx, hero.id);
+              showToast(`${sq.name}の枠${emptyIdx + 1}に${hero.name}を配置しました`);
               return;
-            }
-            if (sq.mode === 'free') {
-              const emptyFreeIdx = sq.slots.findIndex(x => x === null);
-              if (emptyFreeIdx !== -1) {
-                assignHeroToSlot(sIdx, emptyFreeIdx, hero.id);
-                showToast(`${sq.name}に${hero.name}を配置しました`);
-                return;
-              }
             }
           }
           showToast('配置できる空き枠がありません。枠をタップして選択してください。');
@@ -1311,7 +1296,7 @@
         showToast(`「部隊${nextNum}」を追加しました`);
       };
 
-      // 出征上限・ダイヤバフ・雪猿・専門家シリル変更イベント
+      // 出征上限・ダイヤバフ・雪猿・巨熊キラー変更イベント
       document.getElementById('baseCapacityInput').oninput = (e) => {
         state.marchSettings.baseCapacity = Math.max(0, Number(e.target.value) || 0);
         saveState();
@@ -1338,12 +1323,6 @@
         saveState();
         renderMarchSettings();
         renderSquads();
-      };
-
-      document.getElementById('cyrilSkill1Select').onchange = (e) => {
-        state.marchSettings.cyrilSkill1Level = Math.max(0, Math.min(10, Number(e.target.value) || 0));
-        saveState();
-        renderMarchSettings();
       };
 
       // 手持ち総兵数入力イベント
@@ -1384,8 +1363,6 @@
         const petFlat = getPetBonusTroops();
         const cyril4Lv = Number(state.marchSettings.cyrilSkill4Level) || 0;
         const cyril4Flat = getCyrilSkill4BonusTroops();
-        const cyril1Lv = Number(state.marchSettings.cyrilSkill1Level) || 0;
-        const cyril1Flat = getCyrilSkill1RallyBonusTroops();
 
         const buffParts = [];
         if (gemBuff > 0) buffParts.push(`ダイヤ+${gemBuff}%`);
@@ -1395,21 +1372,22 @@
         const lines = [
           `【${preset.name}】出征上限: ${effCap.toLocaleString()}人${buffParts.length > 0 ? ` (${buffParts.join(' / ')})` : ''}`
         ];
-        if (cyril1Lv > 0) {
-          lines.push(`※ 包囲狩猟Lv.${cyril1Lv} (集結容量 +${cyril1Flat.toLocaleString()}人)`);
-        }
 
         preset.squads.forEach(sq => {
-          const names = sq.slots.map((id, idx) => {
+          let bowCount = 0;
+          const names = sq.slots.map(id => {
             const h = id ? getHeroById(id) : null;
-            if (sq.mode === 'standard') return `${['盾', '槍', '弓'][idx]}:${h ? h.name : '---'}`;
-            return h ? h.name : '---';
+            if (!h) return '---';
+            if (h.type === 'bow') bowCount++;
+            const icon = TROOP_META[h.type]?.icon || '';
+            return `${icon}${h.name}`;
           });
           const r = sq.ratio || createDefaultRatio();
           const cShield = Math.round(effCap * (r.shield / 100)).toLocaleString();
           const cSpear = Math.round(effCap * (r.spear / 100)).toLocaleString();
           const cBow = Math.round(effCap * (r.bow / 100)).toLocaleString();
-          lines.push(`■ ${sq.name}: ${names.join(' / ')}`);
+          const warnTag = bowCount >= 2 ? ` [⚠️弓兵×${bowCount}]` : '';
+          lines.push(`■ ${sq.name}${warnTag}: ${names.join(' / ')}`);
           lines.push(`   割合 ${r.shield}:${r.spear}:${r.bow}% (盾:${cShield} / 槍:${cSpear} / 弓:${cBow})`);
         });
 
