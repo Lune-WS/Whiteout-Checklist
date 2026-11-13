@@ -153,9 +153,20 @@
             </div>
 
             <div class="flex items-center bg-[#12161f] border border-[#2a6ea6] rounded overflow-hidden">
-              <span class="text-[11px] font-bold text-emerald-300 pl-2 pr-1">🐾 ペット:</span>
-              <input type="number" id="petBuffInput" min="0" max="100" step="1" placeholder="0" class="w-12 bg-[#12161f] text-white text-xs font-bold text-right py-1 focus:outline-none" />
-              <span class="text-slate-400 text-[11px] pr-2">%</span>
+              <span class="text-[11px] font-bold text-emerald-300 pl-2 pr-1">🦍 雪猿:</span>
+              <select id="petLevelSelect" class="bg-[#12161f] text-white text-xs font-bold pr-2 py-1 focus:outline-none cursor-pointer">
+                <option value="0">なし (0)</option>
+                <option value="1">Lv.1 (+1,500)</option>
+                <option value="2">Lv.2 (+3,000)</option>
+                <option value="3">Lv.3 (+4,500)</option>
+                <option value="4">Lv.4 (+6,000)</option>
+                <option value="5">Lv.5 (+7,500)</option>
+                <option value="6">Lv.6 (+9,000)</option>
+                <option value="7">Lv.7 (+10,500)</option>
+                <option value="8">Lv.8 (+12,000)</option>
+                <option value="9">Lv.9 (+13,500)</option>
+                <option value="10">Lv.10 (+15,000)</option>
+              </select>
             </div>
 
             <div id="effectiveCapacityBadge" class="bg-[#2574b5]/30 border border-sky-400/50 text-sky-200 font-extrabold px-2 py-1 rounded text-[11px]">
@@ -467,6 +478,8 @@
       bow:    { label: '弓兵', icon: '🏹', color: 'text-amber-300' }
     };
 
+    const PET_MARCH_BONUS_PER_LEVEL = 1500; // 雪猿「雪崩の如く」Lv.1〜10: レベル × 1,500人
+
     const STORAGE_KEY = 'wos_squad_builder_v2';
 
     function createDefaultRatio() {
@@ -503,8 +516,8 @@
       maxGen: 7, // 初期表示上限をG7に設定
       marchSettings: {
         baseCapacity: 150000,
-        gemBuff: 0, // 0, 10, 20
-        petBuff: 0, // %
+        gemBuff: 0, // 0, 10, 20 (%)
+        petLevel: 0, // 雪猿スキルレベル 0〜10 (1レベルにつき+1,500人)
         totalTroops: { shield: 0, spear: 0, bow: 0 }
       },
       filters: { type: 'ALL', gen: 'ALL', rarity: 'ALL', search: '' },
@@ -520,7 +533,6 @@
           const parsed = JSON.parse(raw);
           if (Array.isArray(parsed.presets) && parsed.presets.length > 0) {
             state.presets = parsed.presets;
-            // 既存データにratioがない場合の補完
             state.presets.forEach(p => {
               p.squads.forEach(sq => {
                 if (!sq.ratio) sq.ratio = createDefaultRatio();
@@ -534,9 +546,11 @@
           if (Array.isArray(parsed.deletedHeroIds)) state.deletedHeroIds = parsed.deletedHeroIds;
           if (typeof parsed.maxGen === 'number') state.maxGen = parsed.maxGen;
           if (parsed.marchSettings && typeof parsed.marchSettings === 'object') {
+            const loadedLevel = Number(parsed.marchSettings.petLevel);
             state.marchSettings = {
               ...state.marchSettings,
               ...parsed.marchSettings,
+              petLevel: (!isNaN(loadedLevel) && loadedLevel >= 0 && loadedLevel <= 10) ? loadedLevel : 0,
               totalTroops: {
                 shield: 0,
                 spear: 0,
@@ -691,26 +705,36 @@
       }
     }
 
+    function getPetBonusTroops() {
+      const lv = Math.max(0, Math.min(10, Number(state.marchSettings.petLevel) || 0));
+      return lv * PET_MARCH_BONUS_PER_LEVEL;
+    }
+
     function getEffectiveCapacity() {
       const base = Number(state.marchSettings.baseCapacity) || 0;
       const gem = Number(state.marchSettings.gemBuff) || 0;
-      const pet = Number(state.marchSettings.petBuff) || 0;
-      return Math.floor(base * (1 + (gem + pet) / 100));
+      const petFlat = getPetBonusTroops();
+      return Math.floor(base * (1 + gem / 100)) + petFlat;
     }
 
     function renderMarchSettings() {
       document.getElementById('baseCapacityInput').value = state.marchSettings.baseCapacity;
       document.getElementById('gemBuffSelect').value = String(state.marchSettings.gemBuff);
-      document.getElementById('petBuffInput').value = state.marchSettings.petBuff;
+      document.getElementById('petLevelSelect').value = String(state.marchSettings.petLevel || 0);
       const totals = state.marchSettings.totalTroops || { shield: 0, spear: 0, bow: 0 };
       document.getElementById('totalShieldInput').value = totals.shield || '';
       document.getElementById('totalSpearInput').value = totals.spear || '';
       document.getElementById('totalBowInput').value = totals.bow || '';
 
       const eff = getEffectiveCapacity();
-      const totalBuff = (Number(state.marchSettings.gemBuff) || 0) + (Number(state.marchSettings.petBuff) || 0);
+      const gemBuff = Number(state.marchSettings.gemBuff) || 0;
+      const petFlat = getPetBonusTroops();
+      const badgeDetails = [];
+      if (gemBuff > 0) badgeDetails.push(`+${gemBuff}%`);
+      if (petFlat > 0) badgeDetails.push(`+${petFlat.toLocaleString()}人`);
+
       document.getElementById('effectiveCapacityBadge').textContent =
-        `実出征: ${eff.toLocaleString()}人${totalBuff > 0 ? ` (+${totalBuff}%)` : ''}`;
+        `実出征: ${eff.toLocaleString()}人${badgeDetails.length > 0 ? ` (${badgeDetails.join(' / ')})` : ''}`;
 
       renderTroopBalanceSummary();
     }
@@ -724,7 +748,6 @@
 
       let reqShield = 0, reqSpear = 0, reqBow = 0;
       preset.squads.forEach(sq => {
-        // 英雄が1人以上配置されている部隊、または「候補」以外の部隊を対象に集計
         const hasHero = sq.slots.some(id => id !== null);
         if (!hasHero && sq.name.includes('候補')) return;
         const r = sq.ratio || createDefaultRatio();
@@ -923,7 +946,7 @@
         inputsGroup.appendChild(makeRatioInput('spear', '🔱', 'text-emerald-300'));
         inputsGroup.appendChild(makeRatioInput('bow', '🏹', 'text-amber-300'));
 
-        // クイック比率プリセット（例：熊5:20:75、王城50:20:30、均等33:33:34）
+        // クイック比率プリセット
         const presetBtns = document.createElement('div');
         presetBtns.className = 'flex items-center gap-1';
         [
@@ -1041,7 +1064,6 @@
         card.draggable = true;
         card.innerHTML = renderHeroCardInner(hero, true, isAssigned);
 
-        // 右上：編集・写真設定・個別削除ボタン
         const editBtn = document.createElement('button');
         editBtn.type = 'button';
         editBtn.title = `${hero.name}の写真設定・編集・削除`;
@@ -1220,7 +1242,7 @@
         showToast(`「部隊${nextNum}」を追加しました`);
       };
 
-      // 出征上限・ダイヤバフ・ペットバフ変更イベント
+      // 出征上限・ダイヤバフ・雪猿スキルレベル変更イベント
       document.getElementById('baseCapacityInput').oninput = (e) => {
         state.marchSettings.baseCapacity = Math.max(0, Number(e.target.value) || 0);
         saveState();
@@ -1235,8 +1257,8 @@
         renderSquads();
       };
 
-      document.getElementById('petBuffInput').oninput = (e) => {
-        state.marchSettings.petBuff = Math.max(0, Number(e.target.value) || 0);
+      document.getElementById('petLevelSelect').onchange = (e) => {
+        state.marchSettings.petLevel = Math.max(0, Math.min(10, Number(e.target.value) || 0));
         saveState();
         renderMarchSettings();
         renderSquads();
@@ -1275,9 +1297,16 @@
       document.getElementById('copyTextBtn').onclick = () => {
         const preset = getCurrentPreset();
         const effCap = getEffectiveCapacity();
-        const totalBuff = (Number(state.marchSettings.gemBuff) || 0) + (Number(state.marchSettings.petBuff) || 0);
+        const gemBuff = Number(state.marchSettings.gemBuff) || 0;
+        const petLevel = Number(state.marchSettings.petLevel) || 0;
+        const petFlat = getPetBonusTroops();
+
+        const buffParts = [];
+        if (gemBuff > 0) buffParts.push(`ダイヤ+${gemBuff}%`);
+        if (petLevel > 0) buffParts.push(`雪猿Lv.${petLevel} +${petFlat.toLocaleString()}人`);
+
         const lines = [
-          `【${preset.name}】出征上限: ${effCap.toLocaleString()}人${totalBuff > 0 ? ` (バフ+${totalBuff}%)` : ''}`
+          `【${preset.name}】出征上限: ${effCap.toLocaleString()}人${buffParts.length > 0 ? ` (${buffParts.join(' / ')})` : ''}`
         ];
         preset.squads.forEach(sq => {
           const names = sq.slots.map((id, idx) => {
