@@ -284,3 +284,198 @@ input[type="checkbox"]:active {
     margin-bottom: 4px;
     border-left: 4px solid #6366f1;
 }
+/* ==========================================
+   📝 がっつりメモ帳（定型文・長文保存）スタイル
+========================================== */
+.free-memo-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+}
+
+.memo-scope-switch {
+    display: inline-flex;
+    background: #edf4ff;
+    padding: 4px;
+    border-radius: 10px;
+    gap: 4px;
+}
+
+.scope-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #64748b;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.scope-btn.active {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 2px 5px rgba(75, 130, 255, 0.3);
+}
+
+.free-memo-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    min-height: 260px;
+}
+
+.free-memo-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-right: 1px solid var(--border);
+    padding-right: 12px;
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.memo-tab-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fbff;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: 0.15s;
+    text-align: left;
+}
+
+.memo-tab-item:hover {
+    background: #edf4ff;
+}
+
+.memo-tab-item.active {
+    background: #ebf3ff;
+    border-color: var(--blue);
+    box-shadow: 0 2px 6px rgba(75, 130, 255, 0.15);
+}
+
+.memo-tab-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.memo-tab-preview {
+    font-size: 11px;
+    color: #718096;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.free-memo-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.free-memo-toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.free-memo-toolbar input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--text);
+    background: #f8fbff;
+}
+
+.free-memo-toolbar input:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: #fff;
+}
+
+.copy-chat-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    background: linear-gradient(135deg, #48bb78, #38a169);
+    color: white;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(56, 161, 105, 0.25);
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.copy-chat-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(56, 161, 105, 0.35);
+}
+
+.delete-memo-btn {
+    border: 1px solid #fed7d7;
+    background: #fff5f5;
+    color: #e53e3e;
+    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.delete-memo-btn:hover {
+    background: #fed7d7;
+}
+
+.free-memo-editor textarea {
+    width: 100%;
+    flex: 1;
+    min-height: 200px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: "Yu Gothic UI", "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    resize: vertical;
+    background: #fcfdff;
+}
+
+.free-memo-editor textarea:focus {
+    outline: none;
+    border-color: var(--blue);
+    background: #fff;
+}
+
+.free-memo-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #718096;
+}
+
+@media (max-width: 800px) {
+    .free-memo-layout {
+        grid-template-columns: 1fr;
+    }
+    .free-memo-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-right: 0;
+        padding-bottom: 10px;
+        max-height: 140px;
+    }
+}
