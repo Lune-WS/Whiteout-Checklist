@@ -1205,3 +1205,170 @@ if (saveSettingsBtn) {
         SettingManager.save({ characters: chars, alliances: alliances });
     };
 }
+// ==========================================
+// 📝 がっつりメモ帳（定型文・長文保存）機能
+// ==========================================
+let currentMemoScope = "common"; // "common" or "char"
+let currentFreeMemoId = null;
+
+function getFreeMemoStorageKey() {
+    return currentMemoScope === "common"
+        ? "ws_free_memos_common"
+        : `ws_free_memos_${currentCharacter}`;
+}
+
+function loadFreeMemos() {
+    const key = getFreeMemoStorageKey();
+    let memos = JSON.parse(localStorage.getItem(key) || "null");
+    if (!memos || memos.length === 0) {
+        memos = [
+            {
+                id: Date.now(),
+                title: currentMemoScope === "common" ? "共通メモ①" : `${currentCharacter}のメモ①`,
+                content: ""
+            }
+        ];
+        localStorage.setItem(key, JSON.stringify(memos));
+    }
+    return memos;
+}
+
+function switchMemoScope(scope) {
+    currentMemoScope = scope;
+    currentFreeMemoId = null;
+    document.getElementById("memoScopeCommon")?.classList.toggle("active", scope === "common");
+    document.getElementById("memoScopeChar")?.classList.toggle("active", scope === "char");
+    renderFreeMemos();
+}
+
+function renderFreeMemos() {
+    const charLabel = document.getElementById("memoCharLabel");
+    if (charLabel) charLabel.textContent = currentCharacter;
+
+    const memos = loadFreeMemos();
+    if (!currentFreeMemoId || !memos.some(m => String(m.id) === String(currentFreeMemoId))) {
+        currentFreeMemoId = memos[0].id;
+    }
+
+    const listContainer = document.getElementById("freeMemoList");
+    if (listContainer) {
+        listContainer.innerHTML = memos.map(m => {
+            const isActive = String(m.id) === String(currentFreeMemoId);
+            const preview = m.content ? m.content.replace(/\n/g, " ").slice(0, 24) : "（内容なし）";
+            return `
+                <div class="memo-tab-item ${isActive ? "active" : ""}" onclick="selectFreeMemo('${m.id}')">
+                    <div class="memo-tab-title">${escapeHtml(m.title || "無題のメモ")}</div>
+                    <div class="memo-tab-preview">${escapeHtml(preview)}</div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    const activeMemo = memos.find(m => String(m.id) === String(currentFreeMemoId)) || memos[0];
+    const titleInput = document.getElementById("freeMemoTitle");
+    const contentInput = document.getElementById("freeMemoContent");
+
+    if (titleInput && contentInput && activeMemo) {
+        titleInput.value = activeMemo.title;
+        contentInput.value = activeMemo.content;
+        updateFreeMemoCount(activeMemo.content);
+    }
+}
+
+function selectFreeMemo(id) {
+    currentFreeMemoId = id;
+    renderFreeMemos();
+}
+
+function createNewFreeMemo() {
+    const memos = loadFreeMemos();
+    const newMemo = {
+        id: Date.now(),
+        title: `新規メモ ${memos.length + 1}`,
+        content: ""
+    };
+    memos.unshift(newMemo);
+    localStorage.setItem(getFreeMemoStorageKey(), JSON.stringify(memos));
+    currentFreeMemoId = newMemo.id;
+    renderFreeMemos();
+}
+
+function saveCurrentFreeMemo() {
+    const titleInput = document.getElementById("freeMemoTitle");
+    const contentInput = document.getElementById("freeMemoContent");
+    const statusEl = document.getElementById("freeMemoStatus");
+    if (!titleInput || !contentInput) return;
+
+    const memos = loadFreeMemos();
+    const target = memos.find(m => String(m.id) === String(currentFreeMemoId));
+    if (target) {
+        target.title = titleInput.value;
+        target.content = contentInput.value;
+        localStorage.setItem(getFreeMemoStorageKey(), JSON.stringify(memos));
+        updateFreeMemoCount(target.content);
+
+        // 左側リストのタイトルとプレビューだけ即時更新
+        const activeTab = document.querySelector(".memo-tab-item.active");
+        if (activeTab) {
+            activeTab.querySelector(".memo-tab-title").textContent = target.title || "無題のメモ";
+            activeTab.querySelector(".memo-tab-preview").textContent = target.content
+                ? target.content.replace(/\n/g, " ").slice(0, 24)
+                : "（内容なし）";
+        }
+
+        if (statusEl) {
+            statusEl.textContent = "✓ 保存しました";
+        }
+    }
+}
+
+function deleteCurrentFreeMemo() {
+    let memos = loadFreeMemos();
+    if (memos.length <= 1) {
+        if (!confirm("最後の1件です。内容をクリアしますか？")) return;
+        memos[0].title = "メモ①";
+        memos[0].content = "";
+        localStorage.setItem(getFreeMemoStorageKey(), JSON.stringify(memos));
+        renderFreeMemos();
+        return;
+    }
+
+    if (!confirm("このメモを削除しますか？")) return;
+    memos = memos.filter(m => String(m.id) !== String(currentFreeMemoId));
+    localStorage.setItem(getFreeMemoStorageKey(), JSON.stringify(memos));
+    currentFreeMemoId = memos[0].id;
+    renderFreeMemos();
+}
+
+function updateFreeMemoCount(text) {
+    const countEl = document.getElementById("freeMemoCharCount");
+    if (countEl) {
+        countEl.textContent = `${(text || "").length} 文字`;
+    }
+}
+
+function copyFreeMemoToClipboard() {
+    const contentInput = document.getElementById("freeMemoContent");
+    const btn = document.getElementById("copyFreeMemoBtn");
+    if (!contentInput || !contentInput.value) {
+        alert("コピーする内容がありません。");
+        return;
+    }
+
+    navigator.clipboard.writeText(contentInput.value).then(() => {
+        if (btn) {
+            const originalText = btn.textContent;
+            btn.textContent = "✅ コピー完了！";
+            btn.style.background = "#2b6cb0";
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = "";
+            }, 1800);
+        }
+    }).catch(() => {
+        // フォールバック
+        contentInput.select();
+        document.execCommand("copy");
+        alert("クリップボードにコピーしました！");
+    });
+}
