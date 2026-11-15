@@ -184,6 +184,7 @@
 </main>
 
 <!-- Event Area -->
+<!-- Event Area & ToDo List -->
 <section class="bottom-area">
 
     <section class="card event-card">
@@ -216,15 +217,16 @@
 
     </section>
 
+    <!-- 旧メモ帳をToDoリストとして維持 -->
     <section id="officerCard" class="card officer-card">
 
         <div class="card-header">
-            <h2>📝 メモ帳</h2>
+            <h2>✅ ToDoリスト</h2>
             <button id="toggleOfficerForm" class="primary-btn">＋追加</button>
         </div>
 
         <div id="officerForm" class="input-form hidden">
-            <input id="officerInput" type="text" placeholder="内容">
+            <input id="officerInput" type="text" placeholder="やることを入力">
             <button id="addOfficerBtn" class="success-btn">追加</button>
         </div>
 
@@ -232,6 +234,43 @@
 
     </section>
 
+</section>
+
+<!-- 新設：がっつり保存＆チャットコピー用メモ帳 -->
+<section class="card free-memo-card" style="margin-top: 18px;">
+    <div class="card-header" style="flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <h2>📝 メモ帳（定型文・長文保存）</h2>
+            <div class="memo-scope-switch">
+                <button type="button" id="memoScopeCommon" class="scope-btn active" onclick="switchMemoScope('common')">🌐 全キャラ共通</button>
+                <button type="button" id="memoScopeChar" class="scope-btn" onclick="switchMemoScope('char')">👤 キャラ別 (<span id="memoCharLabel">Lune</span>)</button>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="primary-btn" onclick="createNewFreeMemo()">＋ 新規メモ</button>
+        </div>
+    </div>
+
+    <div class="free-memo-layout">
+        <!-- 左側：メモ一覧リスト -->
+        <div class="free-memo-sidebar" id="freeMemoList">
+            <!-- script.jsで生成 -->
+        </div>
+
+        <!-- 右側：エディタ＆コピーエリア -->
+        <div class="free-memo-editor">
+            <div class="free-memo-toolbar">
+                <input type="text" id="freeMemoTitle" placeholder="メモのタイトル（例：熊罠募集文、同盟ルールなど）" oninput="saveCurrentFreeMemo()">
+                <button type="button" id="copyFreeMemoBtn" class="copy-chat-btn" onclick="copyFreeMemoToClipboard()">📋 チャット用にコピー</button>
+                <button type="button" class="delete-memo-btn" onclick="deleteCurrentFreeMemo()" title="このメモを削除">🗑️</button>
+            </div>
+            <textarea id="freeMemoContent" placeholder="ここに長文メモやゲーム内チャット用の定型文を入力してください（自動保存されます）..." oninput="saveCurrentFreeMemo()"></textarea>
+            <div class="free-memo-footer">
+                <span id="freeMemoStatus" style="color: #53c26d; font-weight: bold;">✓ 自動保存済み</span>
+                <span id="freeMemoCharCount">0 文字</span>
+            </div>
+        </div>
+    </div>
 </section>
 
 <!-- 地底メモ ＆ キャラ設定 -->
